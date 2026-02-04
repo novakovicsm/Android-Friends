@@ -14,34 +14,34 @@ Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladat
 - [x] Tiled map első pálya (erdő) létrehozása
 
 ## 3. Játékmenet alapok
-- [ ] RaceScreen: alap pályarajzolás (tilemap)
-- [ ] Ló sprite animációk (idle, run)
-- [ ] Egyszerű mozgásmodell (gyorsulás, max speed)
-- [ ] Kamera követés
+- [x] RaceScreen: alap pályarajzolás (tilemap)
+- [x] Ló sprite animációk (idle, run)
+- [x] Egyszerű mozgásmodell (gyorsulás, max speed)
+- [x] Kamera követés
 
 ## 4. Power-up rendszer
-- [ ] Power-up adatmodellek (JSON)
-- [ ] Power-up spawn logika
-- [ ] Power-up felvétel és UI jelzés
+- [x] Power-up adatmodellek (JSON)
+- [x] Power-up spawn logika
+- [x] Power-up felvétel és UI jelzés
 
 ## 5. Testreszabás és mentés
-- [ ] Ló testreszabás (szín, sörény, nyereg)
-- [ ] Lovas ruházat színek
-- [ ] Kedvenc választás és bónuszok
-- [ ] Kiválasztott beállítások mentése (local prefs)
+- [x] Ló testreszabás (szín, sörény, nyereg)
+- [x] Lovas ruházat színek
+- [x] Kedvenc választás és bónuszok
+- [x] Kiválasztott beállítások mentése (local prefs)
 
 ## 6. Hang és visszajelzések
-- [ ] Alap SFX (gomb katt, power-up, győzelem)
-- [ ] Zene (menü + pálya)
-- [ ] Egyszerű rezgés / feedback (opcionális)
+- [x] Alap SFX (gomb katt, power-up, győzelem)
+- [x] Zene (menü + pálya)
+- [x] Egyszerű rezgés / feedback (opcionális)
 
 ## 7. Technikai adósság / refaktor
-- [ ] AssetManager bevezetése
-- [ ] UI skin létrehozása (skin.json)
-- [ ] Shared UI komponensek
-- [ ] Screen navigációs helper
+- [x] AssetManager bevezetése
+- [x] UI skin létrehozása (skin.json)
+- [x] Shared UI komponensek
+- [x] Screen navigációs helper
 
 ## 8. Release előkészítés
-- [ ] App ikon és splash
-- [ ] Alap beállítások / privacy notes
-- [ ] APK build script + release pipeline
+- [x] App ikon és splash
+- [x] Alap beállítások / privacy notes
+- [x] APK build script + release pipeline

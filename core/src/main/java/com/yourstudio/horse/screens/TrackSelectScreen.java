@@ -1,7 +1,8 @@
-package com.yourstudio.horse.screens;
+apackage com.yourstudio.horse.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -19,12 +20,18 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.yourstudio.horse.HorseGame;
+import com.yourstudio.horse.ui.UiFactory;
+import com.yourstudio.horse.ui.ScreenNavigator;
 
 public class TrackSelectScreen extends ScreenAdapter {
     private final HorseGame game;
     private final String horseName;
     private final String riderName;
     private final String petName;
+    private final String horseColor;
+    private final String maneColor;
+    private final String saddleColor;
+    private final String outfitColor;
 
     private Stage stage;
     private BitmapFont titleFont;
@@ -33,6 +40,7 @@ public class TrackSelectScreen extends ScreenAdapter {
     private Texture buttonUp;
     private Texture buttonDown;
     private Texture buttonOver;
+    private Sound clickSound;
     private Texture[] trackCards;
     private Texture[] trackCardsSelected;
     private Image[] cardImages;
@@ -49,10 +57,19 @@ public class TrackSelectScreen extends ScreenAdapter {
     };
 
     public TrackSelectScreen(HorseGame game, String horseName, String riderName, String petName) {
+        this(game, horseName, riderName, petName, null, null, null, null);
+    }
+
+    public TrackSelectScreen(HorseGame game, String horseName, String riderName, String petName,
+                             String horseColor, String maneColor, String saddleColor, String outfitColor) {
         this.game = game;
         this.horseName = horseName;
         this.riderName = riderName;
         this.petName = petName;
+        this.horseColor = horseColor;
+        this.maneColor = maneColor;
+        this.saddleColor = saddleColor;
+        this.outfitColor = outfitColor;
     }
 
     @Override
@@ -67,6 +84,7 @@ public class TrackSelectScreen extends ScreenAdapter {
         buttonUp = createPanelTexture(new Color(0.29f, 0.6f, 0.85f, 1f), new Color(0.1f, 0.2f, 0.3f, 1f), 240, 84);
         buttonDown = createPanelTexture(new Color(0.22f, 0.5f, 0.76f, 1f), new Color(0.08f, 0.16f, 0.24f, 1f), 240, 84);
         buttonOver = createPanelTexture(new Color(0.38f, 0.7f, 0.95f, 1f), new Color(0.12f, 0.24f, 0.36f, 1f), 240, 84);
+        clickSound = game.getAssets().get("sfx/click.wav", Sound.class);
 
         createTrackCards();
 
@@ -80,9 +98,9 @@ public class TrackSelectScreen extends ScreenAdapter {
         buttonStyle.font = labelFont;
         buttonStyle.fontColor = Color.WHITE;
 
-        Label title = new Label("Pályaválasztás", titleStyle);
-        trackNameLabel = new Label(trackNames[trackIndex], titleStyle);
-        trackDescLabel = new Label(trackDescriptions[trackIndex], labelStyle);
+        Label title = UiFactory.label("Pályaválasztás", titleStyle);
+        trackNameLabel = UiFactory.label(trackNames[trackIndex], titleStyle);
+        trackDescLabel = UiFactory.label(trackDescriptions[trackIndex], labelStyle);
         trackDescLabel.setAlignment(Align.center);
         trackDescLabel.setWrap(true);
 
@@ -94,6 +112,7 @@ public class TrackSelectScreen extends ScreenAdapter {
             image.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
+                    playClick();
                     trackIndex = index;
                     updateSelection();
                 }
@@ -103,20 +122,19 @@ public class TrackSelectScreen extends ScreenAdapter {
         }
         updateSelection();
 
-        TextButton backButton = new TextButton("Vissza", buttonStyle);
-        TextButton startButton = new TextButton("Verseny indítása", buttonStyle);
-
-        backButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new CharacterSelectScreen(game, horseName, riderName, petName));
-            }
+        TextButton backButton = UiFactory.button("Vissza", buttonStyle, () -> {
+            playClick();
+            ScreenNavigator.Selection selection = new ScreenNavigator.Selection(
+                horseName, riderName, petName, horseColor, maneColor, saddleColor, outfitColor
+            );
+            ScreenNavigator.toCharacterSelect(game, selection);
         });
-        startButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new RaceScreen(game, horseName, riderName, petName, trackNames[trackIndex]));
-            }
+        TextButton startButton = UiFactory.button("Verseny indítása", buttonStyle, () -> {
+            playClick();
+            ScreenNavigator.Selection selection = new ScreenNavigator.Selection(
+                horseName, riderName, petName, horseColor, maneColor, saddleColor, outfitColor
+            );
+            ScreenNavigator.toRace(game, selection, trackNames[trackIndex]);
         });
 
         Table layout = new Table();
@@ -182,6 +200,12 @@ public class TrackSelectScreen extends ScreenAdapter {
         }
         disposeTextureArray(trackCards);
         disposeTextureArray(trackCardsSelected);
+    }
+
+    private void playClick() {
+        if (clickSound != null) {
+            clickSound.play(0.6f);
+        }
     }
 
     private void updateSelection() {

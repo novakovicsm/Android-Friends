@@ -2,6 +2,8 @@ package com.yourstudio.horse.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -17,6 +19,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.yourstudio.horse.HorseGame;
+import com.yourstudio.horse.ui.UiFactory;
+import com.yourstudio.horse.ui.ScreenNavigator;
 
 public class MainMenuScreen extends ScreenAdapter {
     private final HorseGame game;
@@ -28,6 +32,8 @@ public class MainMenuScreen extends ScreenAdapter {
     private Texture buttonOver;
     private Texture background;
     private Texture logoPanel;
+    private Sound clickSound;
+    private Music menuMusic;
 
     public MainMenuScreen(HorseGame game) {
         this.game = game;
@@ -46,6 +52,11 @@ public class MainMenuScreen extends ScreenAdapter {
         buttonOver = createPanelTexture(new Color(0.38f, 0.7f, 0.95f, 1f), new Color(0.12f, 0.24f, 0.36f, 1f), 280, 96);
         background = createPixelBackground(320, 180);
         logoPanel = createPanelTexture(new Color(0.95f, 0.89f, 0.65f, 1f), new Color(0.4f, 0.25f, 0.12f, 1f), 520, 140);
+        clickSound = game.getAssets().get("sfx/click.wav", Sound.class);
+        menuMusic = game.getAssets().get("sfx/menu_music.wav", Music.class);
+        menuMusic.setLooping(true);
+        menuMusic.setVolume(0.5f);
+        menuMusic.play();
 
         Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, new Color(0.28f, 0.16f, 0.08f, 1f));
         Label.LabelStyle subtitleStyle = new Label.LabelStyle(buttonFont, new Color(0.28f, 0.16f, 0.08f, 1f));
@@ -56,14 +67,13 @@ public class MainMenuScreen extends ScreenAdapter {
         buttonStyle.font = buttonFont;
         buttonStyle.fontColor = Color.WHITE;
 
-        Label title = new Label("Android Friends", titleStyle);
-        Label subtitle = new Label("Pixel lovas kalandok", subtitleStyle);
-        TextButton startButton = new TextButton("Start", buttonStyle);
-        startButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new CharacterSelectScreen(game));
+        Label title = UiFactory.label("Versenylovak", titleStyle);
+        Label subtitle = UiFactory.label("Pixel lovas kalandok", subtitleStyle);
+        TextButton startButton = UiFactory.button("Indítás", buttonStyle, () -> {
+            if (clickSound != null) {
+                clickSound.play(0.6f);
             }
+            ScreenNavigator.toCharacterSelect(game, null);
         });
 
         Table layout = new Table();
@@ -126,6 +136,9 @@ public class MainMenuScreen extends ScreenAdapter {
         }
         if (logoPanel != null) {
             logoPanel.dispose();
+        }
+        if (menuMusic != null) {
+            menuMusic.stop();
         }
     }
 
