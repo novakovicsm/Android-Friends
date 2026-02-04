@@ -1,0 +1,10 @@
+rootProject.name = 'Android-Friends'
+
+include 'core', 'desktop', 'android'
+
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
