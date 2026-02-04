@@ -3,15 +3,15 @@
 Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladatokat lépésről lépésre fogjuk megoldani.
 
 ## 1. UI és képernyő flow
-- [ ] Main menu finomhangolás (pixel art háttér, logo, gomb stílusok)
-- [ ] Karakterválasztó UI: ló/lovas/kedvenc előnézet (placeholder sprite-ok)
-- [ ] Pályaválasztó képernyő (4 pálya, tematikus kártyák)
-- [ ] Verseny HUD (sebesség, kör, power-up indikátor)
+- [x] Main menu finomhangolás (pixel art háttér, logo, gomb stílusok)
+- [x] Karakterválasztó UI: ló/lovas/kedvenc előnézet (placeholder sprite-ok)
+- [x] Pályaválasztó képernyő (4 pálya, tematikus kártyák)
+- [x] Verseny HUD (sebesség, kör, power-up indikátor)
 
 ## 2. Asset pipeline
-- [ ] Asset mappastruktúra véglegesítése (sprites, ui, maps, sfx)
-- [ ] Aseprite → TexturePacker workflow dokumentálása
-- [ ] Tiled map első pálya (erdő) létrehozása
+- [x] Asset mappastruktúra véglegesítése (sprites, ui, maps, sfx)
+- [x] Aseprite → TexturePacker workflow dokumentálása
+- [x] Tiled map első pálya (erdő) létrehozása
 
 ## 3. Játékmenet alapok
 - [ ] RaceScreen: alap pályarajzolás (tilemap)

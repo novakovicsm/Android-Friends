@@ -21,10 +21,13 @@ import com.yourstudio.horse.HorseGame;
 public class MainMenuScreen extends ScreenAdapter {
     private final HorseGame game;
     private Stage stage;
-    private BitmapFont font;
+    private BitmapFont titleFont;
+    private BitmapFont buttonFont;
     private Texture buttonUp;
     private Texture buttonDown;
+    private Texture buttonOver;
     private Texture background;
+    private Texture logoPanel;
 
     public MainMenuScreen(HorseGame game) {
         this.game = game;
@@ -33,19 +36,28 @@ public class MainMenuScreen extends ScreenAdapter {
     @Override
     public void show() {
         stage = new Stage(new ScreenViewport());
-        font = new BitmapFont();
-        buttonUp = createColorTexture(new Color(0.29f, 0.6f, 0.85f, 1f));
-        buttonDown = createColorTexture(new Color(0.2f, 0.48f, 0.7f, 1f));
-        background = createColorTexture(new Color(0.13f, 0.13f, 0.2f, 1f));
+        titleFont = new BitmapFont();
+        titleFont.getData().setScale(2.4f);
+        buttonFont = new BitmapFont();
+        buttonFont.getData().setScale(1.2f);
 
-        Label.LabelStyle titleStyle = new Label.LabelStyle(font, Color.WHITE);
+        buttonUp = createPanelTexture(new Color(0.29f, 0.6f, 0.85f, 1f), new Color(0.1f, 0.2f, 0.3f, 1f), 280, 96);
+        buttonDown = createPanelTexture(new Color(0.22f, 0.5f, 0.76f, 1f), new Color(0.08f, 0.16f, 0.24f, 1f), 280, 96);
+        buttonOver = createPanelTexture(new Color(0.38f, 0.7f, 0.95f, 1f), new Color(0.12f, 0.24f, 0.36f, 1f), 280, 96);
+        background = createPixelBackground(320, 180);
+        logoPanel = createPanelTexture(new Color(0.95f, 0.89f, 0.65f, 1f), new Color(0.4f, 0.25f, 0.12f, 1f), 520, 140);
+
+        Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, new Color(0.28f, 0.16f, 0.08f, 1f));
+        Label.LabelStyle subtitleStyle = new Label.LabelStyle(buttonFont, new Color(0.28f, 0.16f, 0.08f, 1f));
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
         buttonStyle.up = toDrawable(buttonUp);
         buttonStyle.down = toDrawable(buttonDown);
-        buttonStyle.font = font;
+        buttonStyle.over = toDrawable(buttonOver);
+        buttonStyle.font = buttonFont;
         buttonStyle.fontColor = Color.WHITE;
 
         Label title = new Label("Android Friends", titleStyle);
+        Label subtitle = new Label("Pixel lovas kalandok", subtitleStyle);
         TextButton startButton = new TextButton("Start", buttonStyle);
         startButton.addListener(new ClickListener() {
             @Override
@@ -57,9 +69,16 @@ public class MainMenuScreen extends ScreenAdapter {
         Table layout = new Table();
         layout.setFillParent(true);
         layout.pad(40f);
-        layout.add(title).padBottom(40f);
+        Table logoTable = new Table();
+        logoTable.setBackground(toDrawable(logoPanel));
+        logoTable.pad(18f, 28f, 18f, 28f);
+        logoTable.add(title).padBottom(6f);
+        logoTable.row();
+        logoTable.add(subtitle);
+
+        layout.add(logoTable).padBottom(50f);
         layout.row();
-        layout.add(startButton).width(260f).height(90f);
+        layout.add(startButton).width(280f).height(96f);
 
         stage.addActor(layout);
         Gdx.input.setInputProcessor(stage);
@@ -87,8 +106,11 @@ public class MainMenuScreen extends ScreenAdapter {
         if (stage != null) {
             stage.dispose();
         }
-        if (font != null) {
-            font.dispose();
+        if (titleFont != null) {
+            titleFont.dispose();
+        }
+        if (buttonFont != null) {
+            buttonFont.dispose();
         }
         if (buttonUp != null) {
             buttonUp.dispose();
@@ -96,15 +118,63 @@ public class MainMenuScreen extends ScreenAdapter {
         if (buttonDown != null) {
             buttonDown.dispose();
         }
+        if (buttonOver != null) {
+            buttonOver.dispose();
+        }
         if (background != null) {
             background.dispose();
         }
+        if (logoPanel != null) {
+            logoPanel.dispose();
+        }
     }
 
-    private Texture createColorTexture(Color color) {
-        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pixmap.setColor(color);
+    private Texture createPixelBackground(int width, int height) {
+        Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
+        Color skyTop = new Color(0.38f, 0.7f, 0.9f, 1f);
+        Color skyBottom = new Color(0.66f, 0.86f, 0.96f, 1f);
+        for (int y = 0; y < height; y++) {
+            float t = y / (float) (height - 1);
+            pixmap.setColor(
+                skyBottom.r + (skyTop.r - skyBottom.r) * t,
+                skyBottom.g + (skyTop.g - skyBottom.g) * t,
+                skyBottom.b + (skyTop.b - skyBottom.b) * t,
+                1f
+            );
+            pixmap.drawLine(0, y, width, y);
+        }
+
+        pixmap.setColor(0.2f, 0.55f, 0.25f, 1f);
+        pixmap.fillRectangle(0, 0, width, height / 3);
+        pixmap.setColor(0.15f, 0.42f, 0.2f, 1f);
+        for (int x = 0; x < width; x += 16) {
+            pixmap.fillRectangle(x, height / 3 - 10, 12, 10);
+        }
+
+        pixmap.setColor(0.12f, 0.33f, 0.18f, 1f);
+        pixmap.fillCircle(width / 4, height / 3, 28);
+        pixmap.fillCircle(width / 2, height / 3 + 6, 36);
+        pixmap.fillCircle(width * 3 / 4, height / 3, 30);
+
+        pixmap.setColor(1f, 1f, 1f, 1f);
+        for (int x = 12; x < width; x += 40) {
+            pixmap.fillRectangle(x, height - 30, 6, 4);
+            pixmap.fillRectangle(x + 8, height - 34, 10, 4);
+        }
+
+        Texture texture = new Texture(pixmap);
+        pixmap.dispose();
+        return texture;
+    }
+
+    private Texture createPanelTexture(Color fillColor, Color borderColor, int width, int height) {
+        Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
+        pixmap.setColor(fillColor);
         pixmap.fill();
+        pixmap.setColor(borderColor);
+        for (int i = 0; i < 4; i++) {
+            pixmap.drawRectangle(i, i, width - (i * 2), height - (i * 2));
+        }
         Texture texture = new Texture(pixmap);
         pixmap.dispose();
         return texture;
