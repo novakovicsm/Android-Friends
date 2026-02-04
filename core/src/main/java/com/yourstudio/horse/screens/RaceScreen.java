@@ -18,16 +18,23 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.yourstudio.horse.HorseGame;
 
-public class MainMenuScreen extends ScreenAdapter {
+public class RaceScreen extends ScreenAdapter {
     private final HorseGame game;
+    private final String horseName;
+    private final String riderName;
+    private final String petName;
+
     private Stage stage;
+    private Texture background;
     private BitmapFont font;
     private Texture buttonUp;
     private Texture buttonDown;
-    private Texture background;
 
-    public MainMenuScreen(HorseGame game) {
+    public RaceScreen(HorseGame game, String horseName, String riderName, String petName) {
         this.game = game;
+        this.horseName = horseName;
+        this.riderName = riderName;
+        this.petName = petName;
     }
 
     @Override
@@ -36,18 +43,20 @@ public class MainMenuScreen extends ScreenAdapter {
         font = new BitmapFont();
         buttonUp = createColorTexture(new Color(0.29f, 0.6f, 0.85f, 1f));
         buttonDown = createColorTexture(new Color(0.2f, 0.48f, 0.7f, 1f));
-        background = createColorTexture(new Color(0.13f, 0.13f, 0.2f, 1f));
+        background = createColorTexture(new Color(0.2f, 0.12f, 0.08f, 1f));
 
-        Label.LabelStyle titleStyle = new Label.LabelStyle(font, Color.WHITE);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
         buttonStyle.up = toDrawable(buttonUp);
         buttonStyle.down = toDrawable(buttonDown);
         buttonStyle.font = font;
         buttonStyle.fontColor = Color.WHITE;
 
-        Label title = new Label("Android Friends", titleStyle);
-        TextButton startButton = new TextButton("Start", buttonStyle);
-        startButton.addListener(new ClickListener() {
+        Label title = new Label("Verseny (placeholder)", labelStyle);
+        Label selection = new Label("Ló: " + horseName + " | Lovas: " + riderName + " | Kedvenc: " + petName, labelStyle);
+        TextButton backButton = new TextButton("Vissza", buttonStyle);
+
+        backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 game.setScreen(new CharacterSelectScreen(game));
@@ -56,10 +65,12 @@ public class MainMenuScreen extends ScreenAdapter {
 
         Table layout = new Table();
         layout.setFillParent(true);
-        layout.pad(40f);
-        layout.add(title).padBottom(40f);
+        layout.pad(24f);
+        layout.add(title).padBottom(20f);
         layout.row();
-        layout.add(startButton).width(260f).height(90f);
+        layout.add(selection).padBottom(30f);
+        layout.row();
+        layout.add(backButton).width(220f).height(80f);
 
         stage.addActor(layout);
         Gdx.input.setInputProcessor(stage);

@@ -1,3 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.yourstudio.horse">
+
+    <application
+        android:label="Android Friends"
+        android:icon="@mipmap/ic_launcher"
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
@@ -7,8 +13,7 @@
         <activity
             android:name="com.yourstudio.horse.AndroidLauncher"
             android:screenOrientation="landscape"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-            android:exported="true">
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
