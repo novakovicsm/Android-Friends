@@ -5,11 +5,19 @@ plugins {
 android {
     namespace 'com.yourstudio.horse'
     compileSdkVersion 34
+configurations {
+    natives
+}
+
+android {
+    namespace 'com.yourstudio.horse'
+    compileSdkVersion 35
 
     defaultConfig {
         applicationId 'com.yourstudio.horse'
         minSdkVersion 26
         targetSdkVersion 34
+        targetSdkVersion 35
         versionCode 1
         versionName '1.0'
     }
@@ -35,4 +43,35 @@ dependencies {
     implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-arm64-v8a"
     implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
     implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86_64"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-arm64-v8a"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86_64"
+}
+
+def jniLibsDir = file('src/main/jniLibs')
+
+tasks.register('copyAndroidNatives') {
+    inputs.files(configurations.natives)
+    outputs.dir(jniLibsDir)
+    doLast {
+        jniLibsDir.mkdirs()
+        configurations.natives.files.each { jarFile ->
+            def matcher = jarFile.name =~ /-natives-(.+)\.jar$/
+            if (matcher.find()) {
+                def abi = matcher.group(1)
+                def abiDir = new File(jniLibsDir, abi)
+                abiDir.mkdirs()
+                copy {
+                    from zipTree(jarFile)
+                    into abiDir
+                    include '**/*.so'
+                }
+            }
+        }
+    }
+}
+
+tasks.named('preBuild') {
+    dependsOn tasks.named('copyAndroidNatives')
 }
