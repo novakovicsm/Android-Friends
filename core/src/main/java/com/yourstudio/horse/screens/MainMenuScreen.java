@@ -16,11 +16,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.yourstudio.horse.HorseGame;
 
 public class MainMenuScreen extends ScreenAdapter {
@@ -30,8 +25,6 @@ public class MainMenuScreen extends ScreenAdapter {
     private Texture buttonUp;
     private Texture buttonDown;
     private Texture background;
-    private SpriteBatch batch;
-    private BitmapFont font;
 
     public MainMenuScreen(HorseGame game) {
         this.game = game;
@@ -70,9 +63,6 @@ public class MainMenuScreen extends ScreenAdapter {
 
         stage.addActor(layout);
         Gdx.input.setInputProcessor(stage);
-        batch = new SpriteBatch();
-        font = new BitmapFont();
-        font.setColor(Color.WHITE);
     }
 
     @Override
@@ -90,19 +80,12 @@ public class MainMenuScreen extends ScreenAdapter {
         if (stage != null) {
             stage.getViewport().update(width, height, true);
         }
-        ScreenUtils.clear(0.13f, 0.13f, 0.2f, 1f);
-        batch.begin();
-        font.draw(batch, "Android Friends", 48, 96);
-        font.draw(batch, "Main menu placeholder", 48, 64);
-        batch.end();
     }
 
     @Override
     public void dispose() {
         if (stage != null) {
             stage.dispose();
-        if (batch != null) {
-            batch.dispose();
         }
         if (font != null) {
             font.dispose();
