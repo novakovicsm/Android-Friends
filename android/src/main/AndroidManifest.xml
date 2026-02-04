@@ -7,6 +7,15 @@
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
         <activity
             android:name="com.yourstudio.horse.AndroidLauncher"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:label="Android Friends"
+        android:icon="@drawable/ic_launcher"
+        android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+        <activity
+            android:name="com.yourstudio.horse.AndroidLauncher"
+            android:exported="true"
             android:screenOrientation="landscape"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
             <intent-filter>
