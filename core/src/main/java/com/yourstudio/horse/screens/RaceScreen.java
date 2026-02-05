@@ -37,7 +37,6 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.yourstudio.horse.HorseGame;
-import com.yourstudio.horse.ui.PixelArtFactory;
 import com.yourstudio.horse.ui.ScreenNavigator;
 
 public class RaceScreen extends ScreenAdapter {
@@ -183,32 +182,9 @@ public class RaceScreen extends ScreenAdapter {
         stage = new Stage(new ScreenViewport());
         titleFont = createUIFont(54, 3.1f);
         bodyFont = createUIFont(28, 1.45f);
-        buttonUp = PixelArtFactory.createPixelButton(
-            220,
-            88,
-            new Color(0.26f, 0.56f, 0.86f, 1f),
-            new Color(0.12f, 0.26f, 0.46f, 0.18f),
-            new Color(0.9f, 0.92f, 0.96f, 1f),
-            new Color(0.08f, 0.14f, 0.22f, 1f),
-            false
-        );
-        buttonDown = PixelArtFactory.createPixelButton(
-            220,
-            88,
-            new Color(0.2f, 0.46f, 0.72f, 1f),
-            new Color(0.1f, 0.22f, 0.38f, 0.18f),
-            new Color(0.9f, 0.92f, 0.96f, 1f),
-            new Color(0.08f, 0.14f, 0.22f, 1f),
-            true
-        );
-        background = PixelArtFactory.createPixelBackground(
-            360,
-            200,
-            new Color(0.2f, 0.16f, 0.2f, 1f),
-            new Color(0.36f, 0.28f, 0.22f, 1f),
-            new Color(0.18f, 0.14f, 0.1f, 1f),
-            new Color(0.12f, 0.1f, 0.08f, 1f)
-        );
+        buttonUp = loadUiTexture("ui/button_primary.png");
+        buttonDown = loadUiTexture("ui/button_primary_down.png");
+        background = loadUiTexture("ui/bg_race.png");
         clickSound = game.getAssets().get("sfx/click.wav", Sound.class);
         powerupSound = game.getAssets().get("sfx/powerup.wav", Sound.class);
         winSound = game.getAssets().get("sfx/win.wav", Sound.class);
@@ -216,14 +192,7 @@ public class RaceScreen extends ScreenAdapter {
         raceMusic.setLooping(true);
         raceMusic.setVolume(0.5f);
         raceMusic.play();
-        hudPanel = PixelArtFactory.createPixelPanel(
-            320,
-            190,
-            new Color(0.12f, 0.12f, 0.16f, 0.9f),
-            new Color(0.05f, 0.05f, 0.08f, 0.2f),
-            new Color(0.62f, 0.62f, 0.7f, 1f),
-            new Color(0.2f, 0.2f, 0.28f, 1f)
-        );
+        hudPanel = loadUiTexture("ui/panel_hud.png");
         loadHorseAnimations();
         idleAnimation.setPlayMode(Animation.PlayMode.LOOP);
         runAnimation.setPlayMode(Animation.PlayMode.LOOP);
@@ -512,16 +481,9 @@ public class RaceScreen extends ScreenAdapter {
         return new TextureRegionDrawable(texture);
     }
 
-    private Texture createPanelTexture(Color fillColor, Color borderColor, int width, int height) {
-        Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
-        pixmap.setColor(fillColor);
-        pixmap.fill();
-        pixmap.setColor(borderColor);
-        for (int i = 0; i < 3; i++) {
-            pixmap.drawRectangle(i, i, width - (i * 2), height - (i * 2));
-        }
-        Texture texture = new Texture(pixmap);
-        pixmap.dispose();
+    private Texture loadUiTexture(String path) {
+        Texture texture = new Texture(path);
+        texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
         return texture;
     }
 
@@ -939,15 +901,17 @@ public class RaceScreen extends ScreenAdapter {
 
     private Texture[] createHorseIdleFrames() {
         Texture[] frames = new Texture[2];
-        frames[0] = createHorseFrame(new Color(0.65f, 0.44f, 0.3f, 1f), new Color(0.25f, 0.16f, 0.1f, 1f), 0);
-        frames[1] = createHorseFrame(new Color(0.65f, 0.44f, 0.3f, 1f), new Color(0.25f, 0.16f, 0.1f, 1f), 1);
+        Color body = new Color(0.92f, 0.86f, 0.78f, 1f);
+        Color mane = resolveManeColor();
+        frames[0] = createHorseFrame(body, mane, 0);
+        frames[1] = createHorseFrame(body, mane, 1);
         return frames;
     }
 
     private Texture[] createHorseRunFrames() {
         Texture[] frames = new Texture[4];
-        Color body = new Color(0.65f, 0.44f, 0.3f, 1f);
-        Color mane = new Color(0.25f, 0.16f, 0.1f, 1f);
+        Color body = new Color(0.92f, 0.86f, 0.78f, 1f);
+        Color mane = resolveManeColor();
         for (int i = 0; i < frames.length; i++) {
             frames[i] = createHorseFrame(body, mane, i + 2);
         }
@@ -960,46 +924,77 @@ public class RaceScreen extends ScreenAdapter {
         pixmap.setColor(0f, 0f, 0f, 0f);
         pixmap.fill();
 
+        Color outline = darken(body, 0.48f);
         Color bodyShade = darken(body, 0.18f);
-        Color hoof = darken(body, 0.35f);
-        Color maneDark = darken(mane, 0.15f);
+        Color maneShade = darken(mane, 0.22f);
+        Color hoof = darken(body, 0.6f);
 
-        pixmap.setColor(0f, 0f, 0f, 0.25f);
-        pixmap.fillRectangle(12, 8, 40, 6);
-        pixmap.fillCircle(12, 11, 3);
-        pixmap.fillCircle(52, 11, 3);
+        int bob = variant % 2 == 0 ? 0 : 1;
+        int runPhase = Math.max(0, variant - 2);
+        int legSwing = (runPhase % 2 == 0) ? 4 : -4;
 
+        // Shadow
+        pixmap.setColor(0f, 0f, 0f, 0.22f);
+        pixmap.fillRectangle(10, 8, 44, 6);
+        pixmap.fillCircle(10, 11, 3);
+        pixmap.fillCircle(54, 11, 3);
+
+        // Body (flatter back, more horse-like proportions)
         pixmap.setColor(body);
-        pixmap.fillRectangle(14, 26, 28, 14);
-        pixmap.fillRectangle(30, 32, 16, 10);
-        pixmap.fillCircle(48, 38, 7);
+        pixmap.fillRectangle(16, 26 + bob, 30, 13); // torso
+        pixmap.fillRectangle(28, 35 + bob, 16, 7); // back
+        pixmap.fillCircle(46, 40 + bob, 8); // rump
+
+        // Neck (angled, slimmer)
+        pixmap.fillRectangle(24, 40 + bob, 6, 8);
+        pixmap.fillRectangle(30, 44 + bob, 6, 8);
 
         pixmap.setColor(bodyShade);
-        pixmap.fillRectangle(16, 24, 24, 4);
-        pixmap.fillRectangle(30, 30, 14, 3);
-        pixmap.fillRectangle(44, 34, 6, 3);
+        pixmap.fillRectangle(18, 24 + bob, 26, 3);
+        pixmap.fillRectangle(30, 33 + bob, 12, 2);
+        pixmap.fillRectangle(42, 36 + bob, 6, 2);
+        pixmap.fillRectangle(24, 38 + bob, 6, 2);
 
-        int legOffset = variant % 2 == 0 ? 0 : 3;
+        // Head (smaller, more horse-like)
+        pixmap.setColor(body);
+        pixmap.fillRectangle(40, 50 + bob, 7, 5); // head
+        pixmap.fillRectangle(46, 48 + bob, 6, 4); // muzzle
+        pixmap.fillRectangle(38, 54 + bob, 4, 4); // ear base
         pixmap.setColor(bodyShade);
-        pixmap.fillRectangle(18, 12 + legOffset, 5, 14);
-        pixmap.fillRectangle(28, 12, 5, 14 + legOffset);
-        pixmap.fillRectangle(38, 12 + legOffset, 5, 14);
-        pixmap.fillRectangle(46, 12, 4, 12 + legOffset);
+        pixmap.fillRectangle(46, 50 + bob, 5, 2);
+
+        // Legs
+        int baseY = 12 + bob;
+        pixmap.setColor(bodyShade);
+        pixmap.fillRectangle(18, baseY + legSwing, 4, 16);
+        pixmap.fillRectangle(28, baseY - legSwing, 4, 16);
+        pixmap.fillRectangle(38, baseY + legSwing, 4, 16);
+        pixmap.fillRectangle(46, baseY - legSwing, 3, 14);
         pixmap.setColor(hoof);
-        pixmap.fillRectangle(18, 10 + legOffset, 5, 3);
-        pixmap.fillRectangle(28, 10, 5, 3);
-        pixmap.fillRectangle(38, 10 + legOffset, 5, 3);
-        pixmap.fillRectangle(46, 10, 4, 3);
+        pixmap.fillRectangle(18, baseY - 2 + legSwing, 4, 3);
+        pixmap.fillRectangle(28, baseY - 2 - legSwing, 4, 3);
+        pixmap.fillRectangle(38, baseY - 2 + legSwing, 4, 3);
+        pixmap.fillRectangle(46, baseY - 2 - legSwing, 3, 3);
 
+        // Mane + tail
         pixmap.setColor(mane);
-        pixmap.fillRectangle(30, 40, 12, 6);
-        pixmap.fillRectangle(18, 40, 10, 5);
-        pixmap.setColor(maneDark);
-        pixmap.fillRectangle(12, 28, 6, 10);
-        pixmap.fillRectangle(44, 42, 4, 3);
+        pixmap.fillRectangle(26, 50 + bob, 8, 6); // mane front
+        pixmap.fillRectangle(32, 46 + bob, 10, 6); // mane back
+        pixmap.fillRectangle(10, 34 + bob, 5, 12); // tail base (from rump)
+        pixmap.setColor(maneShade);
+        pixmap.fillRectangle(8, 32 + bob, 3, 12); // tail tip
+        pixmap.fillRectangle(40, 56 + bob, 3, 4); // forelock
 
+        // Outline (simple pass)
+        pixmap.setColor(outline);
+        pixmap.drawRectangle(16, 26 + bob, 31, 14);
+        pixmap.drawRectangle(28, 35 + bob, 17, 9);
+        pixmap.drawCircle(46, 40 + bob, 8);
+        pixmap.drawRectangle(24, 40 + bob, 7, 9);
+
+        // Eye highlight
         pixmap.setColor(Color.WHITE);
-        pixmap.fillRectangle(50, 38, 2, 2);
+        pixmap.fillRectangle(44, 52 + bob, 2, 2);
 
         // Flip the pixmap vertically so the horse is upright in libGDX
         Pixmap flipped = new Pixmap(size, size, Pixmap.Format.RGBA8888);
@@ -1009,9 +1004,26 @@ public class RaceScreen extends ScreenAdapter {
             }
         }
         Texture texture = new Texture(flipped);
+        texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
         pixmap.dispose();
         flipped.dispose();
         return texture;
+    }
+
+    private Color resolveManeColor() {
+        if ("Fekete".equals(maneColor)) {
+            return new Color(0.12f, 0.12f, 0.14f, 1f);
+        }
+        if ("Csokoládé".equals(maneColor)) {
+            return new Color(0.28f, 0.16f, 0.1f, 1f);
+        }
+        if ("Szürke".equals(maneColor)) {
+            return new Color(0.56f, 0.56f, 0.6f, 1f);
+        }
+        if ("Szőke".equals(maneColor)) {
+            return new Color(0.85f, 0.78f, 0.5f, 1f);
+        }
+        return new Color(0.32f, 0.26f, 0.2f, 1f);
     }
 
     private Color darken(Color color, float amount) {

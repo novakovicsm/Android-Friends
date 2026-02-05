@@ -1,0 +1,44 @@
+{
+  "powerups": [
+    {
+      "id": "gyorsitas",
+      "name": "Gyorsítás",
+      "description": "Rövid ideig növeli a maximális sebességet.",
+      "durationSeconds": 4,
+      "effect": {
+        "type": "speed_boost",
+        "multiplier": 1.35
+      }
+    },
+    {
+      "id": "pajzs",
+      "name": "Pajzs",
+      "description": "Ideiglenesen véd a lassító hatások ellen.",
+      "durationSeconds": 5,
+      "effect": {
+        "type": "shield",
+        "strength": 1
+      }
+    },
+    {
+      "id": "villam",
+      "name": "Villám",
+      "description": "Azonnali gyorsítás és rövid sokkhatás.",
+      "durationSeconds": 2,
+      "effect": {
+        "type": "burst",
+        "bonusSpeed": 18
+      }
+    },
+    {
+      "id": "stamina",
+      "name": "Kitartás",
+      "description": "Fokozatosan visszatölti az energiát.",
+      "durationSeconds": 6,
+      "effect": {
+        "type": "stamina_regen",
+        "regenPerSecond": 3
+      }
+    }
+  ]
+}

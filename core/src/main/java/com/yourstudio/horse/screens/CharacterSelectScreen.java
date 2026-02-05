@@ -132,32 +132,9 @@ public class CharacterSelectScreen extends ScreenAdapter {
         stage = new Stage(new ScreenViewport());
         titleFont = createUIFont(54, 3.1f);
         bodyFont = createUIFont(28, 1.45f);
-        buttonUp = PixelArtFactory.createPixelButton(
-            320,
-            96,
-            new Color(0.26f, 0.56f, 0.86f, 1f),
-            new Color(0.12f, 0.26f, 0.46f, 0.18f),
-            new Color(0.9f, 0.92f, 0.96f, 1f),
-            new Color(0.08f, 0.14f, 0.22f, 1f),
-            false
-        );
-        buttonDown = PixelArtFactory.createPixelButton(
-            320,
-            96,
-            new Color(0.2f, 0.46f, 0.72f, 1f),
-            new Color(0.1f, 0.22f, 0.38f, 0.18f),
-            new Color(0.9f, 0.92f, 0.96f, 1f),
-            new Color(0.08f, 0.14f, 0.22f, 1f),
-            true
-        );
-        background = PixelArtFactory.createPixelBackground(
-            360,
-            200,
-            new Color(0.08f, 0.18f, 0.2f, 1f),
-            new Color(0.22f, 0.34f, 0.28f, 1f),
-            new Color(0.1f, 0.24f, 0.12f, 1f),
-            new Color(0.08f, 0.18f, 0.1f, 1f)
-        );
+        buttonUp = loadUiTexture("ui/button_primary.png");
+        buttonDown = loadUiTexture("ui/button_primary_down.png");
+        background = loadUiTexture("ui/bg_select.png");
         clickSound = game.getAssets().get("sfx/click.wav", Sound.class);
         horseColorValues = new Color[] {
             new Color(0.64f, 0.38f, 0.2f, 1f),
@@ -719,5 +696,11 @@ public class CharacterSelectScreen extends ScreenAdapter {
 
     private Drawable toDrawable(Texture texture) {
         return new TextureRegionDrawable(texture);
+    }
+
+    private Texture loadUiTexture(String path) {
+        Texture texture = new Texture(path);
+        texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+        return texture;
     }
 }

@@ -6,7 +6,6 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -24,7 +23,6 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.yourstudio.horse.HorseGame;
-import com.yourstudio.horse.ui.PixelArtFactory;
 import com.yourstudio.horse.ui.UiFactory;
 import com.yourstudio.horse.ui.ScreenNavigator;
 
@@ -57,63 +55,12 @@ public class MainMenuScreen extends ScreenAdapter {
         titleFont = createUIFont(titleSize, 3.1f * scale);
         buttonFont = createUIFont(buttonSize, 1.45f * scale);
 
-        int buttonWidth = Math.max(240, Math.round(360f * scale));
-        int buttonHeight = Math.max(84, Math.round(112f * scale));
-        int logoWidth = Math.max(360, Math.round(560f * scale));
-        int logoHeight = Math.max(110, Math.round(150f * scale));
-        int menuWidth = Math.max(420, Math.round(600f * scale));
-        int menuHeight = Math.max(220, Math.round(320f * scale));
-        buttonUp = PixelArtFactory.createPixelButton(
-            buttonWidth,
-            buttonHeight,
-            new Color(0.2f, 0.5f, 0.85f, 1f),
-            new Color(0.1f, 0.2f, 0.4f, 0.18f),
-            new Color(0.88f, 0.9f, 0.95f, 1f),
-            new Color(0.08f, 0.14f, 0.25f, 1f),
-            false
-        );
-        buttonDown = PixelArtFactory.createPixelButton(
-            buttonWidth,
-            buttonHeight,
-            new Color(0.18f, 0.44f, 0.74f, 1f),
-            new Color(0.08f, 0.18f, 0.36f, 0.18f),
-            new Color(0.88f, 0.9f, 0.95f, 1f),
-            new Color(0.08f, 0.14f, 0.25f, 1f),
-            true
-        );
-        buttonOver = PixelArtFactory.createPixelButton(
-            buttonWidth,
-            buttonHeight,
-            new Color(0.28f, 0.62f, 0.92f, 1f),
-            new Color(0.12f, 0.28f, 0.48f, 0.18f),
-            new Color(0.95f, 0.95f, 0.98f, 1f),
-            new Color(0.1f, 0.16f, 0.28f, 1f),
-            false
-        );
-        background = PixelArtFactory.createPixelBackground(
-            360,
-            200,
-            new Color(0.16f, 0.28f, 0.5f, 1f),
-            new Color(0.48f, 0.7f, 0.88f, 1f),
-            new Color(0.12f, 0.35f, 0.2f, 1f),
-            new Color(0.08f, 0.26f, 0.16f, 1f)
-        );
-        logoPanel = PixelArtFactory.createPixelPanel(
-            logoWidth,
-            logoHeight,
-            new Color(0.94f, 0.9f, 0.84f, 1f),
-            new Color(0.3f, 0.25f, 0.2f, 0.12f),
-            new Color(0.98f, 0.98f, 0.98f, 1f),
-            new Color(0.3f, 0.22f, 0.18f, 1f)
-        );
-        menuPanel = PixelArtFactory.createPixelPanel(
-            menuWidth,
-            menuHeight,
-            new Color(0.14f, 0.18f, 0.26f, 0.95f),
-            new Color(0.06f, 0.08f, 0.12f, 0.18f),
-            new Color(0.78f, 0.78f, 0.82f, 1f),
-            new Color(0.18f, 0.2f, 0.28f, 1f)
-        );
+        buttonUp = loadUiTexture("ui/button_primary.png");
+        buttonDown = loadUiTexture("ui/button_primary_down.png");
+        buttonOver = loadUiTexture("ui/button_primary_over.png");
+        background = loadUiTexture("ui/bg_menu.png");
+        logoPanel = loadUiTexture("ui/panel_logo.png");
+        menuPanel = loadUiTexture("ui/panel_menu.png");
         clickSound = game.getAssets().get("sfx/click.wav", Sound.class);
         menuMusic = game.getAssets().get("sfx/menu_music.wav", Music.class);
         menuMusic.setLooping(true);
@@ -240,5 +187,11 @@ public class MainMenuScreen extends ScreenAdapter {
 
     private Drawable toDrawable(Texture texture) {
         return new TextureRegionDrawable(texture);
+    }
+
+    private Texture loadUiTexture(String path) {
+        Texture texture = new Texture(path);
+        texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+        return texture;
     }
 }

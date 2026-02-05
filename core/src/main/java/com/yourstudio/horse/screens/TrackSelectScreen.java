@@ -5,7 +5,6 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -24,7 +23,6 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.yourstudio.horse.HorseGame;
-import com.yourstudio.horse.ui.PixelArtFactory;
 import com.yourstudio.horse.ui.UiFactory;
 import com.yourstudio.horse.ui.ScreenNavigator;
 
@@ -83,13 +81,13 @@ public class TrackSelectScreen extends ScreenAdapter {
         titleFont = createUIFont(54, 3.1f);
         labelFont = createUIFont(28, 1.45f);
 
-        background = createPixelBackground(360, 200);
-        buttonUp = createPanelTexture(new Color(0.29f, 0.6f, 0.85f, 1f), new Color(0.1f, 0.2f, 0.3f, 1f), 280, 96);
-        buttonDown = createPanelTexture(new Color(0.22f, 0.5f, 0.76f, 1f), new Color(0.08f, 0.16f, 0.24f, 1f), 280, 96);
-        buttonOver = createPanelTexture(new Color(0.38f, 0.7f, 0.95f, 1f), new Color(0.12f, 0.24f, 0.36f, 1f), 280, 96);
+        background = loadUiTexture("ui/bg_select.png");
+        buttonUp = loadUiTexture("ui/button_primary.png");
+        buttonDown = loadUiTexture("ui/button_primary_down.png");
+        buttonOver = loadUiTexture("ui/button_primary_over.png");
         clickSound = game.getAssets().get("sfx/click.wav", Sound.class);
 
-        createTrackCards();
+        loadTrackCards();
 
         Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, Color.WHITE);
         Label.LabelStyle labelStyle = new Label.LabelStyle(labelFont, Color.WHITE);
@@ -220,92 +218,18 @@ public class TrackSelectScreen extends ScreenAdapter {
         trackDescLabel.setText(trackDescriptions[trackIndex]);
     }
 
-    private void createTrackCards() {
+    private void loadTrackCards() {
         trackCards = new Texture[trackNames.length];
         trackCardsSelected = new Texture[trackNames.length];
 
-        Color[] skies = {
-            new Color(0.35f, 0.65f, 0.35f, 1f),
-            new Color(0.35f, 0.7f, 0.9f, 1f),
-            new Color(0.6f, 0.65f, 0.75f, 1f),
-            new Color(0.2f, 0.2f, 0.35f, 1f)
-        };
-        Color[] grounds = {
-            new Color(0.18f, 0.4f, 0.18f, 1f),
-            new Color(0.95f, 0.84f, 0.55f, 1f),
-            new Color(0.4f, 0.35f, 0.3f, 1f),
-            new Color(0.2f, 0.2f, 0.25f, 1f)
-        };
-        Color[] accents = {
-            new Color(0.1f, 0.25f, 0.1f, 1f),
-            new Color(0.1f, 0.4f, 0.6f, 1f),
-            new Color(0.25f, 0.2f, 0.2f, 1f),
-            new Color(0.6f, 0.3f, 0.85f, 1f)
-        };
-
-        for (int i = 0; i < trackNames.length; i++) {
-            trackCards[i] = createTrackCard(skies[i], grounds[i], accents[i], false);
-            trackCardsSelected[i] = createTrackCard(skies[i], grounds[i], accents[i], true);
-        }
-    }
-
-    private Texture createTrackCard(Color sky, Color ground, Color accent, boolean selected) {
-        int width = 170;
-        int height = 120;
-        Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
-        pixmap.setColor(sky);
-        pixmap.fillRectangle(0, height / 2, width, height / 2);
-        pixmap.setColor(ground);
-        pixmap.fillRectangle(0, 0, width, height / 2);
-
-        pixmap.setColor(accent);
-        pixmap.fillRectangle(10, height / 2 + 8, 24, 8);
-        pixmap.fillRectangle(44, height / 2 + 12, 18, 6);
-        pixmap.fillRectangle(70, height / 2 + 6, 30, 10);
-
-        pixmap.fillRectangle(20, height / 2 - 18, 24, 10);
-        pixmap.fillRectangle(90, height / 2 - 22, 30, 12);
-
-        Color border = selected ? new Color(0.95f, 0.86f, 0.4f, 1f) : new Color(0.2f, 0.2f, 0.25f, 1f);
-        pixmap.setColor(border);
-        for (int i = 0; i < 3; i++) {
-            pixmap.drawRectangle(i, i, width - (i * 2), height - (i * 2));
-        }
-
-        Texture texture = new Texture(pixmap);
-        pixmap.dispose();
-        return texture;
-    }
-
-    private Texture createPixelBackground(int width, int height) {
-        Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
-        Color top = new Color(0.12f, 0.16f, 0.25f, 1f);
-        Color bottom = new Color(0.22f, 0.3f, 0.42f, 1f);
-        for (int y = 0; y < height; y++) {
-            float t = y / (float) (height - 1);
-            pixmap.setColor(
-                bottom.r + (top.r - bottom.r) * t,
-                bottom.g + (top.g - bottom.g) * t,
-                bottom.b + (top.b - bottom.b) * t,
-                1f
-            );
-            pixmap.drawLine(0, y, width, y);
-        }
-        pixmap.setColor(0.1f, 0.2f, 0.12f, 1f);
-        pixmap.fillRectangle(0, 0, width, height / 3);
-        pixmap.setColor(0.08f, 0.18f, 0.1f, 1f);
-        for (int x = 0; x < width; x += 18) {
-            pixmap.fillRectangle(x, height / 3 - 8, 12, 8);
-        }
-        Texture texture = new Texture(pixmap);
-        pixmap.dispose();
-        return texture;
-    }
-
-    private Texture createPanelTexture(Color fillColor, Color borderColor, int width, int height) {
-        Color shade = new Color(Math.max(0f, fillColor.r - 0.08f), Math.max(0f, fillColor.g - 0.08f), Math.max(0f, fillColor.b - 0.08f), 0.18f);
-        Color borderLight = new Color(0.92f, 0.92f, 0.96f, 1f);
-        return PixelArtFactory.createPixelPanel(width, height, fillColor, shade, borderLight, borderColor);
+        trackCards[0] = loadUiTexture("ui/card_forest.png");
+        trackCardsSelected[0] = loadUiTexture("ui/card_forest_selected.png");
+        trackCards[1] = loadUiTexture("ui/card_beach.png");
+        trackCardsSelected[1] = loadUiTexture("ui/card_beach_selected.png");
+        trackCards[2] = loadUiTexture("ui/card_mountain.png");
+        trackCardsSelected[2] = loadUiTexture("ui/card_mountain_selected.png");
+        trackCards[3] = loadUiTexture("ui/card_city.png");
+        trackCardsSelected[3] = loadUiTexture("ui/card_city_selected.png");
     }
 
     private BitmapFont createUIFont(int size, float fallbackScale) {
@@ -328,6 +252,12 @@ public class TrackSelectScreen extends ScreenAdapter {
 
     private Drawable toDrawable(Texture texture) {
         return new TextureRegionDrawable(texture);
+    }
+
+    private Texture loadUiTexture(String path) {
+        Texture texture = new Texture(path);
+        texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+        return texture;
     }
 
     private void disposeTextureArray(Texture[] textures) {
