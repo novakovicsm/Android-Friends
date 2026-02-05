@@ -240,7 +240,6 @@ public class RaceScreen extends ScreenAdapter {
         hudContent.add(petBonusLabel).left().padTop(6f);
             applyPetBonus();
         hudTable.add(hudContent);
-
         Table layout = new Table();
         layout.setFillParent(true);
         layout.pad(24f);
@@ -321,7 +320,6 @@ public class RaceScreen extends ScreenAdapter {
             drawHorseAnimation(stage.getBatch(), false);
             stage.getBatch().end();
         }
-
         stage.act(delta);
         stage.draw();
     }
