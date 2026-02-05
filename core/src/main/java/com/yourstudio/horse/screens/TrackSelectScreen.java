@@ -3,10 +3,14 @@ package com.yourstudio.horse.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -48,12 +52,12 @@ public class TrackSelectScreen extends ScreenAdapter {
     private Label trackDescLabel;
     private int trackIndex;
 
-    private final String[] trackNames = {"Erdő", "Tengerpart", "Hegyek", "Éjszakai város"};
+    private final String[] trackNames = {"Erd\u0151", "Tengerpart", "Hegyek", "\u00C9jszakai v\u00E1ros"};
     private final String[] trackDescriptions = {
-        "Sűrű fák, puha ösvények és napfényes tisztások.",
-        "Homokos partok, hullámok hangja, szeles sprint.",
-        "Meredek emelkedők és hűvös hegyi levegő.",
-        "Neonfények, szűk utcák és gyors kanyarok."
+        "S\u0171r\u0171 f\u00E1k, puha \u00F6sv\u00E9nyek \u00E9s napf\u00E9nyes tiszt\u00E1sok.",
+        "Homokos partok, hull\u00E1mok hangja, szeles sprint.",
+        "Meredek emelked\u0151k \u00E9s h\u0171v\u00F6s hegyi leveg\u0151.",
+        "Neonf\u00E9nyek, sz\u0171k utc\u00E1k \u00E9s gyors kanyarok."
     };
 
     public TrackSelectScreen(HorseGame game, String horseName, String riderName, String petName) {
@@ -75,15 +79,13 @@ public class TrackSelectScreen extends ScreenAdapter {
     @Override
     public void show() {
         stage = new Stage(new ScreenViewport());
-        titleFont = new BitmapFont();
-        titleFont.getData().setScale(2.0f);
-        labelFont = new BitmapFont();
-        labelFont.getData().setScale(1.1f);
+        titleFont = createUIFont(54, 3.1f);
+        labelFont = createUIFont(28, 1.45f);
 
-        background = createPixelBackground(320, 180);
-        buttonUp = createPanelTexture(new Color(0.29f, 0.6f, 0.85f, 1f), new Color(0.1f, 0.2f, 0.3f, 1f), 240, 84);
-        buttonDown = createPanelTexture(new Color(0.22f, 0.5f, 0.76f, 1f), new Color(0.08f, 0.16f, 0.24f, 1f), 240, 84);
-        buttonOver = createPanelTexture(new Color(0.38f, 0.7f, 0.95f, 1f), new Color(0.12f, 0.24f, 0.36f, 1f), 240, 84);
+        background = createPixelBackground(360, 200);
+        buttonUp = createPanelTexture(new Color(0.29f, 0.6f, 0.85f, 1f), new Color(0.1f, 0.2f, 0.3f, 1f), 280, 96);
+        buttonDown = createPanelTexture(new Color(0.22f, 0.5f, 0.76f, 1f), new Color(0.08f, 0.16f, 0.24f, 1f), 280, 96);
+        buttonOver = createPanelTexture(new Color(0.38f, 0.7f, 0.95f, 1f), new Color(0.12f, 0.24f, 0.36f, 1f), 280, 96);
         clickSound = game.getAssets().get("sfx/click.wav", Sound.class);
 
         createTrackCards();
@@ -98,7 +100,7 @@ public class TrackSelectScreen extends ScreenAdapter {
         buttonStyle.font = labelFont;
         buttonStyle.fontColor = Color.WHITE;
 
-        Label title = UiFactory.label("Pályaválasztás", titleStyle);
+        Label title = UiFactory.label("P\u00E1lyav\u00E1laszt\u00E1s", titleStyle);
         trackNameLabel = UiFactory.label(trackNames[trackIndex], titleStyle);
         trackDescLabel = UiFactory.label(trackDescriptions[trackIndex], labelStyle);
         trackDescLabel.setAlignment(Align.center);
@@ -118,7 +120,7 @@ public class TrackSelectScreen extends ScreenAdapter {
                 }
             });
             cardImages[i] = image;
-            cardsTable.add(image).width(170f).height(120f).pad(10f);
+            cardsTable.add(image).width(200f).height(140f).pad(12f);
         }
         updateSelection();
 
@@ -129,7 +131,7 @@ public class TrackSelectScreen extends ScreenAdapter {
             );
             ScreenNavigator.toCharacterSelect(game, selection);
         });
-        TextButton startButton = UiFactory.button("Verseny indítása", buttonStyle, () -> {
+        TextButton startButton = UiFactory.button("Verseny ind\u00EDt\u00E1sa", buttonStyle, () -> {
             playClick();
             ScreenNavigator.Selection selection = new ScreenNavigator.Selection(
                 horseName, riderName, petName, horseColor, maneColor, saddleColor, outfitColor
@@ -140,18 +142,18 @@ public class TrackSelectScreen extends ScreenAdapter {
         Table layout = new Table();
         layout.setFillParent(true);
         layout.pad(24f);
-        layout.add(title).padBottom(24f);
+        layout.add(title).padBottom(18f);
         layout.row();
         layout.add(cardsTable).padBottom(24f);
         layout.row();
         layout.add(trackNameLabel).padBottom(10f);
         layout.row();
-        layout.add(trackDescLabel).width(540f).padBottom(26f);
+        layout.add(trackDescLabel).width(620f).padBottom(26f);
         layout.row();
 
         Table buttonRow = new Table();
-        buttonRow.add(backButton).width(220f).height(80f).padRight(18f);
-        buttonRow.add(startButton).width(260f).height(80f);
+        buttonRow.add(backButton).width(240f).height(92f).padRight(18f);
+        buttonRow.add(startButton).width(300f).height(92f);
         layout.add(buttonRow);
 
         stage.addActor(layout);
@@ -310,6 +312,24 @@ public class TrackSelectScreen extends ScreenAdapter {
         Texture texture = new Texture(pixmap);
         pixmap.dispose();
         return texture;
+    }
+
+    private BitmapFont createUIFont(int size, float fallbackScale) {
+        FileHandle fontFile = Gdx.files.internal("fonts/ArchitectsDaughter.ttf");
+        if (fontFile.exists()) {
+            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(fontFile);
+            FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+            parameter.size = size;
+            parameter.minFilter = TextureFilter.Linear;
+            parameter.magFilter = TextureFilter.Linear;
+            parameter.characters = FreeTypeFontGenerator.DEFAULT_CHARS + "\u00C1\u00C9\u00CD\u00D3\u00D6\u0150\u00DA\u00DC\u0170\u00E1\u00E9\u00ED\u00F3\u00F6\u0151\u00FA\u00FC\u0171";
+            BitmapFont font = generator.generateFont(parameter);
+            generator.dispose();
+            return font;
+        }
+        BitmapFont font = new BitmapFont();
+        font.getData().setScale(fallbackScale);
+        return font;
     }
 
     private Drawable toDrawable(Texture texture) {

@@ -4,12 +4,16 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -48,7 +52,8 @@ public class RaceScreen extends ScreenAdapter {
 
     private Stage stage;
     private Texture background;
-    private BitmapFont font;
+    private BitmapFont titleFont;
+    private BitmapFont bodyFont;
     private Texture buttonUp;
     private Texture buttonDown;
     private Sound clickSound;
@@ -60,6 +65,9 @@ public class RaceScreen extends ScreenAdapter {
     private Label lapLabel;
     private Label powerupLabel;
     private Label petBonusLabel;
+    private Label directionLabel;
+    private TextButton leftButton;
+    private TextButton rightButton;
     private Image horsePreviewImage;
     private Image riderPreviewImage;
     private Image petPreviewImage;
@@ -67,6 +75,10 @@ public class RaceScreen extends ScreenAdapter {
     private Texture horsePreviewFallback;
     private Texture[] riderPreviews;
     private Texture[] petPreviews;
+    private Texture riderPreviewCustom;
+    private Color horseTintColor;
+    private Color riderOutfitColor;
+    private Color riderHairColor;
     private int horseIndex;
     private int riderIndex;
     private int petIndex;
@@ -167,7 +179,8 @@ public class RaceScreen extends ScreenAdapter {
     @Override
     public void show() {
         stage = new Stage(new ScreenViewport());
-        font = new BitmapFont();
+        titleFont = createUIFont(54, 3.1f);
+        bodyFont = createUIFont(28, 1.45f);
         buttonUp = createColorTexture(new Color(0.29f, 0.6f, 0.85f, 1f));
         buttonDown = createColorTexture(new Color(0.2f, 0.48f, 0.7f, 1f));
         background = createColorTexture(new Color(0.2f, 0.12f, 0.08f, 1f));
@@ -178,7 +191,7 @@ public class RaceScreen extends ScreenAdapter {
         raceMusic.setLooping(true);
         raceMusic.setVolume(0.5f);
         raceMusic.play();
-        hudPanel = createPanelTexture(new Color(0.12f, 0.12f, 0.16f, 0.85f), new Color(0.35f, 0.35f, 0.45f, 1f), 260, 130);
+        hudPanel = createPanelTexture(new Color(0.12f, 0.12f, 0.16f, 0.85f), new Color(0.35f, 0.35f, 0.45f, 1f), 320, 190);
         loadHorseAnimations();
         idleAnimation.setPlayMode(Animation.PlayMode.LOOP);
         runAnimation.setPlayMode(Animation.PlayMode.LOOP);
@@ -187,6 +200,9 @@ public class RaceScreen extends ScreenAdapter {
         horseIndex = findIndex(horses, horseName);
         riderIndex = findIndex(riders, riderName);
         petIndex = findIndex(pets, petName);
+        horseTintColor = colorForHorseColor(horseColor);
+        riderOutfitColor = colorForOutfitColor(outfitColor);
+        riderHairColor = colorForRiderHair(riderName);
         horsePreviewRegion = idleAnimation != null ? idleAnimation.getKeyFrame(0f) : null;
         if (horsePreviewRegion == null) {
             horsePreviewFallback = createHorsePreview(new Color(0.65f, 0.44f, 0.3f, 1f), new Color(0.25f, 0.16f, 0.1f, 1f));
@@ -197,6 +213,7 @@ public class RaceScreen extends ScreenAdapter {
         horsePreviewImage = new Image(horsePreviewRegion);
         riderPreviewImage = new Image(toDrawable(riderPreviews[riderIndex]));
         petPreviewImage = new Image(toDrawable(petPreviews[petIndex]));
+        refreshRiderPreview();
 
         camera = new OrthographicCamera();
         mapViewport = new FitViewport(640f, 360f, camera);
@@ -222,24 +239,46 @@ public class RaceScreen extends ScreenAdapter {
             mapLoaded = false;
         }
 
-        Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
+        Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, Color.WHITE);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(bodyFont, Color.WHITE);
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
         buttonStyle.up = toDrawable(buttonUp);
         buttonStyle.down = toDrawable(buttonDown);
-        buttonStyle.font = font;
+        buttonStyle.font = bodyFont;
         buttonStyle.fontColor = Color.WHITE;
 
-        Label title = new Label("Verseny (helykitöltő)", labelStyle);
-        Label selection = new Label("Ló: " + horseName + " | Lovas: " + riderName + " | Kedvenc: " + petName, labelStyle);
-        String horseCustomization = "Lószín: " + safeLabel(horseColor) + " | Sörény: " + safeLabel(maneColor) + " | Nyereg: " + safeLabel(saddleColor) + " | Ruházat: " + safeLabel(outfitColor);
+        Label title = new Label("Verseny", titleStyle);
+        Label selection = new Label("L\u00F3: " + horseName + " | Lovas: " + riderName + " | Kedvenc: " + petName, labelStyle);
+        String horseCustomization = "L\u00F3sz\u00EDn: " + safeLabel(horseColor) + " | S\u00F6r\u00E9ny: " + safeLabel(maneColor) + " | Nyereg: " + safeLabel(saddleColor) + " | Ruh\u00E1zat: " + safeLabel(outfitColor);
         Label customization = new Label(horseCustomization, labelStyle);
-        Label trackLabel = new Label("Pálya: " + trackName, labelStyle);
+        Label trackLabel = new Label("P\u00E1lya: " + trackName, labelStyle);
         TextButton backButton = new TextButton("Vissza", buttonStyle);
 
-        speedLabel = new Label("Sebesség: 0 km/h", labelStyle);
-        lapLabel = new Label("Kör: 1/3", labelStyle);
-        powerupLabel = new Label("Bónusz: --", labelStyle);
-    petBonusLabel = new Label("Kedvenc bónusz: --", labelStyle);
+        speedLabel = new Label("Sebess\u00E9g: 0 km/h", labelStyle);
+        lapLabel = new Label("K\u00F6r: 1/3", labelStyle);
+        powerupLabel = new Label("B\u00F3nusz: --", labelStyle);
+        petBonusLabel = new Label("Kedvenc b\u00F3nusz: --", labelStyle);
+        directionLabel = new Label("Ir\u00E1ny:", labelStyle);
+        leftButton = new TextButton("Balra", buttonStyle);
+        rightButton = new TextButton("Jobbra", buttonStyle);
+        leftButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (clickSound != null) {
+                    clickSound.play(0.6f);
+                }
+                horseDirection = -1f;
+            }
+        });
+        rightButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (clickSound != null) {
+                    clickSound.play(0.6f);
+                }
+                horseDirection = 1f;
+            }
+        });
 
         backButton.addListener(new ClickListener() {
             @Override
@@ -271,7 +310,7 @@ public class RaceScreen extends ScreenAdapter {
         previewRow.add(riderPreviewImage).size(64f, 48f).padRight(6f);
         previewRow.add(petPreviewImage).size(64f, 48f);
         hudContent.add(previewRow).left().padTop(8f);
-            applyPetBonus();
+        applyPetBonus();
         hudTable.add(hudContent);
         Table layout = new Table();
         layout.setFillParent(true);
@@ -286,8 +325,18 @@ public class RaceScreen extends ScreenAdapter {
         layout.row();
         layout.add(backButton).width(220f).height(80f);
 
+        Table directionTable = new Table();
+        directionTable.setFillParent(true);
+        directionTable.bottom().pad(24f);
+        Table directionRow = new Table();
+        directionRow.add(directionLabel).padRight(12f);
+        directionRow.add(leftButton).width(140f).height(72f).padRight(12f);
+        directionRow.add(rightButton).width(140f).height(72f);
+        directionTable.add(directionRow);
+
         stage.addActor(layout);
         stage.addActor(hudTable);
+        stage.addActor(directionTable);
         Gdx.input.setInputProcessor(stage);
     }
 
@@ -315,12 +364,12 @@ public class RaceScreen extends ScreenAdapter {
                 Gdx.input.vibrate(120);
             }
         }
-        speedLabel.setText("Sebesség: " + (int) speed + " km/h");
-        lapLabel.setText("Kör: " + currentLap + "/3");
+        speedLabel.setText("Sebess\u00E9g: " + (int) speed + " km/h");
+        lapLabel.setText("K\u00F6r: " + currentLap + "/3");
         if (activePowerupName != null) {
-            powerupLabel.setText("Bónusz: " + activePowerupName + " (" + (int) Math.ceil(activePowerupTimer) + "s)");
+            powerupLabel.setText("B\u00F3nusz: " + activePowerupName + " (" + (int) Math.ceil(activePowerupTimer) + "s)");
         } else {
-            powerupLabel.setText("Bónusz: --");
+            powerupLabel.setText("B\u00F3nusz: --");
         }
         animationTime += delta;
         if (mapLoaded && mapRenderer != null && camera != null) {
@@ -372,8 +421,11 @@ public class RaceScreen extends ScreenAdapter {
         if (stage != null) {
             stage.dispose();
         }
-        if (font != null) {
-            font.dispose();
+        if (titleFont != null) {
+            titleFont.dispose();
+        }
+        if (bodyFont != null) {
+            bodyFont.dispose();
         }
         if (buttonUp != null) {
             buttonUp.dispose();
@@ -408,6 +460,9 @@ public class RaceScreen extends ScreenAdapter {
         if (horsePreviewFallback != null) {
             horsePreviewFallback.dispose();
         }
+        if (riderPreviewCustom != null) {
+            riderPreviewCustom.dispose();
+        }
         disposeTextureArray(riderPreviews);
         disposeTextureArray(petPreviews);
     }
@@ -436,6 +491,24 @@ public class RaceScreen extends ScreenAdapter {
         Texture texture = new Texture(pixmap);
         pixmap.dispose();
         return texture;
+    }
+
+    private BitmapFont createUIFont(int size, float fallbackScale) {
+        FileHandle fontFile = Gdx.files.internal("fonts/ArchitectsDaughter.ttf");
+        if (fontFile.exists()) {
+            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(fontFile);
+            FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+            parameter.size = size;
+            parameter.minFilter = TextureFilter.Linear;
+            parameter.magFilter = TextureFilter.Linear;
+            parameter.characters = FreeTypeFontGenerator.DEFAULT_CHARS + "\u00C1\u00C9\u00CD\u00D3\u00D6\u0150\u00DA\u00DC\u0170\u00E1\u00E9\u00ED\u00F3\u00F6\u0151\u00FA\u00FC\u0171";
+            BitmapFont font = generator.generateFont(parameter);
+            generator.dispose();
+            return font;
+        }
+        BitmapFont font = new BitmapFont();
+        font.getData().setScale(fallbackScale);
+        return font;
     }
 
     private String safeLabel(String value) {
@@ -564,20 +637,20 @@ public class RaceScreen extends ScreenAdapter {
         String bonusText = "--";
         if ("Kutya".equals(petName)) {
             petSpeedBonus = 6f;
-            bonusText = "+6 km/h végsebesség";
+            bonusText = "+6 km/h v\u00E9gsebess\u00E9g";
         } else if ("Cica".equals(petName)) {
             petAccelBonus = 5f;
-            bonusText = "+5 gyorsulás";
+            bonusText = "+5 gyorsul\u00E1s";
         } else if ("Nyuszi".equals(petName)) {
             petAccelBonus = 3f;
             petSpeedBonus = 3f;
-            bonusText = "+3 gyorsulás, +3 km/h";
-        } else if ("Papagáj".equals(petName)) {
+            bonusText = "+3 gyorsul\u00E1s, +3 km/h";
+        } else if ("Papag\u00E1j".equals(petName)) {
             petShieldBonus = 1f;
             bonusText = "+1 pajzs";
         }
         if (petBonusLabel != null) {
-            petBonusLabel.setText("Kedvenc bónusz: " + bonusText);
+            petBonusLabel.setText("Kedvenc b\u00F3nusz: " + bonusText);
         }
     }
 
@@ -616,7 +689,7 @@ public class RaceScreen extends ScreenAdapter {
             if (dx * dx + dy * dy <= 24f * 24f) {
                 powerupSpawns.removeIndex(i);
                 PowerupDef def = findPowerupDef(spawn.id);
-                activePowerupName = def != null ? def.name : "Bónusz";
+                activePowerupName = def != null ? def.name : "B\u00F3nusz";
                 activePowerupTimer = 4f;
                 if (powerupSound != null) {
                     powerupSound.play(0.7f);
@@ -661,7 +734,8 @@ public class RaceScreen extends ScreenAdapter {
 
     private void loadPowerupDefs() {
         try {
-            JsonValue root = new JsonReader().parse(Gdx.files.internal("data/powerups.json"));
+            FileHandle powerupsFile = Gdx.files.internal("data/powerups.json");
+            JsonValue root = new JsonReader().parse(powerupsFile.readString("UTF-8"));
             JsonValue list = root.get("powerups");
             if (list != null) {
                 for (JsonValue entry : list) {
@@ -674,9 +748,9 @@ public class RaceScreen extends ScreenAdapter {
             Gdx.app.error("RaceScreen", "Failed to load powerups.json", exception);
         }
         if (powerupDefs.size == 0) {
-            powerupDefs.add(new PowerupDef("gyorsitas", "Gyorsítás"));
+            powerupDefs.add(new PowerupDef("gyorsitas", "Gyors\u00EDt\u00E1s"));
             powerupDefs.add(new PowerupDef("pajzs", "Pajzs"));
-            powerupDefs.add(new PowerupDef("villam", "Villám"));
+            powerupDefs.add(new PowerupDef("villam", "Vill\u00E1m"));
         }
     }
 
@@ -709,6 +783,10 @@ public class RaceScreen extends ScreenAdapter {
             return;
         }
         TextureRegion frame = animation.getKeyFrame(animationTime);
+        Color previousColor = new Color(batch.getColor());
+        if (horseTintColor != null) {
+            batch.setColor(horseTintColor);
+        }
         float size = 96f;
         float x;
         float y;
@@ -724,6 +802,66 @@ public class RaceScreen extends ScreenAdapter {
         } else {
             batch.draw(frame, x + size, y, -size, size);
         }
+        batch.setColor(previousColor);
+    }
+
+    private void refreshRiderPreview() {
+        if (riderPreviewImage == null || riderOutfitColor == null || riderHairColor == null) {
+            return;
+        }
+        if (riderPreviewCustom != null) {
+            riderPreviewCustom.dispose();
+        }
+        riderPreviewCustom = createRiderPreview(riderOutfitColor, riderHairColor);
+        riderPreviewImage.setDrawable(toDrawable(riderPreviewCustom));
+    }
+
+    private Color colorForHorseColor(String value) {
+        if ("Meleg barna".equals(value)) {
+            return new Color(0.64f, 0.38f, 0.2f, 1f);
+        }
+        if ("Arany".equals(value)) {
+            return new Color(0.85f, 0.72f, 0.42f, 1f);
+        }
+        if ("Hamvas".equals(value)) {
+            return new Color(0.7f, 0.72f, 0.78f, 1f);
+        }
+        if ("S\u00F6t\u00E9t".equals(value)) {
+            return new Color(0.25f, 0.2f, 0.15f, 1f);
+        }
+        return null;
+    }
+
+    private Color colorForOutfitColor(String value) {
+        if ("Piros".equals(value)) {
+            return new Color(0.75f, 0.2f, 0.2f, 1f);
+        }
+        if ("K\u00E9k".equals(value)) {
+            return new Color(0.2f, 0.4f, 0.8f, 1f);
+        }
+        if ("Z\u00F6ld".equals(value)) {
+            return new Color(0.2f, 0.6f, 0.35f, 1f);
+        }
+        if ("Lila".equals(value)) {
+            return new Color(0.55f, 0.3f, 0.75f, 1f);
+        }
+        return null;
+    }
+
+    private Color colorForRiderHair(String value) {
+        if ("Lili".equals(value)) {
+            return new Color(0.2f, 0.15f, 0.1f, 1f);
+        }
+        if ("Noel".equals(value)) {
+            return new Color(0.4f, 0.25f, 0.1f, 1f);
+        }
+        if ("Mira".equals(value)) {
+            return new Color(0.1f, 0.08f, 0.05f, 1f);
+        }
+        if ("\u00C1ron".equals(value)) {
+            return new Color(0.7f, 0.55f, 0.3f, 1f);
+        }
+        return new Color(0.2f, 0.15f, 0.1f, 1f);
     }
 
     private void loadHorseAnimations() {
@@ -751,7 +889,7 @@ public class RaceScreen extends ScreenAdapter {
         if ("Pej".equals(horseName)) {
             return "bay";
         }
-        if ("Szürke".equals(horseName)) {
+        if ("Sz\u00FCrke".equals(horseName)) {
             return "gray";
         }
         if ("Palomino".equals(horseName)) {

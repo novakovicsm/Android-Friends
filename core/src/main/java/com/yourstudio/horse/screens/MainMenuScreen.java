@@ -215,7 +215,7 @@ public class MainMenuScreen extends ScreenAdapter {
     }
 
     private BitmapFont createUIFont(int size, float fallbackScale) {
-        FileHandle fontFile = Gdx.files.internal("fonts/ui.ttf");
+        FileHandle fontFile = Gdx.files.internal("fonts/ArchitectsDaughter.ttf");
         if (fontFile.exists()) {
             FreeTypeFontGenerator generator = new FreeTypeFontGenerator(fontFile);
             FreeTypeFontParameter parameter = new FreeTypeFontParameter();

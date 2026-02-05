@@ -59,6 +59,13 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private Image maneColorSwatchImage;
     private Image saddleColorSwatchImage;
     private Image outfitColorSwatchImage;
+    private Texture horsePreviewCustom;
+    private Texture riderPreviewCustom;
+    private Color[] horseColorValues;
+    private Color[] maneColorValues;
+    private Color[] saddleColorValues;
+    private Color[] outfitColorValues;
+    private Color[] riderHairColors;
 
     private final String[] horses = {"Gesztenye", "Pej", "Sz\u00FCrke", "Palomino"};
     private final String[] riders = {"Lili", "Noel", "Mira", "\u00C1ron"};
@@ -127,13 +134,43 @@ public class CharacterSelectScreen extends ScreenAdapter {
         buttonDown = createColorTexture(new Color(0.2f, 0.48f, 0.7f, 1f));
         background = createColorTexture(new Color(0.08f, 0.2f, 0.12f, 1f));
         clickSound = game.getAssets().get("sfx/click.wav", Sound.class);
+        horseColorValues = new Color[] {
+            new Color(0.64f, 0.38f, 0.2f, 1f),
+            new Color(0.85f, 0.72f, 0.42f, 1f),
+            new Color(0.7f, 0.72f, 0.78f, 1f),
+            new Color(0.25f, 0.2f, 0.15f, 1f)
+        };
+        maneColorValues = new Color[] {
+            new Color(0.08f, 0.08f, 0.08f, 1f),
+            new Color(0.28f, 0.16f, 0.08f, 1f),
+            new Color(0.5f, 0.5f, 0.55f, 1f),
+            new Color(0.85f, 0.78f, 0.5f, 1f)
+        };
+        saddleColorValues = new Color[] {
+            new Color(0.65f, 0.2f, 0.2f, 1f),
+            new Color(0.2f, 0.35f, 0.7f, 1f),
+            new Color(0.2f, 0.55f, 0.3f, 1f),
+            new Color(0.12f, 0.12f, 0.12f, 1f)
+        };
+        outfitColorValues = new Color[] {
+            new Color(0.75f, 0.2f, 0.2f, 1f),
+            new Color(0.2f, 0.4f, 0.8f, 1f),
+            new Color(0.2f, 0.6f, 0.35f, 1f),
+            new Color(0.55f, 0.3f, 0.75f, 1f)
+        };
+        riderHairColors = new Color[] {
+            new Color(0.2f, 0.15f, 0.1f, 1f),
+            new Color(0.4f, 0.25f, 0.1f, 1f),
+            new Color(0.1f, 0.08f, 0.05f, 1f),
+            new Color(0.7f, 0.55f, 0.3f, 1f)
+        };
         loadHorsePreviews();
         riderPreviews = createRiderPreviews();
         petPreviews = createPetPreviews();
-        horseColorSwatches = createSwatches(new Color(0.64f, 0.38f, 0.2f, 1f), new Color(0.85f, 0.72f, 0.42f, 1f), new Color(0.7f, 0.72f, 0.78f, 1f), new Color(0.25f, 0.2f, 0.15f, 1f));
-        maneColorSwatches = createSwatches(new Color(0.08f, 0.08f, 0.08f, 1f), new Color(0.28f, 0.16f, 0.08f, 1f), new Color(0.5f, 0.5f, 0.55f, 1f), new Color(0.85f, 0.78f, 0.5f, 1f));
-        saddleColorSwatches = createSwatches(new Color(0.65f, 0.2f, 0.2f, 1f), new Color(0.2f, 0.35f, 0.7f, 1f), new Color(0.2f, 0.55f, 0.3f, 1f), new Color(0.12f, 0.12f, 0.12f, 1f));
-        outfitColorSwatches = createSwatches(new Color(0.75f, 0.2f, 0.2f, 1f), new Color(0.2f, 0.4f, 0.8f, 1f), new Color(0.2f, 0.6f, 0.35f, 1f), new Color(0.55f, 0.3f, 0.75f, 1f));
+        horseColorSwatches = createSwatches(horseColorValues);
+        maneColorSwatches = createSwatches(maneColorValues);
+        saddleColorSwatches = createSwatches(saddleColorValues);
+        outfitColorSwatches = createSwatches(outfitColorValues);
 
         Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, Color.WHITE);
         Label.LabelStyle labelStyle = new Label.LabelStyle(bodyFont, Color.WHITE);
@@ -159,6 +196,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
         maneColorSwatchImage = new Image(toDrawable(maneColorSwatches[maneColorIndex]));
         saddleColorSwatchImage = new Image(toDrawable(saddleColorSwatches[saddleColorIndex]));
         outfitColorSwatchImage = new Image(toDrawable(outfitColorSwatches[outfitColorIndex]));
+        refreshHorsePreview();
+        refreshRiderPreview();
 
         Table layout = new Table();
         layout.setFillParent(true);
@@ -254,6 +293,12 @@ public class CharacterSelectScreen extends ScreenAdapter {
         if (background != null) {
             background.dispose();
         }
+        if (horsePreviewCustom != null) {
+            horsePreviewCustom.dispose();
+        }
+        if (riderPreviewCustom != null) {
+            riderPreviewCustom.dispose();
+        }
         disposeTextureArray(horseSheets);
         disposeTextureArray(riderPreviews);
         disposeTextureArray(petPreviews);
@@ -323,7 +368,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private void updateHorse(int delta) {
         horseIndex = wrapIndex(horseIndex + delta, horses.length);
         horseValue.setText(horses[horseIndex]);
-        horsePreviewImage.setDrawable(new TextureRegionDrawable(horsePreviewRegions[horseIndex]));
+        refreshHorsePreview();
         saveSelectionPrefs();
     }
 
@@ -331,6 +376,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
         horseColorIndex = wrapIndex(horseColorIndex + delta, horseColors.length);
         horseColorValue.setText(horseColors[horseColorIndex]);
         horseColorSwatchImage.setDrawable(toDrawable(horseColorSwatches[horseColorIndex]));
+        refreshHorsePreview();
         saveSelectionPrefs();
     }
 
@@ -338,6 +384,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
         maneColorIndex = wrapIndex(maneColorIndex + delta, maneColors.length);
         maneColorValue.setText(maneColors[maneColorIndex]);
         maneColorSwatchImage.setDrawable(toDrawable(maneColorSwatches[maneColorIndex]));
+        refreshHorsePreview();
         saveSelectionPrefs();
     }
 
@@ -345,6 +392,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
         saddleColorIndex = wrapIndex(saddleColorIndex + delta, saddleColors.length);
         saddleColorValue.setText(saddleColors[saddleColorIndex]);
         saddleColorSwatchImage.setDrawable(toDrawable(saddleColorSwatches[saddleColorIndex]));
+        refreshHorsePreview();
         saveSelectionPrefs();
     }
 
@@ -352,13 +400,14 @@ public class CharacterSelectScreen extends ScreenAdapter {
         outfitColorIndex = wrapIndex(outfitColorIndex + delta, outfitColors.length);
         outfitColorValue.setText(outfitColors[outfitColorIndex]);
         outfitColorSwatchImage.setDrawable(toDrawable(outfitColorSwatches[outfitColorIndex]));
+        refreshRiderPreview();
         saveSelectionPrefs();
     }
 
     private void updateRider(int delta) {
         riderIndex = wrapIndex(riderIndex + delta, riders.length);
         riderValue.setText(riders[riderIndex]);
-        riderPreviewImage.setDrawable(toDrawable(riderPreviews[riderIndex]));
+        refreshRiderPreview();
         saveSelectionPrefs();
     }
 
@@ -424,7 +473,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
                 TextureRegion[][] split = TextureRegion.split(sheet, 128, 128);
                 horsePreviewRegions[i] = split[0][0];
             } catch (RuntimeException exception) {
-                Texture fallback = createHorsePreview(new Color(0.65f, 0.44f, 0.3f, 1f), new Color(0.25f, 0.16f, 0.1f, 1f));
+                Texture fallback = createHorsePreview(new Color(0.65f, 0.44f, 0.3f, 1f), new Color(0.25f, 0.16f, 0.1f, 1f), new Color(0.35f, 0.2f, 0.1f, 1f));
                 horseSheets[i] = fallback;
                 horsePreviewRegions[i] = new TextureRegion(fallback);
             }
@@ -473,7 +522,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
         return swatches;
     }
 
-    private Texture createHorsePreview(Color body, Color mane) {
+    private Texture createHorsePreview(Color body, Color mane, Color saddle) {
         Pixmap pixmap = createPreviewPanel();
         pixmap.setColor(body);
         pixmap.fillRectangle(26, 48, 86, 32);
@@ -484,7 +533,38 @@ public class CharacterSelectScreen extends ScreenAdapter {
         pixmap.setColor(mane);
         pixmap.fillRectangle(108, 78, 24, 8);
         pixmap.fillRectangle(36, 78, 18, 10);
+        if (saddle != null) {
+            pixmap.setColor(saddle);
+            pixmap.fillRectangle(64, 56, 22, 12);
+        }
         return finalizePreviewTexture(pixmap);
+    }
+
+    private void refreshHorsePreview() {
+        if (horsePreviewImage == null) {
+            return;
+        }
+        if (horsePreviewCustom != null) {
+            horsePreviewCustom.dispose();
+        }
+        Color body = horseColorValues[horseColorIndex];
+        Color mane = maneColorValues[maneColorIndex];
+        Color saddle = saddleColorValues[saddleColorIndex];
+        horsePreviewCustom = createHorsePreview(body, mane, saddle);
+        horsePreviewImage.setDrawable(toDrawable(horsePreviewCustom));
+    }
+
+    private void refreshRiderPreview() {
+        if (riderPreviewImage == null) {
+            return;
+        }
+        if (riderPreviewCustom != null) {
+            riderPreviewCustom.dispose();
+        }
+        Color outfit = outfitColorValues[outfitColorIndex];
+        Color hair = riderHairColors[riderIndex];
+        riderPreviewCustom = createRiderPreview(outfit, hair);
+        riderPreviewImage.setDrawable(toDrawable(riderPreviewCustom));
     }
 
     private Texture createRiderPreview(Color outfit, Color hair) {
@@ -532,7 +612,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
     }
 
     private BitmapFont createUIFont(int size, float fallbackScale) {
-        FileHandle fontFile = Gdx.files.internal("fonts/ui.ttf");
+        FileHandle fontFile = Gdx.files.internal("fonts/ArchitectsDaughter.ttf");
         if (fontFile.exists()) {
             FreeTypeFontGenerator generator = new FreeTypeFontGenerator(fontFile);
             FreeTypeFontParameter parameter = new FreeTypeFontParameter();
