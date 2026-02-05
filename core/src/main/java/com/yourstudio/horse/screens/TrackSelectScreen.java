@@ -1,4 +1,4 @@
-apackage com.yourstudio.horse.screens;
+package com.yourstudio.horse.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;

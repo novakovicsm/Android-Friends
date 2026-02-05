@@ -1,14 +1,16 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.yourstudio.horse">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:label="Android Friends"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_launcher"
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
         <activity
             android:name="com.yourstudio.horse.AndroidLauncher"
             android:screenOrientation="landscape"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

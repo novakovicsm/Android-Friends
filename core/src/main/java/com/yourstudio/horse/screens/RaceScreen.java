@@ -18,6 +18,7 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -59,6 +60,19 @@ public class RaceScreen extends ScreenAdapter {
     private Label lapLabel;
     private Label powerupLabel;
     private Label petBonusLabel;
+    private Image horsePreviewImage;
+    private Image riderPreviewImage;
+    private Image petPreviewImage;
+    private TextureRegion horsePreviewRegion;
+    private Texture horsePreviewFallback;
+    private Texture[] riderPreviews;
+    private Texture[] petPreviews;
+    private int horseIndex;
+    private int riderIndex;
+    private int petIndex;
+    private final String[] horses = {"Gesztenye", "Pej", "Sz\u00FCrke", "Palomino"};
+    private final String[] riders = {"Lili", "Noel", "Mira", "\u00c1ron"};
+    private final String[] pets = {"Kutya", "Cica", "Nyuszi", "Papag\u00E1j"};
     private float elapsedTime;
     private int currentLap = 1;
     private float speed;
@@ -170,6 +184,19 @@ public class RaceScreen extends ScreenAdapter {
         runAnimation.setPlayMode(Animation.PlayMode.LOOP);
         powerupMarker = createPowerupMarker();
         loadPowerupDefs();
+        horseIndex = findIndex(horses, horseName);
+        riderIndex = findIndex(riders, riderName);
+        petIndex = findIndex(pets, petName);
+        horsePreviewRegion = idleAnimation != null ? idleAnimation.getKeyFrame(0f) : null;
+        if (horsePreviewRegion == null) {
+            horsePreviewFallback = createHorsePreview(new Color(0.65f, 0.44f, 0.3f, 1f), new Color(0.25f, 0.16f, 0.1f, 1f));
+            horsePreviewRegion = new TextureRegion(horsePreviewFallback);
+        }
+        riderPreviews = createRiderPreviews();
+        petPreviews = createPetPreviews();
+        horsePreviewImage = new Image(horsePreviewRegion);
+        riderPreviewImage = new Image(toDrawable(riderPreviews[riderIndex]));
+        petPreviewImage = new Image(toDrawable(petPreviews[petIndex]));
 
         camera = new OrthographicCamera();
         mapViewport = new FitViewport(640f, 360f, camera);
@@ -238,6 +265,12 @@ public class RaceScreen extends ScreenAdapter {
         hudContent.add(powerupLabel).left().padTop(6f);
         hudContent.row();
         hudContent.add(petBonusLabel).left().padTop(6f);
+        hudContent.row();
+        Table previewRow = new Table();
+        previewRow.add(horsePreviewImage).size(64f, 48f).padRight(6f);
+        previewRow.add(riderPreviewImage).size(64f, 48f).padRight(6f);
+        previewRow.add(petPreviewImage).size(64f, 48f);
+        hudContent.add(previewRow).left().padTop(8f);
             applyPetBonus();
         hudTable.add(hudContent);
         Table layout = new Table();
@@ -372,6 +405,11 @@ public class RaceScreen extends ScreenAdapter {
         if (runSheet != null) {
             runSheet.dispose();
         }
+        if (horsePreviewFallback != null) {
+            horsePreviewFallback.dispose();
+        }
+        disposeTextureArray(riderPreviews);
+        disposeTextureArray(petPreviews);
     }
 
     private Texture createColorTexture(Color color) {
@@ -402,6 +440,121 @@ public class RaceScreen extends ScreenAdapter {
 
     private String safeLabel(String value) {
         return value == null || value.isEmpty() ? "-" : value;
+    }
+
+    private int findIndex(String[] values, String target) {
+        if (target == null) {
+            return 0;
+        }
+        for (int i = 0; i < values.length; i++) {
+            if (values[i].equals(target)) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    private Texture[] createRiderPreviews() {
+        Color[] outfits = {
+            new Color(0.35f, 0.6f, 0.85f, 1f),
+            new Color(0.6f, 0.45f, 0.8f, 1f),
+            new Color(0.2f, 0.7f, 0.45f, 1f),
+            new Color(0.85f, 0.4f, 0.4f, 1f)
+        };
+        Color[] hair = {
+            new Color(0.2f, 0.15f, 0.1f, 1f),
+            new Color(0.4f, 0.25f, 0.1f, 1f),
+            new Color(0.1f, 0.08f, 0.05f, 1f),
+            new Color(0.7f, 0.55f, 0.3f, 1f)
+        };
+        Texture[] previews = new Texture[outfits.length];
+        for (int i = 0; i < outfits.length; i++) {
+            previews[i] = createRiderPreview(outfits[i], hair[i]);
+        }
+        return previews;
+    }
+
+    private Texture[] createPetPreviews() {
+        Color[] pets = {
+            new Color(0.85f, 0.65f, 0.4f, 1f),
+            new Color(0.6f, 0.6f, 0.65f, 1f),
+            new Color(0.95f, 0.9f, 0.75f, 1f),
+            new Color(0.2f, 0.75f, 0.45f, 1f)
+        };
+        Texture[] previews = new Texture[pets.length];
+        for (int i = 0; i < pets.length; i++) {
+            previews[i] = createPetPreview(pets[i]);
+        }
+        return previews;
+    }
+
+    private Texture createHorsePreview(Color body, Color mane) {
+        Pixmap pixmap = createPreviewPanel();
+        pixmap.setColor(body);
+        pixmap.fillRectangle(26, 48, 86, 32);
+        pixmap.fillRectangle(32, 32, 14, 20);
+        pixmap.fillRectangle(62, 32, 14, 20);
+        pixmap.fillRectangle(94, 32, 14, 20);
+        pixmap.fillCircle(126, 64, 16);
+        pixmap.setColor(mane);
+        pixmap.fillRectangle(108, 78, 24, 8);
+        pixmap.fillRectangle(36, 78, 18, 10);
+        return finalizePreviewTexture(pixmap);
+    }
+
+    private Texture createRiderPreview(Color outfit, Color hair) {
+        Pixmap pixmap = createPreviewPanel();
+        pixmap.setColor(outfit);
+        pixmap.fillRectangle(60, 44, 40, 48);
+        pixmap.fillRectangle(50, 56, 14, 24);
+        pixmap.fillRectangle(96, 56, 14, 24);
+        pixmap.setColor(new Color(0.9f, 0.75f, 0.6f, 1f));
+        pixmap.fillCircle(80, 98, 12);
+        pixmap.setColor(hair);
+        pixmap.fillRectangle(68, 104, 24, 6);
+        return finalizePreviewTexture(pixmap);
+    }
+
+    private Texture createPetPreview(Color fur) {
+        Pixmap pixmap = createPreviewPanel();
+        pixmap.setColor(fur);
+        pixmap.fillCircle(80, 64, 20);
+        pixmap.fillCircle(60, 72, 10);
+        pixmap.fillCircle(100, 72, 10);
+        pixmap.setColor(new Color(0.2f, 0.2f, 0.2f, 1f));
+        pixmap.fillCircle(72, 68, 3);
+        pixmap.fillCircle(88, 68, 3);
+        pixmap.fillRectangle(78, 56, 4, 6);
+        return finalizePreviewTexture(pixmap);
+    }
+
+    private Pixmap createPreviewPanel() {
+        int width = 160;
+        int height = 120;
+        Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
+        pixmap.setColor(0.94f, 0.91f, 0.85f, 1f);
+        pixmap.fill();
+        pixmap.setColor(0.35f, 0.26f, 0.18f, 1f);
+        pixmap.drawRectangle(0, 0, width, height);
+        pixmap.drawRectangle(1, 1, width - 2, height - 2);
+        return pixmap;
+    }
+
+    private Texture finalizePreviewTexture(Pixmap pixmap) {
+        Texture texture = new Texture(pixmap);
+        pixmap.dispose();
+        return texture;
+    }
+
+    private void disposeTextureArray(Texture[] textures) {
+        if (textures == null) {
+            return;
+        }
+        for (Texture texture : textures) {
+            if (texture != null) {
+                texture.dispose();
+            }
+        }
     }
 
     private void applyPetBonus() {
@@ -468,7 +621,11 @@ public class RaceScreen extends ScreenAdapter {
                 if (powerupSound != null) {
                     powerupSound.play(0.7f);
                 }
-                Gdx.input.vibrate(60);
+                try {
+                    Gdx.input.vibrate(60);
+                } catch (SecurityException ignored) {
+                    // VIBRATE permission missing or restricted; ignore to avoid crash.
+                }
             }
         }
     }

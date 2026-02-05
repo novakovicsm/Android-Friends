@@ -56,7 +56,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private Image outfitColorSwatchImage;
 
     private final String[] horses = {"Gesztenye", "Pej", "Szürke", "Palomino"};
-    private final String[] riders = {"Lili", "Noel", "Mira", "Áron"};
+    private final String[] riders = {"Lili", "Noel", "Mira", "\u00C1ron"};
     private final String[] pets = {"Kutya", "Cica", "Nyuszi", "Papagáj"};
     private final String[] horseColors = {"Meleg barna", "Arany", "Hamvas", "Sötét"};
     private final String[] maneColors = {"Fekete", "Csokoládé", "Szürke", "Szőke"};
