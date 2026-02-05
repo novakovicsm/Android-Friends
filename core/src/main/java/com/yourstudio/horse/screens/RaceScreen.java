@@ -33,7 +33,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.yourstudio.horse.HorseGame;
@@ -126,6 +125,13 @@ public class RaceScreen extends ScreenAdapter {
     private float mapBoundsMaxY;
     private boolean mapHasBounds;
     private final float horseBoundsPadding = 32f;
+    private float mapScale = 1f;
+    private float mapPixelWidth;
+    private float mapPixelHeight;
+    private float scaledMapMinX;
+    private float scaledMapMaxX;
+    private float scaledMapMinY;
+    private float scaledMapMaxY;
 
     public RaceScreen(HorseGame game, String horseName, String riderName, String petName) {
         this.game = game;
@@ -217,7 +223,7 @@ public class RaceScreen extends ScreenAdapter {
         refreshRiderPreview();
 
         camera = new OrthographicCamera();
-        mapViewport = new FitViewport(640f, 360f, camera);
+        mapViewport = new ScreenViewport(camera);
         mapViewport.apply();
         try {
             map = new TmxMapLoader().load("maps/forest.tmx");
@@ -228,11 +234,14 @@ public class RaceScreen extends ScreenAdapter {
             Integer tileWidth = props.get("tilewidth", Integer.class);
             Integer tileHeight = props.get("tileheight", Integer.class);
             if (mapWidthTiles != null && mapHeightTiles != null && tileWidth != null && tileHeight != null) {
+                mapPixelWidth = mapWidthTiles * tileWidth;
+                mapPixelHeight = mapHeightTiles * tileHeight;
                 mapBoundsMinX = 0f;
                 mapBoundsMinY = 0f;
-                mapBoundsMaxX = mapWidthTiles * tileWidth;
-                mapBoundsMaxY = mapHeightTiles * tileHeight;
+                mapBoundsMaxX = mapPixelWidth;
+                mapBoundsMaxY = mapPixelHeight;
                 mapHasBounds = true;
+                updateMapScale(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
             }
             mapLoaded = true;
         } catch (RuntimeException exception) {
@@ -240,7 +249,6 @@ public class RaceScreen extends ScreenAdapter {
             mapLoaded = false;
         }
 
-        Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, Color.WHITE);
         Label.LabelStyle labelStyle = new Label.LabelStyle(bodyFont, Color.WHITE);
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
         buttonStyle.up = toDrawable(buttonUp);
@@ -248,11 +256,6 @@ public class RaceScreen extends ScreenAdapter {
         buttonStyle.font = bodyFont;
         buttonStyle.fontColor = Color.WHITE;
 
-        Label title = new Label("Verseny - UI v2", titleStyle);
-        Label selection = new Label("L\u00F3: " + horseName + " | Lovas: " + riderName + " | Kedvenc: " + petName, labelStyle);
-        String horseCustomization = "L\u00F3sz\u00EDn: " + safeLabel(horseColor) + " | S\u00F6r\u00E9ny: " + safeLabel(maneColor) + " | Nyereg: " + safeLabel(saddleColor) + " | Ruh\u00E1zat: " + safeLabel(outfitColor);
-        Label customization = new Label(horseCustomization, labelStyle);
-        Label trackLabel = new Label("P\u00E1lya: " + trackName, labelStyle);
         TextButton backButton = new TextButton("Vissza", buttonStyle);
 
         speedLabel = new Label("Sebess\u00E9g: 0 km/h", labelStyle);
@@ -313,29 +316,21 @@ public class RaceScreen extends ScreenAdapter {
         hudContent.add(previewRow).left().padTop(8f);
         applyPetBonus();
         hudTable.add(hudContent);
-        Table layout = new Table();
-        layout.setFillParent(true);
-        layout.pad(24f);
-        layout.add(title).padBottom(20f);
-        layout.row();
-        layout.add(selection).padBottom(30f);
-        layout.row();
-        layout.add(customization).padBottom(18f);
-        layout.row();
-        layout.add(trackLabel).padBottom(30f);
-        layout.row();
-        layout.add(backButton).width(220f).height(80f);
+        Table backButtonTable = new Table();
+        backButtonTable.setFillParent(true);
+        backButtonTable.top().right().pad(16f);
+        backButtonTable.add(backButton).width(220f).height(80f);
 
         Table directionTable = new Table();
         directionTable.setFillParent(true);
         directionTable.bottom().pad(24f);
         Table directionRow = new Table();
         directionRow.add(directionLabel).padRight(12f);
-        directionRow.add(leftButton).width(140f).height(72f).padRight(12f);
-        directionRow.add(rightButton).width(140f).height(72f);
+        directionRow.add(leftButton).width(210f).height(108f).padRight(12f);
+        directionRow.add(rightButton).width(210f).height(108f);
         directionTable.add(directionRow);
 
-        stage.addActor(layout);
+        stage.addActor(backButtonTable);
         stage.addActor(hudTable);
         stage.addActor(directionTable);
         Gdx.input.setInputProcessor(stage);
@@ -374,6 +369,11 @@ public class RaceScreen extends ScreenAdapter {
         }
         animationTime += delta;
         if (mapLoaded && mapRenderer != null && camera != null) {
+            // Draw a full-screen background so any unused map area isn't black.
+            stage.getBatch().begin();
+            drawBackgroundFit(stage.getBatch());
+            stage.getBatch().end();
+
             horseX += speed * delta * horseDirection;
             horseY = 80f + 24f * (float) Math.sin(distance * 0.03f);
             if (mapHasBounds) {
@@ -388,7 +388,11 @@ public class RaceScreen extends ScreenAdapter {
                 }
                 horseY = MathUtils.clamp(horseY, mapBoundsMinY + horseBoundsPadding, mapBoundsMaxY - horseBoundsPadding);
             }
-            camera.position.set(clampCameraX(horseX), clampCameraY(horseY), 0f);
+            // Ensure the map viewport always fills the screen.
+            mapViewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+            float renderHorseX = horseX * mapScale;
+            float renderHorseY = horseY * mapScale;
+            camera.position.set(clampCameraX(renderHorseX), clampCameraY(renderHorseY), 0f);
             camera.update();
             mapRenderer.setView(camera);
             mapRenderer.render();
@@ -398,7 +402,7 @@ public class RaceScreen extends ScreenAdapter {
             mapRenderer.getBatch().end();
         } else {
             stage.getBatch().begin();
-            stage.getBatch().draw(background, 0, 0, stage.getViewport().getWorldWidth(), stage.getViewport().getWorldHeight());
+            drawBackgroundFit(stage.getBatch());
             drawPowerups(stage.getBatch());
             drawHorseAnimation(stage.getBatch(), false);
             stage.getBatch().end();
@@ -414,6 +418,9 @@ public class RaceScreen extends ScreenAdapter {
         }
         if (mapViewport != null) {
             mapViewport.update(width, height, true);
+        }
+        if (mapHasBounds) {
+            updateMapScale(width, height);
         }
     }
 
@@ -503,10 +510,6 @@ public class RaceScreen extends ScreenAdapter {
         BitmapFont font = new BitmapFont();
         font.getData().setScale(fallbackScale);
         return font;
-    }
-
-    private String safeLabel(String value) {
-        return value == null || value.isEmpty() ? "-" : value;
     }
 
     private int findIndex(String[] values, String target) {
@@ -710,8 +713,11 @@ public class RaceScreen extends ScreenAdapter {
         if (powerupMarker == null) {
             return;
         }
+        float scale = mapLoaded ? mapScale : 1f;
         for (PowerupSpawn spawn : powerupSpawns) {
-            batch.draw(powerupMarker, spawn.x - 10f, spawn.y - 10f, 20f, 20f);
+            float x = spawn.x * scale;
+            float y = spawn.y * scale;
+            batch.draw(powerupMarker, x - 10f * scale, y - 10f * scale, 20f * scale, 20f * scale);
         }
     }
 
@@ -781,12 +787,13 @@ public class RaceScreen extends ScreenAdapter {
         if (horseTintColor != null) {
             batch.setColor(horseTintColor);
         }
-        float size = 96f;
+        float scale = mapSpace ? mapScale : 1f;
+        float size = 96f * scale;
         float x;
         float y;
         if (mapSpace) {
-            x = horseX - size * 0.5f;
-            y = horseY - size * 0.5f;
+            x = horseX * scale - size * 0.5f;
+            y = horseY * scale - size * 0.5f;
         } else {
             x = stage.getViewport().getWorldWidth() * 0.5f - size * 0.5f;
             y = stage.getViewport().getWorldHeight() * 0.25f - size * 0.5f;
@@ -928,6 +935,10 @@ public class RaceScreen extends ScreenAdapter {
         Color bodyShade = darken(body, 0.18f);
         Color maneShade = darken(mane, 0.22f);
         Color hoof = darken(body, 0.6f);
+        Color riderOutfit = riderOutfitColor != null ? riderOutfitColor : new Color(0.35f, 0.6f, 0.85f, 1f);
+        Color riderHair = riderHairColor != null ? riderHairColor : new Color(0.2f, 0.15f, 0.1f, 1f);
+        Color riderSkin = new Color(0.92f, 0.78f, 0.62f, 1f);
+        Color petFur = resolvePetFurColor();
 
         int bob = variant % 2 == 0 ? 0 : 1;
         int runPhase = Math.max(0, variant - 2);
@@ -945,23 +956,23 @@ public class RaceScreen extends ScreenAdapter {
         pixmap.fillRectangle(28, 35 + bob, 16, 7); // back
         pixmap.fillCircle(46, 40 + bob, 8); // rump
 
-        // Neck (angled, slimmer)
-        pixmap.fillRectangle(24, 40 + bob, 6, 8);
-        pixmap.fillRectangle(30, 44 + bob, 6, 8);
+        // Neck (thinner, more forward)
+        pixmap.fillRectangle(24, 40 + bob, 4, 8);
+        pixmap.fillRectangle(28, 46 + bob, 4, 8);
 
         pixmap.setColor(bodyShade);
         pixmap.fillRectangle(18, 24 + bob, 26, 3);
         pixmap.fillRectangle(30, 33 + bob, 12, 2);
         pixmap.fillRectangle(42, 36 + bob, 6, 2);
-        pixmap.fillRectangle(24, 38 + bob, 6, 2);
+        pixmap.fillRectangle(24, 38 + bob, 4, 2);
 
         // Head (smaller, more horse-like)
         pixmap.setColor(body);
-        pixmap.fillRectangle(40, 50 + bob, 7, 5); // head
-        pixmap.fillRectangle(46, 48 + bob, 6, 4); // muzzle
-        pixmap.fillRectangle(38, 54 + bob, 4, 4); // ear base
+        pixmap.fillRectangle(44, 52 + bob, 7, 5); // head forward
+        pixmap.fillRectangle(50, 50 + bob, 6, 4); // muzzle forward
+        pixmap.fillRectangle(42, 56 + bob, 4, 4); // ear base
         pixmap.setColor(bodyShade);
-        pixmap.fillRectangle(46, 50 + bob, 5, 2);
+        pixmap.fillRectangle(50, 52 + bob, 5, 2);
 
         // Legs
         int baseY = 12 + bob;
@@ -978,23 +989,45 @@ public class RaceScreen extends ScreenAdapter {
 
         // Mane + tail
         pixmap.setColor(mane);
-        pixmap.fillRectangle(26, 50 + bob, 8, 6); // mane front
-        pixmap.fillRectangle(32, 46 + bob, 10, 6); // mane back
+        pixmap.fillRectangle(26, 50 + bob, 7, 6); // mane front
+        pixmap.fillRectangle(30, 46 + bob, 9, 6); // mane back
         pixmap.fillRectangle(10, 34 + bob, 5, 12); // tail base (from rump)
         pixmap.setColor(maneShade);
         pixmap.fillRectangle(8, 32 + bob, 3, 12); // tail tip
-        pixmap.fillRectangle(40, 56 + bob, 3, 4); // forelock
+        pixmap.fillRectangle(44, 58 + bob, 3, 4); // forelock
+
+        // Saddle
+        pixmap.setColor(darken(body, 0.3f));
+        pixmap.fillRectangle(28, 38 + bob, 12, 5);
+        pixmap.fillRectangle(26, 36 + bob, 6, 4);
+
+        // Rider
+        pixmap.setColor(riderOutfit);
+        pixmap.fillRectangle(28, 44 + bob, 10, 6); // torso
+        pixmap.fillRectangle(30, 40 + bob, 4, 5); // leg
+        pixmap.fillRectangle(34, 40 + bob, 4, 5); // leg
+        pixmap.setColor(riderSkin);
+        pixmap.fillRectangle(30, 50 + bob, 6, 5); // head
+        pixmap.setColor(riderHair);
+        pixmap.fillRectangle(30, 54 + bob, 6, 3); // hair
+
+        // Pet on saddle
+        pixmap.setColor(petFur);
+        pixmap.fillRectangle(36, 48 + bob, 6, 4); // body
+        pixmap.fillRectangle(40, 50 + bob, 4, 3); // head
+        pixmap.setColor(darken(petFur, 0.2f));
+        pixmap.fillRectangle(38, 52 + bob, 2, 2); // ear
 
         // Outline (simple pass)
         pixmap.setColor(outline);
         pixmap.drawRectangle(16, 26 + bob, 31, 14);
         pixmap.drawRectangle(28, 35 + bob, 17, 9);
         pixmap.drawCircle(46, 40 + bob, 8);
-        pixmap.drawRectangle(24, 40 + bob, 7, 9);
+        pixmap.drawRectangle(24, 40 + bob, 5, 9);
 
         // Eye highlight
         pixmap.setColor(Color.WHITE);
-        pixmap.fillRectangle(44, 52 + bob, 2, 2);
+        pixmap.fillRectangle(48, 54 + bob, 2, 2);
 
         // Flip the pixmap vertically so the horse is upright in libGDX
         Pixmap flipped = new Pixmap(size, size, Pixmap.Format.RGBA8888);
@@ -1008,6 +1041,22 @@ public class RaceScreen extends ScreenAdapter {
         pixmap.dispose();
         flipped.dispose();
         return texture;
+    }
+
+    private Color resolvePetFurColor() {
+        if ("Kutya".equals(petName)) {
+            return new Color(0.85f, 0.65f, 0.4f, 1f);
+        }
+        if ("Cica".equals(petName)) {
+            return new Color(0.6f, 0.6f, 0.65f, 1f);
+        }
+        if ("Nyuszi".equals(petName)) {
+            return new Color(0.95f, 0.9f, 0.75f, 1f);
+        }
+        if ("Papagáj".equals(petName)) {
+            return new Color(0.2f, 0.75f, 0.45f, 1f);
+        }
+        return new Color(0.7f, 0.7f, 0.7f, 1f);
     }
 
     private Color resolveManeColor() {
@@ -1048,10 +1097,10 @@ public class RaceScreen extends ScreenAdapter {
             return targetX;
         }
         float halfWidth = camera.viewportWidth * 0.5f;
-        float min = mapBoundsMinX + halfWidth;
-        float max = mapBoundsMaxX - halfWidth;
+        float min = scaledMapMinX + halfWidth;
+        float max = scaledMapMaxX - halfWidth;
         if (min > max) {
-            return (mapBoundsMinX + mapBoundsMaxX) * 0.5f;
+            return (scaledMapMinX + scaledMapMaxX) * 0.5f;
         }
         return MathUtils.clamp(targetX, min, max);
     }
@@ -1061,11 +1110,47 @@ public class RaceScreen extends ScreenAdapter {
             return targetY;
         }
         float halfHeight = camera.viewportHeight * 0.5f;
-        float min = mapBoundsMinY + halfHeight;
-        float max = mapBoundsMaxY - halfHeight;
+        float min = scaledMapMinY + halfHeight;
+        float max = scaledMapMaxY - halfHeight;
         if (min > max) {
-            return (mapBoundsMinY + mapBoundsMaxY) * 0.5f;
+            return (scaledMapMinY + scaledMapMaxY) * 0.5f;
         }
         return MathUtils.clamp(targetY, min, max);
+    }
+
+    private void updateMapScale(int screenWidth, int screenHeight) {
+        if (mapPixelWidth <= 0f || mapPixelHeight <= 0f) {
+            return;
+        }
+        float scaleX = screenWidth / mapPixelWidth;
+        float scaleY = screenHeight / mapPixelHeight;
+        float newScale = Math.min(scaleX, scaleY);
+        if (Math.abs(newScale - mapScale) > 0.001f) {
+            mapScale = newScale;
+            if (mapRenderer != null) {
+                mapRenderer.dispose();
+            }
+            mapRenderer = new OrthogonalTiledMapRenderer(map, mapScale);
+        }
+        scaledMapMinX = 0f;
+        scaledMapMinY = 0f;
+        scaledMapMaxX = mapPixelWidth * mapScale;
+        scaledMapMaxY = mapPixelHeight * mapScale;
+    }
+
+    private void drawBackgroundFit(com.badlogic.gdx.graphics.g2d.Batch batch) {
+        if (background == null || stage == null) {
+            return;
+        }
+        float worldWidth = stage.getViewport().getWorldWidth();
+        float worldHeight = stage.getViewport().getWorldHeight();
+        float texWidth = background.getWidth();
+        float texHeight = background.getHeight();
+        float scale = Math.max(worldWidth / texWidth, worldHeight / texHeight);
+        float drawWidth = texWidth * scale;
+        float drawHeight = texHeight * scale;
+        float x = (worldWidth - drawWidth) * 0.5f;
+        float y = (worldHeight - drawHeight) * 0.5f;
+        batch.draw(background, x, y, drawWidth, drawHeight);
     }
 }

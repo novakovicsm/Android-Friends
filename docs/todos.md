@@ -53,3 +53,26 @@ Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladat
 - [ ] Kis kedvenc választás nincs összekötve bónuszokkal.
 - [ ] Tematikus power-upok és felvételük hiányzik a verseny során.
 - [ ] Pixel art UI/assetek helyett még csak programozott placeholder színek vannak.
+
+## Milestone 2 – Teendők
+
+### Playable loop polish (race feel, input, HUD, rewards)
+- [ ] Input finomhangolás: érzékenység, gyorsítás/lassítás görbék, irányváltás animáció
+- [ ] Versenyérzet: sebességvisszajelzés (kamera enyhe előre dőlés/rásegítés), por/sparkle effekt
+- [ ] HUD tisztítás: aktív power-up időzítő, köridő/legjobb idő, célvonal jelzés
+- [ ] Célba érés flow: győzelmi panel, jutalom összegzés, újraindítás gomb
+- [ ] Jutalom rendszer: egyszerű valuta/pontok, beváltás preview
+
+### Content expansion (more tracks, power-ups, assets)
+- [ ] 3 új pálya (tengerpart, hegyek, éjszakai város) Tiled map
+- [ ] Pálya-specifikus díszletek/tileset elemek
+- [ ] Tematikus power-upok pályánként + ikonok (legalább 2-2)
+- [ ] Új SFX: boost, pickup variánsok, célba érés
+- [ ] Pixel art race háttér és pálya dekorációk frissítése
+
+### Customization depth (horse/rider/pet cosmetics + bonuses)
+- [ ] Ló testreszabás bővítése: minták / foltok / lábvédők
+- [ ] Lovas ruházat: több szín + sisak / kabát variánsok
+- [ ] Kedvenc bónuszok részletes balansz + UI leírás
+- [ ] Pet kozmetika: színek + kis kiegészítők
+- [ ] Mentett loadout előnézet a főmenüben
