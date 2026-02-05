@@ -4,10 +4,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -35,7 +39,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private final HorseGame game;
     private Stage stage;
     private Texture background;
-    private BitmapFont font;
+    private BitmapFont titleFont;
+    private BitmapFont bodyFont;
     private Texture buttonUp;
     private Texture buttonDown;
     private Sound clickSound;
@@ -55,13 +60,13 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private Image saddleColorSwatchImage;
     private Image outfitColorSwatchImage;
 
-    private final String[] horses = {"Gesztenye", "Pej", "Szürke", "Palomino"};
+    private final String[] horses = {"Gesztenye", "Pej", "Sz\u00FCrke", "Palomino"};
     private final String[] riders = {"Lili", "Noel", "Mira", "\u00C1ron"};
-    private final String[] pets = {"Kutya", "Cica", "Nyuszi", "Papagáj"};
-    private final String[] horseColors = {"Meleg barna", "Arany", "Hamvas", "Sötét"};
-    private final String[] maneColors = {"Fekete", "Csokoládé", "Szürke", "Szőke"};
-    private final String[] saddleColors = {"Vörös", "Kék", "Zöld", "Fekete"};
-    private final String[] outfitColors = {"Piros", "Kék", "Zöld", "Lila"};
+    private final String[] pets = {"Kutya", "Cica", "Nyuszi", "Papag\u00E1j"};
+    private final String[] horseColors = {"Meleg barna", "Arany", "Hamvas", "S\u00F6t\u00E9t"};
+    private final String[] maneColors = {"Fekete", "Csokol\u00E1d\u00E9", "Sz\u00FCrke", "Sz\u0151ke"};
+    private final String[] saddleColors = {"V\u00F6r\u00F6s", "K\u00E9k", "Z\u00F6ld", "Fekete"};
+    private final String[] outfitColors = {"Piros", "K\u00E9k", "Z\u00F6ld", "Lila"};
 
     private int horseIndex;
     private int riderIndex;
@@ -116,7 +121,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
     @Override
     public void show() {
         stage = new Stage(new ScreenViewport());
-        font = new BitmapFont();
+        titleFont = createUIFont(54, 3.1f);
+        bodyFont = createUIFont(28, 1.45f);
         buttonUp = createColorTexture(new Color(0.29f, 0.6f, 0.85f, 1f));
         buttonDown = createColorTexture(new Color(0.2f, 0.48f, 0.7f, 1f));
         background = createColorTexture(new Color(0.08f, 0.2f, 0.12f, 1f));
@@ -129,14 +135,15 @@ public class CharacterSelectScreen extends ScreenAdapter {
         saddleColorSwatches = createSwatches(new Color(0.65f, 0.2f, 0.2f, 1f), new Color(0.2f, 0.35f, 0.7f, 1f), new Color(0.2f, 0.55f, 0.3f, 1f), new Color(0.12f, 0.12f, 0.12f, 1f));
         outfitColorSwatches = createSwatches(new Color(0.75f, 0.2f, 0.2f, 1f), new Color(0.2f, 0.4f, 0.8f, 1f), new Color(0.2f, 0.6f, 0.35f, 1f), new Color(0.55f, 0.3f, 0.75f, 1f));
 
-        Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
+        Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, Color.WHITE);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(bodyFont, Color.WHITE);
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
         buttonStyle.up = toDrawable(buttonUp);
         buttonStyle.down = toDrawable(buttonDown);
-        buttonStyle.font = font;
+        buttonStyle.font = bodyFont;
         buttonStyle.fontColor = Color.WHITE;
 
-        Label title = new Label("Karakter választás", labelStyle);
+        Label title = new Label("Karakter v\u00E1laszt\u00E1s", titleStyle);
         horseValue = new Label(horses[horseIndex], labelStyle);
         riderValue = new Label(riders[riderIndex], labelStyle);
         petValue = new Label(pets[petIndex], labelStyle);
@@ -167,17 +174,17 @@ public class CharacterSelectScreen extends ScreenAdapter {
         layout.add(previewRow).colspan(4).padBottom(24f);
         layout.row();
 
-        addSelectorRow(layout, "Ló", horseValue, buttonStyle, () -> updateHorse(-1), () -> updateHorse(1));
-        addSelectorRow(layout, "Lószín", horseColorValue, horseColorSwatchImage, buttonStyle, () -> updateHorseColor(-1), () -> updateHorseColor(1));
-        addSelectorRow(layout, "Sörény", maneColorValue, maneColorSwatchImage, buttonStyle, () -> updateManeColor(-1), () -> updateManeColor(1));
+        addSelectorRow(layout, "L\u00F3", horseValue, buttonStyle, () -> updateHorse(-1), () -> updateHorse(1));
+        addSelectorRow(layout, "L\u00F3sz\u00EDn", horseColorValue, horseColorSwatchImage, buttonStyle, () -> updateHorseColor(-1), () -> updateHorseColor(1));
+        addSelectorRow(layout, "S\u00F6r\u00E9ny", maneColorValue, maneColorSwatchImage, buttonStyle, () -> updateManeColor(-1), () -> updateManeColor(1));
         addSelectorRow(layout, "Nyereg", saddleColorValue, saddleColorSwatchImage, buttonStyle, () -> updateSaddleColor(-1), () -> updateSaddleColor(1));
         addSelectorRow(layout, "Lovas", riderValue, buttonStyle, () -> updateRider(-1), () -> updateRider(1));
-        addSelectorRow(layout, "Ruházat", outfitColorValue, outfitColorSwatchImage, buttonStyle, () -> updateOutfitColor(-1), () -> updateOutfitColor(1));
+        addSelectorRow(layout, "Ruh\u00E1zat", outfitColorValue, outfitColorSwatchImage, buttonStyle, () -> updateOutfitColor(-1), () -> updateOutfitColor(1));
         addSelectorRow(layout, "Kis kedvenc", petValue, buttonStyle, () -> updatePet(-1), () -> updatePet(1));
 
         layout.row().padTop(30f);
         TextButton backButton = new TextButton("Vissza", buttonStyle);
-        TextButton startButton = new TextButton("Verseny indítása", buttonStyle);
+        TextButton startButton = new TextButton("Verseny ind\u00EDt\u00E1sa", buttonStyle);
 
         backButton.addListener(new ClickListener() {
             @Override
@@ -232,8 +239,11 @@ public class CharacterSelectScreen extends ScreenAdapter {
         if (stage != null) {
             stage.dispose();
         }
-        if (font != null) {
-            font.dispose();
+        if (titleFont != null) {
+            titleFont.dispose();
+        }
+        if (bodyFont != null) {
+            bodyFont.dispose();
         }
         if (buttonUp != null) {
             buttonUp.dispose();
@@ -255,7 +265,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
 
     private void addSelectorRow(Table layout, String label, Label valueLabel, TextButton.TextButtonStyle buttonStyle,
                                 Runnable previousAction, Runnable nextAction) {
-        Label rowLabel = new Label(label, new Label.LabelStyle(font, Color.WHITE));
+        Label rowLabel = new Label(label, new Label.LabelStyle(bodyFont, Color.WHITE));
         TextButton prevButton = new TextButton("<", buttonStyle);
         TextButton nextButton = new TextButton(">", buttonStyle);
 
@@ -283,7 +293,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
 
     private void addSelectorRow(Table layout, String label, Label valueLabel, Image previewImage,
                                 TextButton.TextButtonStyle buttonStyle, Runnable previousAction, Runnable nextAction) {
-        Label rowLabel = new Label(label, new Label.LabelStyle(font, Color.WHITE));
+        Label rowLabel = new Label(label, new Label.LabelStyle(bodyFont, Color.WHITE));
         TextButton prevButton = new TextButton("<", buttonStyle);
         TextButton nextButton = new TextButton(">", buttonStyle);
 
@@ -519,6 +529,24 @@ public class CharacterSelectScreen extends ScreenAdapter {
         Texture texture = new Texture(pixmap);
         pixmap.dispose();
         return texture;
+    }
+
+    private BitmapFont createUIFont(int size, float fallbackScale) {
+        FileHandle fontFile = Gdx.files.internal("fonts/ui.ttf");
+        if (fontFile.exists()) {
+            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(fontFile);
+            FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+            parameter.size = size;
+            parameter.minFilter = TextureFilter.Linear;
+            parameter.magFilter = TextureFilter.Linear;
+            parameter.characters = FreeTypeFontGenerator.DEFAULT_CHARS + "\u00C1\u00C9\u00CD\u00D3\u00D6\u0150\u00DA\u00DC\u0170\u00E1\u00E9\u00ED\u00F3\u00F6\u0151\u00FA\u00FC\u0171";
+            BitmapFont font = generator.generateFont(parameter);
+            generator.dispose();
+            return font;
+        }
+        BitmapFont font = new BitmapFont();
+        font.getData().setScale(fallbackScale);
+        return font;
     }
 
     private void disposeTextureArray(Texture[] textures) {
