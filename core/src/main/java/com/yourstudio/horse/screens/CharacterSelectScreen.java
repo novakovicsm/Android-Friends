@@ -25,9 +25,11 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.yourstudio.horse.HorseGame;
+import com.yourstudio.horse.ui.PixelArtFactory;
 import com.yourstudio.horse.ui.ScreenNavigator;
 
 public class CharacterSelectScreen extends ScreenAdapter {
+    private static final boolean FORCE_PROCEDURAL_HORSE = true;
     private static final String PREFS_NAME = "versenylovak_prefs";
     private static final String PREF_HORSE = "horse";
     private static final String PREF_RIDER = "rider";
@@ -130,9 +132,32 @@ public class CharacterSelectScreen extends ScreenAdapter {
         stage = new Stage(new ScreenViewport());
         titleFont = createUIFont(54, 3.1f);
         bodyFont = createUIFont(28, 1.45f);
-        buttonUp = createColorTexture(new Color(0.29f, 0.6f, 0.85f, 1f));
-        buttonDown = createColorTexture(new Color(0.2f, 0.48f, 0.7f, 1f));
-        background = createColorTexture(new Color(0.08f, 0.2f, 0.12f, 1f));
+        buttonUp = PixelArtFactory.createPixelButton(
+            320,
+            96,
+            new Color(0.26f, 0.56f, 0.86f, 1f),
+            new Color(0.12f, 0.26f, 0.46f, 0.18f),
+            new Color(0.9f, 0.92f, 0.96f, 1f),
+            new Color(0.08f, 0.14f, 0.22f, 1f),
+            false
+        );
+        buttonDown = PixelArtFactory.createPixelButton(
+            320,
+            96,
+            new Color(0.2f, 0.46f, 0.72f, 1f),
+            new Color(0.1f, 0.22f, 0.38f, 0.18f),
+            new Color(0.9f, 0.92f, 0.96f, 1f),
+            new Color(0.08f, 0.14f, 0.22f, 1f),
+            true
+        );
+        background = PixelArtFactory.createPixelBackground(
+            360,
+            200,
+            new Color(0.08f, 0.18f, 0.2f, 1f),
+            new Color(0.22f, 0.34f, 0.28f, 1f),
+            new Color(0.1f, 0.24f, 0.12f, 1f),
+            new Color(0.08f, 0.18f, 0.1f, 1f)
+        );
         clickSound = game.getAssets().get("sfx/click.wav", Sound.class);
         horseColorValues = new Color[] {
             new Color(0.64f, 0.38f, 0.2f, 1f),
@@ -454,18 +479,33 @@ public class CharacterSelectScreen extends ScreenAdapter {
     }
 
     private Texture createColorTexture(Color color) {
-        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pixmap.setColor(color);
-        pixmap.fill();
-        Texture texture = new Texture(pixmap);
-        pixmap.dispose();
-        return texture;
+        return PixelArtFactory.createSolidTexture(color);
     }
 
     private void loadHorsePreviews() {
         String[] variants = {"chestnut", "bay", "gray", "palomino"};
         horseSheets = new Texture[variants.length];
         horsePreviewRegions = new TextureRegion[variants.length];
+        if (FORCE_PROCEDURAL_HORSE) {
+            Color[] bodies = {
+                new Color(0.65f, 0.44f, 0.3f, 1f),
+                new Color(0.48f, 0.3f, 0.2f, 1f),
+                new Color(0.72f, 0.72f, 0.78f, 1f),
+                new Color(0.85f, 0.72f, 0.42f, 1f)
+            };
+            Color[] manes = {
+                new Color(0.25f, 0.16f, 0.1f, 1f),
+                new Color(0.2f, 0.12f, 0.08f, 1f),
+                new Color(0.5f, 0.5f, 0.55f, 1f),
+                new Color(0.55f, 0.4f, 0.2f, 1f)
+            };
+            for (int i = 0; i < variants.length; i++) {
+                Texture fallback = createHorsePreview(bodies[i], manes[i], new Color(0.35f, 0.2f, 0.12f, 1f));
+                horseSheets[i] = fallback;
+                horsePreviewRegions[i] = new TextureRegion(fallback);
+            }
+            return;
+        }
         for (int i = 0; i < variants.length; i++) {
             try {
                 Texture sheet = new Texture("sprites/horse_idle_" + variants[i] + ".png");
@@ -524,20 +564,57 @@ public class CharacterSelectScreen extends ScreenAdapter {
 
     private Texture createHorsePreview(Color body, Color mane, Color saddle) {
         Pixmap pixmap = createPreviewPanel();
+        Color bodyShade = darken(body, 0.12f);
+        Color hoof = darken(body, 0.25f);
+        Color maneDark = darken(mane, 0.12f);
+
+        pixmap.setColor(0f, 0f, 0f, 0.2f);
+        pixmap.fillRectangle(30, 36, 90, 10);
+        pixmap.fillCircle(30, 41, 6);
+        pixmap.fillCircle(120, 41, 6);
+
         pixmap.setColor(body);
-        pixmap.fillRectangle(26, 48, 86, 32);
-        pixmap.fillRectangle(32, 32, 14, 20);
-        pixmap.fillRectangle(62, 32, 14, 20);
-        pixmap.fillRectangle(94, 32, 14, 20);
-        pixmap.fillCircle(126, 64, 16);
+        pixmap.fillRectangle(32, 52, 72, 26);
+        pixmap.fillRectangle(86, 60, 28, 18);
+        pixmap.fillCircle(118, 70, 14);
+
+        pixmap.setColor(bodyShade);
+        pixmap.fillRectangle(36, 50, 60, 6);
+        pixmap.fillRectangle(86, 58, 24, 4);
+
+        pixmap.setColor(bodyShade);
+        pixmap.fillRectangle(38, 36, 10, 20);
+        pixmap.fillRectangle(60, 36, 10, 20);
+        pixmap.fillRectangle(82, 36, 10, 20);
+        pixmap.fillRectangle(100, 36, 8, 18);
+        pixmap.setColor(hoof);
+        pixmap.fillRectangle(38, 34, 10, 4);
+        pixmap.fillRectangle(60, 34, 10, 4);
+        pixmap.fillRectangle(82, 34, 10, 4);
+        pixmap.fillRectangle(100, 34, 8, 4);
+
         pixmap.setColor(mane);
-        pixmap.fillRectangle(108, 78, 24, 8);
-        pixmap.fillRectangle(36, 78, 18, 10);
+        pixmap.fillRectangle(88, 78, 28, 10);
+        pixmap.fillRectangle(44, 78, 24, 8);
+        pixmap.setColor(maneDark);
+        pixmap.fillRectangle(26, 60, 8, 22);
+
+        pixmap.setColor(Color.WHITE);
+        pixmap.fillRectangle(124, 70, 3, 3);
         if (saddle != null) {
             pixmap.setColor(saddle);
-            pixmap.fillRectangle(64, 56, 22, 12);
+            pixmap.fillRectangle(66, 60, 22, 12);
         }
         return finalizePreviewTexture(pixmap);
+    }
+
+    private Color darken(Color color, float amount) {
+        return new Color(
+            Math.max(0f, color.r - amount),
+            Math.max(0f, color.g - amount),
+            Math.max(0f, color.b - amount),
+            color.a
+        );
     }
 
     private void refreshHorsePreview() {

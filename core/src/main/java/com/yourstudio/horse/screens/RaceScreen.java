@@ -37,9 +37,11 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.yourstudio.horse.HorseGame;
+import com.yourstudio.horse.ui.PixelArtFactory;
 import com.yourstudio.horse.ui.ScreenNavigator;
 
 public class RaceScreen extends ScreenAdapter {
+    private static final boolean FORCE_PROCEDURAL_HORSE = true;
     private final HorseGame game;
     private final String horseName;
     private final String riderName;
@@ -181,9 +183,32 @@ public class RaceScreen extends ScreenAdapter {
         stage = new Stage(new ScreenViewport());
         titleFont = createUIFont(54, 3.1f);
         bodyFont = createUIFont(28, 1.45f);
-        buttonUp = createColorTexture(new Color(0.29f, 0.6f, 0.85f, 1f));
-        buttonDown = createColorTexture(new Color(0.2f, 0.48f, 0.7f, 1f));
-        background = createColorTexture(new Color(0.2f, 0.12f, 0.08f, 1f));
+        buttonUp = PixelArtFactory.createPixelButton(
+            220,
+            88,
+            new Color(0.26f, 0.56f, 0.86f, 1f),
+            new Color(0.12f, 0.26f, 0.46f, 0.18f),
+            new Color(0.9f, 0.92f, 0.96f, 1f),
+            new Color(0.08f, 0.14f, 0.22f, 1f),
+            false
+        );
+        buttonDown = PixelArtFactory.createPixelButton(
+            220,
+            88,
+            new Color(0.2f, 0.46f, 0.72f, 1f),
+            new Color(0.1f, 0.22f, 0.38f, 0.18f),
+            new Color(0.9f, 0.92f, 0.96f, 1f),
+            new Color(0.08f, 0.14f, 0.22f, 1f),
+            true
+        );
+        background = PixelArtFactory.createPixelBackground(
+            360,
+            200,
+            new Color(0.2f, 0.16f, 0.2f, 1f),
+            new Color(0.36f, 0.28f, 0.22f, 1f),
+            new Color(0.18f, 0.14f, 0.1f, 1f),
+            new Color(0.12f, 0.1f, 0.08f, 1f)
+        );
         clickSound = game.getAssets().get("sfx/click.wav", Sound.class);
         powerupSound = game.getAssets().get("sfx/powerup.wav", Sound.class);
         winSound = game.getAssets().get("sfx/win.wav", Sound.class);
@@ -191,7 +216,14 @@ public class RaceScreen extends ScreenAdapter {
         raceMusic.setLooping(true);
         raceMusic.setVolume(0.5f);
         raceMusic.play();
-        hudPanel = createPanelTexture(new Color(0.12f, 0.12f, 0.16f, 0.85f), new Color(0.35f, 0.35f, 0.45f, 1f), 320, 190);
+        hudPanel = PixelArtFactory.createPixelPanel(
+            320,
+            190,
+            new Color(0.12f, 0.12f, 0.16f, 0.9f),
+            new Color(0.05f, 0.05f, 0.08f, 0.2f),
+            new Color(0.62f, 0.62f, 0.7f, 1f),
+            new Color(0.2f, 0.2f, 0.28f, 1f)
+        );
         loadHorseAnimations();
         idleAnimation.setPlayMode(Animation.PlayMode.LOOP);
         runAnimation.setPlayMode(Animation.PlayMode.LOOP);
@@ -247,7 +279,7 @@ public class RaceScreen extends ScreenAdapter {
         buttonStyle.font = bodyFont;
         buttonStyle.fontColor = Color.WHITE;
 
-        Label title = new Label("Verseny", titleStyle);
+        Label title = new Label("Verseny - UI v2", titleStyle);
         Label selection = new Label("L\u00F3: " + horseName + " | Lovas: " + riderName + " | Kedvenc: " + petName, labelStyle);
         String horseCustomization = "L\u00F3sz\u00EDn: " + safeLabel(horseColor) + " | S\u00F6r\u00E9ny: " + safeLabel(maneColor) + " | Nyereg: " + safeLabel(saddleColor) + " | Ruh\u00E1zat: " + safeLabel(outfitColor);
         Label customization = new Label(horseCustomization, labelStyle);
@@ -865,6 +897,13 @@ public class RaceScreen extends ScreenAdapter {
     }
 
     private void loadHorseAnimations() {
+        if (FORCE_PROCEDURAL_HORSE) {
+            idleFrames = createHorseIdleFrames();
+            runFrames = createHorseRunFrames();
+            idleAnimation = new Animation<>(0.6f, toRegions(idleFrames));
+            runAnimation = new Animation<>(0.12f, toRegions(runFrames));
+            return;
+        }
         String variant = horseNameToVariant();
         try {
             idleSheet = new Texture("sprites/horse_idle_" + variant + ".png");
@@ -921,22 +960,67 @@ public class RaceScreen extends ScreenAdapter {
         pixmap.setColor(0f, 0f, 0f, 0f);
         pixmap.fill();
 
+        Color bodyShade = darken(body, 0.18f);
+        Color hoof = darken(body, 0.35f);
+        Color maneDark = darken(mane, 0.15f);
+
+        pixmap.setColor(0f, 0f, 0f, 0.25f);
+        pixmap.fillRectangle(12, 8, 40, 6);
+        pixmap.fillCircle(12, 11, 3);
+        pixmap.fillCircle(52, 11, 3);
+
         pixmap.setColor(body);
-        pixmap.fillRectangle(10, 24, 34, 18);
-        pixmap.fillCircle(46, 36, 8);
+        pixmap.fillRectangle(14, 26, 28, 14);
+        pixmap.fillRectangle(30, 32, 16, 10);
+        pixmap.fillCircle(48, 38, 7);
+
+        pixmap.setColor(bodyShade);
+        pixmap.fillRectangle(16, 24, 24, 4);
+        pixmap.fillRectangle(30, 30, 14, 3);
+        pixmap.fillRectangle(44, 34, 6, 3);
 
         int legOffset = variant % 2 == 0 ? 0 : 3;
-        pixmap.fillRectangle(16, 10 + legOffset, 6, 14);
-        pixmap.fillRectangle(26, 10, 6, 14 + legOffset);
-        pixmap.fillRectangle(36, 10 + legOffset, 6, 14);
+        pixmap.setColor(bodyShade);
+        pixmap.fillRectangle(18, 12 + legOffset, 5, 14);
+        pixmap.fillRectangle(28, 12, 5, 14 + legOffset);
+        pixmap.fillRectangle(38, 12 + legOffset, 5, 14);
+        pixmap.fillRectangle(46, 12, 4, 12 + legOffset);
+        pixmap.setColor(hoof);
+        pixmap.fillRectangle(18, 10 + legOffset, 5, 3);
+        pixmap.fillRectangle(28, 10, 5, 3);
+        pixmap.fillRectangle(38, 10 + legOffset, 5, 3);
+        pixmap.fillRectangle(46, 10, 4, 3);
 
         pixmap.setColor(mane);
-        pixmap.fillRectangle(38, 42, 12, 6);
-        pixmap.fillRectangle(12, 42, 10, 6);
+        pixmap.fillRectangle(30, 40, 12, 6);
+        pixmap.fillRectangle(18, 40, 10, 5);
+        pixmap.setColor(maneDark);
+        pixmap.fillRectangle(12, 28, 6, 10);
+        pixmap.fillRectangle(44, 42, 4, 3);
 
-        Texture texture = new Texture(pixmap);
+        pixmap.setColor(Color.WHITE);
+        pixmap.fillRectangle(50, 38, 2, 2);
+
+        // Flip the pixmap vertically so the horse is upright in libGDX
+        Pixmap flipped = new Pixmap(size, size, Pixmap.Format.RGBA8888);
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                flipped.drawPixel(x, y, pixmap.getPixel(x, size - 1 - y));
+            }
+        }
+        Texture texture = new Texture(flipped);
         pixmap.dispose();
+        flipped.dispose();
         return texture;
+    }
+
+    private Color darken(Color color, float amount) {
+        return new Color(
+            Math.max(0f, color.r - amount),
+            Math.max(0f, color.g - amount),
+            Math.max(0f, color.b - amount),
+            color.a
+        );
     }
 
     private TextureRegion[] toRegions(Texture[] textures) {

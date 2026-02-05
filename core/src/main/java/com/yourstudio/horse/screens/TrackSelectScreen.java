@@ -24,6 +24,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.yourstudio.horse.HorseGame;
+import com.yourstudio.horse.ui.PixelArtFactory;
 import com.yourstudio.horse.ui.UiFactory;
 import com.yourstudio.horse.ui.ScreenNavigator;
 
@@ -302,16 +303,9 @@ public class TrackSelectScreen extends ScreenAdapter {
     }
 
     private Texture createPanelTexture(Color fillColor, Color borderColor, int width, int height) {
-        Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
-        pixmap.setColor(fillColor);
-        pixmap.fill();
-        pixmap.setColor(borderColor);
-        for (int i = 0; i < 4; i++) {
-            pixmap.drawRectangle(i, i, width - (i * 2), height - (i * 2));
-        }
-        Texture texture = new Texture(pixmap);
-        pixmap.dispose();
-        return texture;
+        Color shade = new Color(Math.max(0f, fillColor.r - 0.08f), Math.max(0f, fillColor.g - 0.08f), Math.max(0f, fillColor.b - 0.08f), 0.18f);
+        Color borderLight = new Color(0.92f, 0.92f, 0.96f, 1f);
+        return PixelArtFactory.createPixelPanel(width, height, fillColor, shade, borderLight, borderColor);
     }
 
     private BitmapFont createUIFont(int size, float fallbackScale) {

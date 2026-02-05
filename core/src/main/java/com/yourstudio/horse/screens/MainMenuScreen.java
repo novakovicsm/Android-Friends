@@ -24,6 +24,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.yourstudio.horse.HorseGame;
+import com.yourstudio.horse.ui.PixelArtFactory;
 import com.yourstudio.horse.ui.UiFactory;
 import com.yourstudio.horse.ui.ScreenNavigator;
 
@@ -48,15 +49,71 @@ public class MainMenuScreen extends ScreenAdapter {
     @Override
     public void show() {
         stage = new Stage(new ScreenViewport());
-        titleFont = createUIFont(54, 3.1f);
-        buttonFont = createUIFont(28, 1.45f);
+        float worldWidth = stage.getViewport().getWorldWidth();
+        float worldHeight = stage.getViewport().getWorldHeight();
+        float scale = Math.max(0.8f, Math.min(worldWidth / 1280f, worldHeight / 720f));
+        int titleSize = Math.max(32, Math.round(54f * scale));
+        int buttonSize = Math.max(18, Math.round(28f * scale));
+        titleFont = createUIFont(titleSize, 3.1f * scale);
+        buttonFont = createUIFont(buttonSize, 1.45f * scale);
 
-        buttonUp = createPanelTexture(new Color(0.18f, 0.48f, 0.82f, 1f), new Color(0.06f, 0.18f, 0.32f, 1f), 360, 112);
-        buttonDown = createPanelTexture(new Color(0.14f, 0.4f, 0.72f, 1f), new Color(0.05f, 0.16f, 0.28f, 1f), 360, 112);
-        buttonOver = createPanelTexture(new Color(0.26f, 0.6f, 0.92f, 1f), new Color(0.08f, 0.22f, 0.38f, 1f), 360, 112);
-        background = createPixelBackground(360, 200);
-        logoPanel = createPanelTexture(new Color(0.96f, 0.93f, 0.88f, 1f), new Color(0.26f, 0.2f, 0.18f, 1f), 560, 150);
-        menuPanel = createPanelTexture(new Color(0.13f, 0.17f, 0.24f, 0.88f), new Color(0.55f, 0.55f, 0.62f, 1f), 600, 320);
+        int buttonWidth = Math.max(240, Math.round(360f * scale));
+        int buttonHeight = Math.max(84, Math.round(112f * scale));
+        int logoWidth = Math.max(360, Math.round(560f * scale));
+        int logoHeight = Math.max(110, Math.round(150f * scale));
+        int menuWidth = Math.max(420, Math.round(600f * scale));
+        int menuHeight = Math.max(220, Math.round(320f * scale));
+        buttonUp = PixelArtFactory.createPixelButton(
+            buttonWidth,
+            buttonHeight,
+            new Color(0.2f, 0.5f, 0.85f, 1f),
+            new Color(0.1f, 0.2f, 0.4f, 0.18f),
+            new Color(0.88f, 0.9f, 0.95f, 1f),
+            new Color(0.08f, 0.14f, 0.25f, 1f),
+            false
+        );
+        buttonDown = PixelArtFactory.createPixelButton(
+            buttonWidth,
+            buttonHeight,
+            new Color(0.18f, 0.44f, 0.74f, 1f),
+            new Color(0.08f, 0.18f, 0.36f, 0.18f),
+            new Color(0.88f, 0.9f, 0.95f, 1f),
+            new Color(0.08f, 0.14f, 0.25f, 1f),
+            true
+        );
+        buttonOver = PixelArtFactory.createPixelButton(
+            buttonWidth,
+            buttonHeight,
+            new Color(0.28f, 0.62f, 0.92f, 1f),
+            new Color(0.12f, 0.28f, 0.48f, 0.18f),
+            new Color(0.95f, 0.95f, 0.98f, 1f),
+            new Color(0.1f, 0.16f, 0.28f, 1f),
+            false
+        );
+        background = PixelArtFactory.createPixelBackground(
+            360,
+            200,
+            new Color(0.16f, 0.28f, 0.5f, 1f),
+            new Color(0.48f, 0.7f, 0.88f, 1f),
+            new Color(0.12f, 0.35f, 0.2f, 1f),
+            new Color(0.08f, 0.26f, 0.16f, 1f)
+        );
+        logoPanel = PixelArtFactory.createPixelPanel(
+            logoWidth,
+            logoHeight,
+            new Color(0.94f, 0.9f, 0.84f, 1f),
+            new Color(0.3f, 0.25f, 0.2f, 0.12f),
+            new Color(0.98f, 0.98f, 0.98f, 1f),
+            new Color(0.3f, 0.22f, 0.18f, 1f)
+        );
+        menuPanel = PixelArtFactory.createPixelPanel(
+            menuWidth,
+            menuHeight,
+            new Color(0.14f, 0.18f, 0.26f, 0.95f),
+            new Color(0.06f, 0.08f, 0.12f, 0.18f),
+            new Color(0.78f, 0.78f, 0.82f, 1f),
+            new Color(0.18f, 0.2f, 0.28f, 1f)
+        );
         clickSound = game.getAssets().get("sfx/click.wav", Sound.class);
         menuMusic = game.getAssets().get("sfx/menu_music.wav", Music.class);
         menuMusic.setLooping(true);
@@ -89,24 +146,24 @@ public class MainMenuScreen extends ScreenAdapter {
 
         Table layout = new Table();
         layout.setFillParent(true);
-        layout.pad(28f);
+        layout.pad(28f * scale);
         Table logoTable = new Table();
         logoTable.setBackground(toDrawable(logoPanel));
-        logoTable.pad(18f, 28f, 18f, 28f);
+        logoTable.pad(18f * scale, 28f * scale, 18f * scale, 28f * scale);
         logoTable.add(title).padBottom(6f);
         logoTable.row();
         logoTable.add(subtitle);
 
         Table menuTable = new Table();
         menuTable.setBackground(toDrawable(menuPanel));
-        menuTable.pad(20f);
-        menuTable.add(description).width(500f).padBottom(18f).row();
-        menuTable.add(startButton).width(360f).height(112f).padBottom(12f).row();
+        menuTable.pad(20f * scale);
+        menuTable.add(description).width(500f * scale).padBottom(18f * scale).row();
+        menuTable.add(startButton).width(360f * scale).height(112f * scale).padBottom(12f * scale).row();
         menuTable.add(hint);
 
-        layout.add(logoTable).padBottom(24f);
+        layout.add(logoTable).width(560f * scale).height(150f * scale).padBottom(24f * scale);
         layout.row();
-        layout.add(menuTable);
+        layout.add(menuTable).width(600f * scale).height(320f * scale);
 
         stage.addActor(layout);
         Gdx.input.setInputProcessor(stage);
@@ -161,57 +218,6 @@ public class MainMenuScreen extends ScreenAdapter {
         if (menuMusic != null) {
             menuMusic.stop();
         }
-    }
-
-    private Texture createPixelBackground(int width, int height) {
-        Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
-        Color skyTop = new Color(0.18f, 0.34f, 0.6f, 1f);
-        Color skyBottom = new Color(0.56f, 0.78f, 0.94f, 1f);
-        for (int y = 0; y < height; y++) {
-            float t = y / (float) (height - 1);
-            pixmap.setColor(
-                skyBottom.r + (skyTop.r - skyBottom.r) * t,
-                skyBottom.g + (skyTop.g - skyBottom.g) * t,
-                skyBottom.b + (skyTop.b - skyBottom.b) * t,
-                1f
-            );
-            pixmap.drawLine(0, y, width, y);
-        }
-
-        pixmap.setColor(0.12f, 0.4f, 0.22f, 1f);
-        pixmap.fillRectangle(0, 0, width, height / 3);
-        pixmap.setColor(0.1f, 0.34f, 0.18f, 1f);
-        for (int x = 0; x < width; x += 14) {
-            pixmap.fillRectangle(x, height / 3 - 9, 10, 9);
-        }
-
-        pixmap.setColor(0.1f, 0.28f, 0.16f, 1f);
-        pixmap.fillCircle(width / 4, height / 3, 26);
-        pixmap.fillCircle(width / 2, height / 3 + 8, 34);
-        pixmap.fillCircle(width * 3 / 4, height / 3 + 2, 28);
-
-        pixmap.setColor(1f, 1f, 1f, 0.9f);
-        for (int x = 18; x < width; x += 48) {
-            pixmap.fillRectangle(x, height - 26, 8, 4);
-            pixmap.fillRectangle(x + 10, height - 30, 14, 4);
-        }
-
-        Texture texture = new Texture(pixmap);
-        pixmap.dispose();
-        return texture;
-    }
-
-    private Texture createPanelTexture(Color fillColor, Color borderColor, int width, int height) {
-        Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
-        pixmap.setColor(fillColor);
-        pixmap.fill();
-        pixmap.setColor(borderColor);
-        for (int i = 0; i < 4; i++) {
-            pixmap.drawRectangle(i, i, width - (i * 2), height - (i * 2));
-        }
-        Texture texture = new Texture(pixmap);
-        pixmap.dispose();
-        return texture;
     }
 
     private BitmapFont createUIFont(int size, float fallbackScale) {
