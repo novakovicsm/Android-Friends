@@ -59,6 +59,8 @@ public class TrackSelectScreen extends ScreenAdapter {
         "Meredek emelked\u0151k \u00E9s h\u0171v\u00F6s hegyi leveg\u0151.",
         "Neonf\u00E9nyek, sz\u0171k utc\u00E1k \u00E9s gyors kanyarok."
     };
+    // Map track index to .tmx file
+    private final String[] trackFiles = {"forest.tmx", "tengerpart.tmx", "hegyek.tmx", "ejszakai_varos.tmx"};
 
     public TrackSelectScreen(HorseGame game, String horseName, String riderName, String petName) {
         this(game, horseName, riderName, petName, null, null, null, null);
@@ -141,7 +143,8 @@ public class TrackSelectScreen extends ScreenAdapter {
             ScreenNavigator.Selection selection = new ScreenNavigator.Selection(
                 horseName, riderName, petName, horseColor, maneColor, saddleColor, outfitColor
             );
-            ScreenNavigator.toRace(game, selection, trackNames[trackIndex]);
+            // Pass the .tmx filename according to selected icon
+            ScreenNavigator.toRace(game, selection, trackFiles[trackIndex]);
         });
 
         layout = new Table();
