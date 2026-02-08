@@ -190,6 +190,17 @@ public class RaceScreen extends ScreenAdapter {
 
     @Override
     public void show() {
+            // Minimal transparent joystick setup
+            Texture knobTexture = new Texture("ui/joystick_knob.png");
+            Drawable knobDrawable = new TextureRegionDrawable(knobTexture);
+            Drawable bgDrawable = null; // Fully transparent background
+            com.badlogic.gdx.scenes.scene2d.ui.Touchpad.TouchpadStyle touchpadStyle = new com.badlogic.gdx.scenes.scene2d.ui.Touchpad.TouchpadStyle();
+            touchpadStyle.knob = knobDrawable;
+            touchpadStyle.background = bgDrawable;
+            com.badlogic.gdx.scenes.scene2d.ui.Touchpad touchpad = new com.badlogic.gdx.scenes.scene2d.ui.Touchpad(10f, touchpadStyle);
+            touchpad.setBounds(32, 32, 128, 128);
+            stage.addActor(touchpad);
+            // Read input in render or update: touchpad.getKnobPercentX(), touchpad.getKnobPercentY()
         stage = new Stage(new ScreenViewport());
         // ...existing code...
         buttonUp = loadUiTexture("ui/button_primary.png");
