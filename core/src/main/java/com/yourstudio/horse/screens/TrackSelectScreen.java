@@ -21,7 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.yourstudio.horse.HorseGame;
 import com.yourstudio.horse.ui.UiFactory;
 import com.yourstudio.horse.ui.ScreenNavigator;
@@ -50,6 +50,7 @@ public class TrackSelectScreen extends ScreenAdapter {
     private Label trackNameLabel;
     private Label trackDescLabel;
     private int trackIndex;
+    private Table layout;
 
     private final String[] trackNames = {"Erd\u0151", "Tengerpart", "Hegyek", "\u00C9jszakai v\u00E1ros"};
     private final String[] trackDescriptions = {
@@ -77,9 +78,14 @@ public class TrackSelectScreen extends ScreenAdapter {
 
     @Override
     public void show() {
-        stage = new Stage(new ScreenViewport());
-        titleFont = createUIFont(54, 3.1f);
-        labelFont = createUIFont(28, 1.45f);
+        stage = new Stage(new ExtendViewport(1280f, 720f));
+        float worldWidth = stage.getViewport().getWorldWidth();
+        float worldHeight = stage.getViewport().getWorldHeight();
+        float scale = Math.min(0.9f, Math.max(0.75f, Math.min(worldWidth / 1280f, worldHeight / 720f)));
+        int titleSize = Math.max(32, Math.round(54f * scale));
+        int labelSize = Math.max(18, Math.round(28f * scale));
+        titleFont = createUIFont(titleSize, 3.1f * scale);
+        labelFont = createUIFont(labelSize, 1.45f * scale);
 
         background = loadUiTexture("ui/bg_select.png");
         buttonUp = loadUiTexture("ui/button_primary.png");
@@ -119,7 +125,7 @@ public class TrackSelectScreen extends ScreenAdapter {
                 }
             });
             cardImages[i] = image;
-            cardsTable.add(image).width(200f).height(140f).pad(12f);
+            cardsTable.add(image).width(200f * scale).height(140f * scale).pad(12f * scale);
         }
         updateSelection();
 
@@ -138,23 +144,24 @@ public class TrackSelectScreen extends ScreenAdapter {
             ScreenNavigator.toRace(game, selection, trackNames[trackIndex]);
         });
 
-        Table layout = new Table();
-        layout.setFillParent(true);
-        layout.pad(24f);
-        layout.add(title).padBottom(18f);
+        layout = new Table();
+        layout.pad(24f * scale);
+        layout.add(title).padBottom(18f * scale);
         layout.row();
-        layout.add(cardsTable).padBottom(24f);
+        layout.add(cardsTable).padBottom(24f * scale);
         layout.row();
-        layout.add(trackNameLabel).padBottom(10f);
+        layout.add(trackNameLabel).padBottom(10f * scale);
         layout.row();
-        layout.add(trackDescLabel).width(620f).padBottom(26f);
+        layout.add(trackDescLabel).width(620f * scale).padBottom(26f * scale);
         layout.row();
 
         Table buttonRow = new Table();
-        buttonRow.add(backButton).width(240f).height(92f).padRight(18f);
-        buttonRow.add(startButton).width(300f).height(92f);
+        buttonRow.add(backButton).width(240f * scale).height(92f * scale).padRight(18f * scale);
+        buttonRow.add(startButton).width(300f * scale).height(92f * scale);
         layout.add(buttonRow);
 
+        layout.pack();
+        applyLayoutScale();
         stage.addActor(layout);
         Gdx.input.setInputProcessor(stage);
     }
@@ -173,6 +180,7 @@ public class TrackSelectScreen extends ScreenAdapter {
     public void resize(int width, int height) {
         if (stage != null) {
             stage.getViewport().update(width, height, true);
+            applyLayoutScale();
         }
     }
 
@@ -269,5 +277,21 @@ public class TrackSelectScreen extends ScreenAdapter {
                 texture.dispose();
             }
         }
+    }
+
+    private void applyLayoutScale() {
+        if (layout == null || stage == null) {
+            return;
+        }
+        float worldWidth = stage.getViewport().getWorldWidth();
+        float worldHeight = stage.getViewport().getWorldHeight();
+        float maxWidth = worldWidth * 0.96f;
+        float maxHeight = worldHeight * 0.9f;
+        float fitScale = Math.min(maxWidth / layout.getWidth(), maxHeight / layout.getHeight());
+        layout.setTransform(true);
+        layout.setScale(fitScale < 1f ? fitScale : 1f);
+        float scaledWidth = layout.getWidth() * layout.getScaleX();
+        float scaledHeight = layout.getHeight() * layout.getScaleY();
+        layout.setPosition((worldWidth - scaledWidth) * 0.5f, (worldHeight - scaledHeight) * 0.5f);
     }
 }
