@@ -45,6 +45,17 @@ import com.yourstudio.horse.HorseGame;
 import com.yourstudio.horse.ui.ScreenNavigator;
 
 public class RaceScreen extends ScreenAdapter {
+                // Coin count for player
+                private int playerCoins = 0;
+                // Call this method wherever coins are collected in the game logic
+                public void collectCoin(int baseAmount) {
+                    int amount = Math.round(baseAmount * petCoinMultiplier);
+                    playerCoins += amount;
+                    // Optionally update UI or play sound here
+                }
+            // Pet bonus fields
+            private float petCoinMultiplier = 1f;
+            private float petPowerupDurationMultiplier = 1f;
         // Joystick input state
         private float joystickX = 0f;
         private float joystickY = 0f;
@@ -93,7 +104,7 @@ public class RaceScreen extends ScreenAdapter {
     private int petIndex;
     private final String[] horses = {"Gesztenye", "Pej", "Sz\u00FCrke", "Palomino"};
     private final String[] riders = {"Lili", "Noel", "Mira", "\u00c1ron"};
-    private final String[] pets = {"Kutya", "Cica", "Nyuszi", "Papag\u00E1j"};
+    private final String[] pets = {"Kutya", "Cica", "Nyuszi", "Papag\u00E1j", "Kapibara", "Lajhár"};
     private float elapsedTime;
     private int currentLap = 1;
     private float speed;
@@ -202,6 +213,14 @@ public class RaceScreen extends ScreenAdapter {
 
     @Override
     public void show() {
+                // Set up pet bonus multipliers
+                petCoinMultiplier = 1f;
+                petPowerupDurationMultiplier = 1f;
+                if ("Kapibara".equals(petName)) {
+                    petCoinMultiplier = 2f;
+                } else if ("Lajhár".equals(petName)) {
+                    petPowerupDurationMultiplier = 1.5f;
+                }
         stage = new Stage(new ScreenViewport());
         // Floating joystick visuals (with safe fallback if assets are missing).
         joystickBaseTexture = createJoystickTexture(128, 0.25f);
@@ -664,15 +683,18 @@ public class RaceScreen extends ScreenAdapter {
     }
 
     private Texture[] createPetPreviews() {
-        Color[] pets = {
-            new Color(0.85f, 0.65f, 0.4f, 1f),
-            new Color(0.6f, 0.6f, 0.65f, 1f),
-            new Color(0.95f, 0.9f, 0.75f, 1f),
-            new Color(0.2f, 0.75f, 0.45f, 1f)
+        // Colors: Kutya, Cica, Nyuszi, Papagáj, Kapibara, Lajhár
+        Color[] petColors = {
+            new Color(0.85f, 0.65f, 0.4f, 1f),   // Kutya
+            new Color(0.6f, 0.6f, 0.65f, 1f),    // Cica
+            new Color(0.95f, 0.9f, 0.75f, 1f),   // Nyuszi
+            new Color(0.2f, 0.75f, 0.45f, 1f),   // Papagáj
+            new Color(0.7f, 0.5f, 0.3f, 1f),     // Kapibara
+            new Color(0.6f, 0.7f, 0.5f, 1f)      // Lajhár
         };
-        Texture[] previews = new Texture[pets.length];
-        for (int i = 0; i < pets.length; i++) {
-            previews[i] = createPetPreview(pets[i]);
+        Texture[] previews = new Texture[petColors.length];
+        for (int i = 0; i < petColors.length; i++) {
+            previews[i] = createPetPreview(petColors[i]);
         }
         return previews;
     }
@@ -753,20 +775,26 @@ public class RaceScreen extends ScreenAdapter {
         String bonusText = "--";
         if ("Kutya".equals(petName)) {
             petSpeedBonus = 6f;
-            bonusText = "+6 km/h v\u00E9gsebess\u00E9g";
+            bonusText = "+6 km/h végsebesség";
         } else if ("Cica".equals(petName)) {
             petAccelBonus = 5f;
-            bonusText = "+5 gyorsul\u00E1s";
+            bonusText = "+5 gyorsulás";
         } else if ("Nyuszi".equals(petName)) {
             petAccelBonus = 3f;
             petSpeedBonus = 3f;
-            bonusText = "+3 gyorsul\u00E1s, +3 km/h";
-        } else if ("Papag\u00E1j".equals(petName)) {
+            bonusText = "+3 gyorsulás, +3 km/h";
+        } else if ("Papagáj".equals(petName)) {
             petShieldBonus = 1f;
             bonusText = "+1 pajzs";
+        } else if ("Kapibara".equals(petName)) {
+            // Coin multiplier bonus (handled in coin collection logic)
+            bonusText = "Érme szorzó: x2";
+        } else if ("Lajhár".equals(petName)) {
+            // Power-up duration increase (handled in power-up logic)
+            bonusText = "Power-up idő: x1.5";
         }
         if (petBonusLabel != null) {
-            petBonusLabel.setText("Kedvenc b\u00F3nusz: " + bonusText);
+            petBonusLabel.setText("Kedvenc bónusz: " + bonusText);
         }
     }
 
@@ -806,7 +834,9 @@ public class RaceScreen extends ScreenAdapter {
                 powerupSpawns.removeIndex(i);
                 PowerupDef def = findPowerupDef(spawn.id);
                 activePowerupName = def != null ? def.name : "B\u00F3nusz";
-                activePowerupTimer = 4f;
+                // Apply pet power-up duration bonus
+                float baseDuration = 4f;
+                activePowerupTimer = baseDuration * petPowerupDurationMultiplier;
                 if (powerupSound != null) {
                     powerupSound.play(0.7f);
                 }
@@ -1174,6 +1204,12 @@ public class RaceScreen extends ScreenAdapter {
         }
         if ("Papagáj".equals(petName)) {
             return new Color(0.2f, 0.75f, 0.45f, 1f);
+        }
+        if ("Kapibara".equals(petName)) {
+            return new Color(0.7f, 0.5f, 0.3f, 1f);
+        }
+        if ("Lajhár".equals(petName)) {
+            return new Color(0.6f, 0.7f, 0.5f, 1f);
         }
         return new Color(0.7f, 0.7f, 0.7f, 1f);
     }

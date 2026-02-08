@@ -72,7 +72,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
 
     private final String[] horses = {"Gesztenye", "Pej", "Sz\u00FCrke", "Palomino"};
     private final String[] riders = {"Lili", "Noel", "Mira", "\u00C1ron"};
-    private final String[] pets = {"Kutya", "Cica", "Nyuszi", "Papag\u00E1j"};
+    private final String[] pets = {"Kutya", "Cica", "Nyuszi", "Papag\u00E1j", "Kapibara", "Lajhár"};
     private final String[] horseColors = {"Meleg barna", "Arany", "Hamvas", "S\u00F6t\u00E9t"};
     private final String[] maneColors = {"Fekete", "Csokol\u00E1d\u00E9", "Sz\u00FCrke", "Sz\u0151ke"};
     private final String[] saddleColors = {"V\u00F6r\u00F6s", "K\u00E9k", "Z\u00F6ld", "Fekete"};
@@ -521,15 +521,18 @@ public class CharacterSelectScreen extends ScreenAdapter {
     }
 
     private Texture[] createPetPreviews() {
-        Color[] pets = {
-            new Color(0.85f, 0.65f, 0.4f, 1f),
-            new Color(0.6f, 0.6f, 0.65f, 1f),
-            new Color(0.95f, 0.9f, 0.75f, 1f),
-            new Color(0.2f, 0.75f, 0.45f, 1f)
+        // Colors: Kutya, Cica, Nyuszi, Papagáj, Kapibara, Lajhár
+        Color[] petColors = {
+            new Color(0.85f, 0.65f, 0.4f, 1f),   // Kutya
+            new Color(0.6f, 0.6f, 0.65f, 1f),    // Cica
+            new Color(0.95f, 0.9f, 0.75f, 1f),   // Nyuszi
+            new Color(0.2f, 0.75f, 0.45f, 1f),   // Papagáj
+            new Color(0.7f, 0.5f, 0.3f, 1f),     // Kapibara
+            new Color(0.6f, 0.7f, 0.5f, 1f)      // Lajhár
         };
-        Texture[] previews = new Texture[pets.length];
-        for (int i = 0; i < pets.length; i++) {
-            previews[i] = createPetPreview(pets[i]);
+        Texture[] previews = new Texture[petColors.length];
+        for (int i = 0; i < petColors.length; i++) {
+            previews[i] = createPetPreview(petColors[i]);
         }
         return previews;
     }

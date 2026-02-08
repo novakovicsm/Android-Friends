@@ -41,4 +41,25 @@
       }
     }
   ]
+  ,
+  "bonusTypes": [
+    {
+      "id": "coin_multiplier",
+      "name": "Érme szorzó",
+      "description": "Több érmét kapsz a verseny során.",
+      "effect": {
+        "type": "coin_multiplier",
+        "multiplier": 2.0
+      }
+    },
+    {
+      "id": "powerup_duration",
+      "name": "Power-up idő növelés",
+      "description": "A felvett power-upok tovább tartanak.",
+      "effect": {
+        "type": "powerup_duration_increase",
+        "multiplier": 1.5
+      }
+    }
+  ]
 }

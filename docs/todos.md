@@ -60,11 +60,13 @@ Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladat
 - [ ] Rider, pet, and color specification: fix selection and display bugs
 
 ### Playable loop polish (race feel, input, HUD, rewards)
-- [ ] Input finomhangolás: érzékenység, gyorsítás/lassítás görbék, irányváltás animáció
+- [x] Input finomhangolás: érzékenység, gyorsítás/lassítás görbék, irányváltás animáció
 - [ ] Versenyérzet: sebességvisszajelzés (kamera enyhe előre dőlés/rásegítés), por/sparkle effekt
 - [ ] HUD tisztítás: aktív power-up időzítő, köridő/legjobb idő, célvonal jelzés
 - [ ] Célba érés flow: győzelmi panel, jutalom összegzés, újraindítás gomb
 - [ ] Jutalom rendszer: egyszerű valuta/pontok, beváltás preview
+- [ ] Akadályok a pályán: életerő, életek számának csökkenése, vagy lassítás
+
 
 ### Content expansion (more tracks, power-ups, assets)
 - [ ] 3 új pálya (tengerpart, hegyek, éjszakai város) Tiled map
