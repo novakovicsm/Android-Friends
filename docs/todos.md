@@ -56,6 +56,9 @@ Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladat
 
 ## Milestone 2 – Teendők
 
+### Bugfixes
+- [ ] Rider, pet, and color specification: fix selection and display bugs
+
 ### Playable loop polish (race feel, input, HUD, rewards)
 - [ ] Input finomhangolás: érzékenység, gyorsítás/lassítás görbék, irányváltás animáció
 - [ ] Versenyérzet: sebességvisszajelzés (kamera enyhe előre dőlés/rásegítés), por/sparkle effekt

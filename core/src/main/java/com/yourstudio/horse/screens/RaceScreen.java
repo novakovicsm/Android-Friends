@@ -41,6 +41,9 @@ import com.yourstudio.horse.HorseGame;
 import com.yourstudio.horse.ui.ScreenNavigator;
 
 public class RaceScreen extends ScreenAdapter {
+        // Joystick input state
+        private float joystickX = 0f;
+        private float joystickY = 0f;
     private static final boolean FORCE_PROCEDURAL_HORSE = true;
     private final HorseGame game;
     private final String horseName;
@@ -269,25 +272,32 @@ public class RaceScreen extends ScreenAdapter {
         lapLabel = new Label("K\u00F6r: 1/3", labelStyle);
         powerupLabel = new Label("B\u00F3nusz: --", labelStyle);
         petBonusLabel = new Label("Kedvenc b\u00F3nusz: --", labelStyle);
-        directionLabel = new Label("Ir\u00E1ny:", labelStyle);
-        leftButton = new TextButton("Balra", buttonStyle);
-        rightButton = new TextButton("Jobbra", buttonStyle);
-        leftButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (clickSound != null) {
-                    clickSound.play(0.6f);
-                }
-                horseDirection = -1f;
+        // directionLabel = new Label("Ir\u00E1ny:", labelStyle);
+            // Joystick control only, remove left/right buttons from UI
+            // directionLabel can remain for feedback if desired
+        // Remove button listeners and implement joystick control
+        stage.addListener(new com.badlogic.gdx.scenes.scene2d.InputListener() {
+            // Joystick controls both X and Y
+            public void touchDragged(InputEvent event, float x, float y, int pointer) {
+                float centerX = Gdx.graphics.getWidth() / 2f;
+                float centerY = Gdx.graphics.getHeight() / 2f;
+                float dx = x - centerX;
+                float dy = y - centerY;
+                joystickX = MathUtils.clamp(dx / centerX, -1f, 1f);
+                joystickY = MathUtils.clamp(dy / centerY, -1f, 1f);
             }
-        });
-        rightButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (clickSound != null) {
-                    clickSound.play(0.6f);
-                }
-                horseDirection = 1f;
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                float centerX = Gdx.graphics.getWidth() / 2f;
+                float centerY = Gdx.graphics.getHeight() / 2f;
+                float dx = x - centerX;
+                float dy = y - centerY;
+                joystickX = MathUtils.clamp(dx / centerX, -1f, 1f);
+                joystickY = MathUtils.clamp(dy / centerY, -1f, 1f);
+                return true;
+            }
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                joystickX = 0f;
+                joystickY = 0f;
             }
         });
 
@@ -381,8 +391,9 @@ public class RaceScreen extends ScreenAdapter {
             drawBackgroundFit(stage.getBatch());
             stage.getBatch().end();
 
-            horseX += speed * delta * horseDirection;
-            horseY = 80f + 24f * (float) Math.sin(distance * 0.03f);
+            // Free movement: joystick controls both X and Y
+            horseX += speed * delta * joystickX;
+            horseY += speed * delta * joystickY;
             if (mapHasBounds) {
                 float minX = mapBoundsMinX + horseBoundsPadding;
                 float maxX = mapBoundsMaxX - horseBoundsPadding;
