@@ -23,7 +23,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.yourstudio.horse.HorseGame;
 import com.yourstudio.horse.ui.PixelArtFactory;
 import com.yourstudio.horse.ui.ScreenNavigator;
@@ -68,6 +68,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private Color[] saddleColorValues;
     private Color[] outfitColorValues;
     private Color[] riderHairColors;
+    private Table layout;
 
     private final String[] horses = {"Gesztenye", "Pej", "Sz\u00FCrke", "Palomino"};
     private final String[] riders = {"Lili", "Noel", "Mira", "\u00C1ron"};
@@ -129,7 +130,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
 
     @Override
     public void show() {
-        stage = new Stage(new ScreenViewport());
+        stage = new Stage(new ExtendViewport(1280f, 720f));
         titleFont = createUIFont(54, 3.1f);
         bodyFont = createUIFont(28, 1.45f);
         buttonUp = loadUiTexture("ui/button_primary.png");
@@ -201,8 +202,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
         refreshHorsePreview();
         refreshRiderPreview();
 
-        Table layout = new Table();
-        layout.setFillParent(true);
+        layout = new Table();
         layout.pad(24f);
 
         layout.add(title).colspan(3).padBottom(30f);
@@ -254,6 +254,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
         layout.add(backButton).width(220f).height(80f).padRight(20f);
         layout.add(startButton).width(320f).height(80f).colspan(2);
 
+        layout.pack();
+        applyLayoutScale();
         stage.addActor(layout);
         Gdx.input.setInputProcessor(stage);
     }
@@ -272,6 +274,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
     public void resize(int width, int height) {
         if (stage != null) {
             stage.getViewport().update(width, height, true);
+            applyLayoutScale();
         }
     }
 
@@ -692,6 +695,22 @@ public class CharacterSelectScreen extends ScreenAdapter {
                 texture.dispose();
             }
         }
+    }
+
+    private void applyLayoutScale() {
+        if (layout == null || stage == null) {
+            return;
+        }
+        float worldWidth = stage.getViewport().getWorldWidth();
+        float worldHeight = stage.getViewport().getWorldHeight();
+        float maxWidth = worldWidth * 0.96f;
+        float maxHeight = worldHeight * 0.9f;
+        float fitScale = Math.min(maxWidth / layout.getWidth(), maxHeight / layout.getHeight());
+        layout.setTransform(true);
+        layout.setScale(fitScale < 1f ? fitScale : 1f);
+        float scaledWidth = layout.getWidth() * layout.getScaleX();
+        float scaledHeight = layout.getHeight() * layout.getScaleY();
+        layout.setPosition((worldWidth - scaledWidth) * 0.5f, (worldHeight - scaledHeight) * 0.5f);
     }
 
     private Drawable toDrawable(Texture texture) {
