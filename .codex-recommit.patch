@@ -1,0 +1,666 @@
+﻿diff --git a/.gitignore b/.gitignore
+index 5b517a0..789880a 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -5,6 +5,8 @@
+ # Generated outputs
+ /core/bin/
+ /android/src/main/jniLibs/
++/desktop/bin/
++/.gradle-user/
+ 
+ # IDE
+ .idea/
+diff --git a/android/google-services.json b/android/google-services.json
+new file mode 100644
+index 0000000..5e664fc
+--- /dev/null
++++ b/android/google-services.json
+@@ -0,0 +1,29 @@
++{
++  "project_info": {
++    "project_number": "975378925499",
++    "project_id": "versenylovak-3e10e",
++    "storage_bucket": "versenylovak-3e10e.firebasestorage.app"
++  },
++  "client": [
++    {
++      "client_info": {
++        "mobilesdk_app_id": "1:975378925499:android:dfa1f4d0f41f299ab8e69e",
++        "android_client_info": {
++          "package_name": "com.yourstudio.horse"
++        }
++      },
++      "oauth_client": [],
++      "api_key": [
++        {
++          "current_key": "AIzaSyDKD0ojc-i6z0FTMjOKBqnfP5D8msqxtXI"
++        }
++      ],
++      "services": {
++        "appinvite_service": {
++          "other_platform_oauth_client": []
++        }
++      }
++    }
++  ],
++  "configuration_version": "1"
++}
+\ No newline at end of file
+diff --git a/assets/maps/beach.tmx b/assets/maps/beach.tmx
+new file mode 100644
+index 0000000..b5f0d5a
+--- /dev/null
++++ b/assets/maps/beach.tmx
+@@ -0,0 +1,16 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="10" height="8" tilewidth="32" tileheight="32" infinite="0" nextlayerid="2" nextobjectid="1">
++  <tileset firstgid="1" source="forest.tsx"/>
++  <layer id="1" name="Ground" width="10" height="8">
++    <data encoding="csv">
++1,2,3,4,1,2,3,4,1,2,
++5,6,7,8,5,6,7,8,5,6,
++9,10,11,12,9,10,11,12,9,10,
++13,14,15,16,13,14,15,16,13,14,
++1,2,3,4,1,2,3,4,1,2,
++5,6,7,8,5,6,7,8,5,6,
++9,10,11,12,9,10,11,12,9,10,
++13,14,15,16,13,14,15,16,13,14
++    </data>
++  </layer>
++</map>
+diff --git a/assets/maps/city.tmx b/assets/maps/city.tmx
+new file mode 100644
+index 0000000..b5f0d5a
+--- /dev/null
++++ b/assets/maps/city.tmx
+@@ -0,0 +1,16 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="10" height="8" tilewidth="32" tileheight="32" infinite="0" nextlayerid="2" nextobjectid="1">
++  <tileset firstgid="1" source="forest.tsx"/>
++  <layer id="1" name="Ground" width="10" height="8">
++    <data encoding="csv">
++1,2,3,4,1,2,3,4,1,2,
++5,6,7,8,5,6,7,8,5,6,
++9,10,11,12,9,10,11,12,9,10,
++13,14,15,16,13,14,15,16,13,14,
++1,2,3,4,1,2,3,4,1,2,
++5,6,7,8,5,6,7,8,5,6,
++9,10,11,12,9,10,11,12,9,10,
++13,14,15,16,13,14,15,16,13,14
++    </data>
++  </layer>
++</map>
+diff --git a/assets/maps/mountains.tmx b/assets/maps/mountains.tmx
+new file mode 100644
+index 0000000..b5f0d5a
+--- /dev/null
++++ b/assets/maps/mountains.tmx
+@@ -0,0 +1,16 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="10" height="8" tilewidth="32" tileheight="32" infinite="0" nextlayerid="2" nextobjectid="1">
++  <tileset firstgid="1" source="forest.tsx"/>
++  <layer id="1" name="Ground" width="10" height="8">
++    <data encoding="csv">
++1,2,3,4,1,2,3,4,1,2,
++5,6,7,8,5,6,7,8,5,6,
++9,10,11,12,9,10,11,12,9,10,
++13,14,15,16,13,14,15,16,13,14,
++1,2,3,4,1,2,3,4,1,2,
++5,6,7,8,5,6,7,8,5,6,
++9,10,11,12,9,10,11,12,9,10,
++13,14,15,16,13,14,15,16,13,14
++    </data>
++  </layer>
++</map>
+diff --git a/build.gradle b/build.gradle
+index ad2033a..7dda185 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -4,7 +4,7 @@ buildscript {
+         mavenCentral()
+     }
+     dependencies {
+-        classpath 'com.android.tools.build:gradle:8.2.2'
++        classpath 'com.android.tools.build:gradle:8.13.2'
+     }
+ }
+ 
+diff --git a/core/src/main/java/com/yourstudio/horse/screens/CharacterSelectScreen.java b/core/src/main/java/com/yourstudio/horse/screens/CharacterSelectScreen.java
+index 0f69a93..776de0b 100644
+--- a/core/src/main/java/com/yourstudio/horse/screens/CharacterSelectScreen.java
++++ b/core/src/main/java/com/yourstudio/horse/screens/CharacterSelectScreen.java
+@@ -23,7 +23,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+ import com.badlogic.gdx.utils.ScreenUtils;
+-import com.badlogic.gdx.utils.viewport.ScreenViewport;
++import com.badlogic.gdx.utils.viewport.FitViewport;
+ import com.yourstudio.horse.HorseGame;
+ import com.yourstudio.horse.ui.PixelArtFactory;
+ import com.yourstudio.horse.ui.ScreenNavigator;
+@@ -69,13 +69,13 @@ public class CharacterSelectScreen extends ScreenAdapter {
+     private Color[] outfitColorValues;
+     private Color[] riderHairColors;
+ 
+-    private final String[] horses = {"Gesztenye", "Pej", "Sz\u00FCrke", "Palomino"};
+-    private final String[] riders = {"Lili", "Noel", "Mira", "\u00C1ron"};
+-    private final String[] pets = {"Kutya", "Cica", "Nyuszi", "Papag\u00E1j"};
+-    private final String[] horseColors = {"Meleg barna", "Arany", "Hamvas", "S\u00F6t\u00E9t"};
+-    private final String[] maneColors = {"Fekete", "Csokol\u00E1d\u00E9", "Sz\u00FCrke", "Sz\u0151ke"};
+-    private final String[] saddleColors = {"V\u00F6r\u00F6s", "K\u00E9k", "Z\u00F6ld", "Fekete"};
+-    private final String[] outfitColors = {"Piros", "K\u00E9k", "Z\u00F6ld", "Lila"};
++    private final String[] horses = {"Gesztenye", "Pej", "Szürke", "Palomino"};
++    private final String[] riders = {"Lili", "Noel", "Mira", "Áron"};
++    private final String[] pets = {"Kutya", "Cica", "Nyuszi", "Papagáj"};
++    private final String[] horseColors = {"Meleg barna", "Arany", "Hamvas", "Sötét"};
++    private final String[] maneColors = {"Fekete", "Csokoládé", "Szürke", "Szőke"};
++    private final String[] saddleColors = {"Vörös", "Kék", "Zöld", "Fekete"};
++    private final String[] outfitColors = {"Piros", "Kék", "Zöld", "Lila"};
+ 
+     private int horseIndex;
+     private int riderIndex;
+@@ -97,15 +97,6 @@ public class CharacterSelectScreen extends ScreenAdapter {
+         this(game, null, null, null, null, null, null, null);
+     }
+ 
+-    public CharacterSelectScreen(HorseGame game, String horseName, String riderName, String petName) {
+-        this(game, horseName, riderName, petName, null, null, null, null);
+-    }
+-
+-    public CharacterSelectScreen(HorseGame game, String horseName, String riderName, String petName,
+-                                 String horseColor, String maneColor, String saddleColor) {
+-        this(game, horseName, riderName, petName, horseColor, maneColor, saddleColor, null);
+-    }
+-
+     public CharacterSelectScreen(HorseGame game, String horseName, String riderName, String petName,
+                                  String horseColor, String maneColor, String saddleColor, String outfitColor) {
+         this.game = game;
+@@ -129,9 +120,9 @@ public class CharacterSelectScreen extends ScreenAdapter {
+ 
+     @Override
+     public void show() {
+-        stage = new Stage(new ScreenViewport());
+-        titleFont = createUIFont(54, 3.1f);
+-        bodyFont = createUIFont(28, 1.45f);
++        stage = new Stage(new FitViewport(1280, 720));
++        titleFont = createUIFont(48, 2.8f);
++        bodyFont = createUIFont(24, 1.25f);
+         buttonUp = loadUiTexture("ui/button_primary.png");
+         buttonDown = loadUiTexture("ui/button_primary_down.png");
+         background = loadUiTexture("ui/bg_select.png");
+@@ -182,7 +173,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
+         buttonStyle.font = bodyFont;
+         buttonStyle.fontColor = Color.WHITE;
+ 
+-        Label title = new Label("Karakter v\u00E1laszt\u00E1s", titleStyle);
++        Label title = new Label("Karakter választás", titleStyle);
+         horseValue = new Label(horses[horseIndex], labelStyle);
+         riderValue = new Label(riders[riderIndex], labelStyle);
+         petValue = new Label(pets[petIndex], labelStyle);
+@@ -203,35 +194,35 @@ public class CharacterSelectScreen extends ScreenAdapter {
+ 
+         Table layout = new Table();
+         layout.setFillParent(true);
+-        layout.pad(24f);
++        layout.pad(10f);
+ 
+-        layout.add(title).colspan(3).padBottom(30f);
++        layout.add(title).colspan(3).padBottom(10f);
+         layout.row();
+ 
+         Table previewRow = new Table();
+-        previewRow.add(horsePreviewImage).width(150f).height(110f).pad(6f);
+-        previewRow.add(riderPreviewImage).width(150f).height(110f).pad(6f);
+-        previewRow.add(petPreviewImage).width(150f).height(110f).pad(6f);
+-        layout.add(previewRow).colspan(4).padBottom(24f);
++        previewRow.add(horsePreviewImage).width(140f).height(100f).pad(4f);
++        previewRow.add(riderPreviewImage).width(140f).height(100f).pad(4f);
++        previewRow.add(petPreviewImage).width(140f).height(100f).pad(4f);
++        layout.add(previewRow).colspan(4).padBottom(10f);
+         layout.row();
+ 
+-        addSelectorRow(layout, "L\u00F3", horseValue, buttonStyle, () -> updateHorse(-1), () -> updateHorse(1));
+-        addSelectorRow(layout, "L\u00F3sz\u00EDn", horseColorValue, horseColorSwatchImage, buttonStyle, () -> updateHorseColor(-1), () -> updateHorseColor(1));
+-        addSelectorRow(layout, "S\u00F6r\u00E9ny", maneColorValue, maneColorSwatchImage, buttonStyle, () -> updateManeColor(-1), () -> updateManeColor(1));
++        addSelectorRow(layout, "Ló", horseValue, buttonStyle, () -> updateHorse(-1), () -> updateHorse(1));
++        addSelectorRow(layout, "Lószín", horseColorValue, horseColorSwatchImage, buttonStyle, () -> updateHorseColor(-1), () -> updateHorseColor(1));
++        addSelectorRow(layout, "Sörény", maneColorValue, maneColorSwatchImage, buttonStyle, () -> updateManeColor(-1), () -> updateManeColor(1));
+         addSelectorRow(layout, "Nyereg", saddleColorValue, saddleColorSwatchImage, buttonStyle, () -> updateSaddleColor(-1), () -> updateSaddleColor(1));
+         addSelectorRow(layout, "Lovas", riderValue, buttonStyle, () -> updateRider(-1), () -> updateRider(1));
+-        addSelectorRow(layout, "Ruh\u00E1zat", outfitColorValue, outfitColorSwatchImage, buttonStyle, () -> updateOutfitColor(-1), () -> updateOutfitColor(1));
++        addSelectorRow(layout, "Ruházat", outfitColorValue, outfitColorSwatchImage, buttonStyle, () -> updateOutfitColor(-1), () -> updateOutfitColor(1));
+         addSelectorRow(layout, "Kis kedvenc", petValue, buttonStyle, () -> updatePet(-1), () -> updatePet(1));
+ 
+-        layout.row().padTop(30f);
++        layout.row().padTop(10f);
+         TextButton backButton = new TextButton("Vissza", buttonStyle);
+-        TextButton startButton = new TextButton("Verseny ind\u00EDt\u00E1sa", buttonStyle);
++        TextButton startButton = new TextButton("Verseny indítása", buttonStyle);
+ 
+         backButton.addListener(new ClickListener() {
+             @Override
+             public void clicked(InputEvent event, float x, float y) {
+                 playClick();
+-                ScreenNavigator.toMainMenu(game);
++                ScreenNavigator.toTrackSelect(game, null);
+             }
+         });
+         startButton.addListener(new ClickListener() {
+@@ -247,12 +238,12 @@ public class CharacterSelectScreen extends ScreenAdapter {
+                     saddleColors[saddleColorIndex],
+                     outfitColors[outfitColorIndex]
+                 );
+-                ScreenNavigator.toTrackSelect(game, selection);
++                ScreenNavigator.toRace(game, selection, "TODO");
+             }
+         });
+ 
+-        layout.add(backButton).width(220f).height(80f).padRight(20f);
+-        layout.add(startButton).width(320f).height(80f).colspan(2);
++        layout.add(backButton).width(220f).height(70f).padRight(20f);
++        layout.add(startButton).width(320f).height(70f).colspan(2);
+ 
+         stage.addActor(layout);
+         Gdx.input.setInputProcessor(stage);
+@@ -331,10 +322,10 @@ public class CharacterSelectScreen extends ScreenAdapter {
+             }
+         });
+ 
+-        layout.add(rowLabel).left().padBottom(18f);
+-        layout.add(prevButton).width(70f).height(60f).padBottom(18f);
+-        layout.add(valueLabel).width(220f).padBottom(18f).padLeft(10f).padRight(10f);
+-        layout.add(nextButton).width(70f).height(60f).padBottom(18f);
++        layout.add(rowLabel).left().padBottom(4f);
++        layout.add(prevButton).width(60f).height(50f).padBottom(4f);
++        layout.add(valueLabel).width(220f).padBottom(4f).padLeft(10f).padRight(10f);
++        layout.add(nextButton).width(60f).height(50f).padBottom(4f);
+         layout.row();
+     }
+ 
+@@ -359,11 +350,11 @@ public class CharacterSelectScreen extends ScreenAdapter {
+             }
+         });
+ 
+-        layout.add(rowLabel).left().padBottom(18f);
+-        layout.add(prevButton).width(70f).height(60f).padBottom(18f);
+-        layout.add(previewImage).width(36f).height(24f).padBottom(18f).padLeft(6f).padRight(6f);
+-        layout.add(valueLabel).width(200f).padBottom(18f).padLeft(6f).padRight(6f);
+-        layout.add(nextButton).width(70f).height(60f).padBottom(18f);
++        layout.add(rowLabel).left().padBottom(4f);
++        layout.add(prevButton).width(60f).height(50f).padBottom(4f);
++        layout.add(previewImage).width(36f).height(24f).padBottom(4f).padLeft(6f).padRight(6f);
++        layout.add(valueLabel).width(200f).padBottom(4f).padLeft(6f).padRight(6f);
++        layout.add(nextButton).width(60f).height(50f).padBottom(4f);
+         layout.row();
+     }
+ 
+@@ -673,7 +664,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
+             parameter.size = size;
+             parameter.minFilter = TextureFilter.Linear;
+             parameter.magFilter = TextureFilter.Linear;
+-            parameter.characters = FreeTypeFontGenerator.DEFAULT_CHARS + "\u00C1\u00C9\u00CD\u00D3\u00D6\u0150\u00DA\u00DC\u0170\u00E1\u00E9\u00ED\u00F3\u00F6\u0151\u00FA\u00FC\u0171";
++            parameter.characters = FreeTypeFontGenerator.DEFAULT_CHARS + "ÁÉÍÓÖŐÚÜŰáéíóöőúüű";
+             BitmapFont font = generator.generateFont(parameter);
+             generator.dispose();
+             return font;
+diff --git a/core/src/main/java/com/yourstudio/horse/screens/MainMenuScreen.java b/core/src/main/java/com/yourstudio/horse/screens/MainMenuScreen.java
+index 6d37376..a68caaa 100644
+--- a/core/src/main/java/com/yourstudio/horse/screens/MainMenuScreen.java
++++ b/core/src/main/java/com/yourstudio/horse/screens/MainMenuScreen.java
+@@ -78,17 +78,17 @@ public class MainMenuScreen extends ScreenAdapter {
+         buttonStyle.fontColor = Color.WHITE;
+ 
+         Label title = UiFactory.label("Versenylovak", titleStyle);
+-        Label subtitle = UiFactory.label("Bar\u00E1ts\u00E1gos lovas kaland", subtitleStyle);
+-        Label description = UiFactory.label("V\u00E1laszd ki a lovadat, a lovast \u00E9s a kedvencet, majd indulhat a verseny.", bodyStyle);
++        Label subtitle = UiFactory.label("Barátságos lovas kaland", subtitleStyle);
++        Label description = UiFactory.label("Válaszd ki a lovadat, a lovast és a kedvencet, majd indulhat a verseny.", bodyStyle);
+         description.setWrap(true);
+         description.setAlignment(Align.center);
+-        TextButton startButton = UiFactory.button("J\u00E1t\u00E9k ind\u00EDt\u00E1sa", buttonStyle, () -> {
++        TextButton startButton = UiFactory.button("Játék indítása", buttonStyle, () -> {
+             if (clickSound != null) {
+                 clickSound.play(0.6f);
+             }
+-            ScreenNavigator.toCharacterSelect(game, null);
++            ScreenNavigator.toTrackSelect(game, null);
+         });
+-        Label hint = UiFactory.label("Koppints az ind\u00EDt\u00E1shoz", bodyStyle);
++        Label hint = UiFactory.label("Koppints az indításhoz", bodyStyle);
+         hint.setAlignment(Align.center);
+ 
+         Table layout = new Table();
+@@ -175,7 +175,7 @@ public class MainMenuScreen extends ScreenAdapter {
+             parameter.size = size;
+             parameter.minFilter = TextureFilter.Linear;
+             parameter.magFilter = TextureFilter.Linear;
+-            parameter.characters = FreeTypeFontGenerator.DEFAULT_CHARS + "\u00C1\u00C9\u00CD\u00D3\u00D6\u0150\u00DA\u00DC\u0170\u00E1\u00E9\u00ED\u00F3\u00F6\u0151\u00FA\u00FC\u0171";
++            parameter.characters = FreeTypeFontGenerator.DEFAULT_CHARS + "ÁÉÍÓÖŐÚÜŰáéíóöőúüű";
+             BitmapFont font = generator.generateFont(parameter);
+             generator.dispose();
+             return font;
+diff --git a/core/src/main/java/com/yourstudio/horse/screens/RaceScreen.java b/core/src/main/java/com/yourstudio/horse/screens/RaceScreen.java
+index 794b928..56ddcef 100644
+--- a/core/src/main/java/com/yourstudio/horse/screens/RaceScreen.java
++++ b/core/src/main/java/com/yourstudio/horse/screens/RaceScreen.java
+@@ -92,10 +92,15 @@ public class RaceScreen extends ScreenAdapter {
+     private final float maxSpeed = 48f;
+     private final float acceleration = 22f;
+     private final float deceleration = 18f;
++    private final float turnSpeedLoss = 6f;
++    private final float minCruiseSpeed = 4f;
++    private final float speedEasing = 1.35f;
+     private final float lapDistance = 300f;
+     private float horseX = 64f;
+     private float horseY = 64f;
+     private float horseDirection = 1f;
++    private float targetDirection = 1f;
++    private float directionSmoothing = 6f;
+     private TiledMap map;
+     private OrthogonalTiledMapRenderer mapRenderer;
+     private OrthographicCamera camera;
+@@ -271,7 +276,7 @@ public class RaceScreen extends ScreenAdapter {
+                 if (clickSound != null) {
+                     clickSound.play(0.6f);
+                 }
+-                horseDirection = -1f;
++                targetDirection = -1f;
+             }
+         });
+         rightButton.addListener(new ClickListener() {
+@@ -280,7 +285,7 @@ public class RaceScreen extends ScreenAdapter {
+                 if (clickSound != null) {
+                     clickSound.play(0.6f);
+                 }
+-                horseDirection = 1f;
++                targetDirection = 1f;
+             }
+         });
+ 
+@@ -341,13 +346,21 @@ public class RaceScreen extends ScreenAdapter {
+         ScreenUtils.clear(0f, 0f, 0f, 1f);
+         elapsedTime += delta;
+         boolean accelerating = Gdx.input.isTouched();
++        float directionDelta = targetDirection - horseDirection;
++        horseDirection += directionDelta * Math.min(1f, directionSmoothing * delta);
+         float effectiveMaxSpeed = maxSpeed + petSpeedBonus;
+         float effectiveAccel = acceleration + petAccelBonus;
+         if (accelerating) {
+-            speed = Math.min(effectiveMaxSpeed, speed + effectiveAccel * delta);
++            float t = Math.min(1f, speed / Math.max(1f, effectiveMaxSpeed));
++            float curve = (float) Math.pow(1f - t, speedEasing);
++            speed = Math.min(effectiveMaxSpeed, speed + effectiveAccel * curve * delta);
++            speed = Math.max(speed, minCruiseSpeed);
+         } else {
+             speed = Math.max(0f, speed - deceleration * delta);
+         }
++        if (Math.abs(directionDelta) > 0.2f) {
++            speed = Math.max(0f, speed - turnSpeedLoss * delta);
++        }
+         distance += speed * delta;
+         updatePowerupSpawns(delta);
+         updatePowerupPickup(delta);
+@@ -382,9 +395,11 @@ public class RaceScreen extends ScreenAdapter {
+                 if (horseX <= minX) {
+                     horseX = minX;
+                     horseDirection = 1f;
++                    targetDirection = 1f;
+                 } else if (horseX >= maxX) {
+                     horseX = maxX;
+                     horseDirection = -1f;
++                    targetDirection = -1f;
+                 }
+                 horseY = MathUtils.clamp(horseY, mapBoundsMinY + horseBoundsPadding, mapBoundsMaxY - horseBoundsPadding);
+             }
+diff --git a/core/src/main/java/com/yourstudio/horse/screens/TrackSelectScreen.java b/core/src/main/java/com/yourstudio/horse/screens/TrackSelectScreen.java
+index 10b28e3..b302a24 100644
+--- a/core/src/main/java/com/yourstudio/horse/screens/TrackSelectScreen.java
++++ b/core/src/main/java/com/yourstudio/horse/screens/TrackSelectScreen.java
+@@ -21,7 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+ import com.badlogic.gdx.utils.Align;
+ import com.badlogic.gdx.utils.ScreenUtils;
+-import com.badlogic.gdx.utils.viewport.ScreenViewport;
++import com.badlogic.gdx.utils.viewport.FitViewport;
+ import com.yourstudio.horse.HorseGame;
+ import com.yourstudio.horse.ui.UiFactory;
+ import com.yourstudio.horse.ui.ScreenNavigator;
+@@ -51,33 +51,38 @@ public class TrackSelectScreen extends ScreenAdapter {
+     private Label trackDescLabel;
+     private int trackIndex;
+ 
+-    private final String[] trackNames = {"Erd\u0151", "Tengerpart", "Hegyek", "\u00C9jszakai v\u00E1ros"};
++    private final String[] trackNames = {"Erdő", "Tengerpart", "Hegyek", "Éjszakai város"};
+     private final String[] trackDescriptions = {
+-        "S\u0171r\u0171 f\u00E1k, puha \u00F6sv\u00E9nyek \u00E9s napf\u00E9nyes tiszt\u00E1sok.",
+-        "Homokos partok, hull\u00E1mok hangja, szeles sprint.",
+-        "Meredek emelked\u0151k \u00E9s h\u0171v\u00F6s hegyi leveg\u0151.",
+-        "Neonf\u00E9nyek, sz\u0171k utc\u00E1k \u00E9s gyors kanyarok."
++        "Sűrű fák, puha ösvények és napfényes tisztások.",
++        "Homokos partok, hullámok hangja, szeles sprint.",
++        "Meredek emelkedők és hűvös hegyi levegő.",
++        "Neonfények, szűk utcák és gyors kanyarok."
+     };
+ 
+-    public TrackSelectScreen(HorseGame game, String horseName, String riderName, String petName) {
+-        this(game, horseName, riderName, petName, null, null, null, null);
+-    }
+-
+-    public TrackSelectScreen(HorseGame game, String horseName, String riderName, String petName,
+-                             String horseColor, String maneColor, String saddleColor, String outfitColor) {
++    public TrackSelectScreen(HorseGame game, ScreenNavigator.Selection selection) {
+         this.game = game;
+-        this.horseName = horseName;
+-        this.riderName = riderName;
+-        this.petName = petName;
+-        this.horseColor = horseColor;
+-        this.maneColor = maneColor;
+-        this.saddleColor = saddleColor;
+-        this.outfitColor = outfitColor;
++        if (selection != null) {
++            this.horseName = selection.horseName;
++            this.riderName = selection.riderName;
++            this.petName = selection.petName;
++            this.horseColor = selection.horseColor;
++            this.maneColor = selection.maneColor;
++            this.saddleColor = selection.saddleColor;
++            this.outfitColor = selection.outfitColor;
++        } else {
++            this.horseName = null;
++            this.riderName = null;
++            this.petName = null;
++            this.horseColor = null;
++            this.maneColor = null;
++            this.saddleColor = null;
++            this.outfitColor = null;
++        }
+     }
+ 
+     @Override
+     public void show() {
+-        stage = new Stage(new ScreenViewport());
++        stage = new Stage(new FitViewport(1280, 720));
+         titleFont = createUIFont(54, 3.1f);
+         labelFont = createUIFont(28, 1.45f);
+ 
+@@ -99,7 +104,7 @@ public class TrackSelectScreen extends ScreenAdapter {
+         buttonStyle.font = labelFont;
+         buttonStyle.fontColor = Color.WHITE;
+ 
+-        Label title = UiFactory.label("P\u00E1lyav\u00E1laszt\u00E1s", titleStyle);
++        Label title = UiFactory.label("Pályaválasztás", titleStyle);
+         trackNameLabel = UiFactory.label(trackNames[trackIndex], titleStyle);
+         trackDescLabel = UiFactory.label(trackDescriptions[trackIndex], labelStyle);
+         trackDescLabel.setAlignment(Align.center);
+@@ -125,17 +130,14 @@ public class TrackSelectScreen extends ScreenAdapter {
+ 
+         TextButton backButton = UiFactory.button("Vissza", buttonStyle, () -> {
+             playClick();
+-            ScreenNavigator.Selection selection = new ScreenNavigator.Selection(
+-                horseName, riderName, petName, horseColor, maneColor, saddleColor, outfitColor
+-            );
+-            ScreenNavigator.toCharacterSelect(game, selection);
++            ScreenNavigator.toMainMenu(game);
+         });
+-        TextButton startButton = UiFactory.button("Verseny ind\u00EDt\u00E1sa", buttonStyle, () -> {
++        TextButton startButton = UiFactory.button("Tovább", buttonStyle, () -> {
+             playClick();
+             ScreenNavigator.Selection selection = new ScreenNavigator.Selection(
+                 horseName, riderName, petName, horseColor, maneColor, saddleColor, outfitColor
+             );
+-            ScreenNavigator.toRace(game, selection, trackNames[trackIndex]);
++            ScreenNavigator.toCharacterSelect(game, selection);
+         });
+ 
+         Table layout = new Table();
+@@ -240,7 +242,7 @@ public class TrackSelectScreen extends ScreenAdapter {
+             parameter.size = size;
+             parameter.minFilter = TextureFilter.Linear;
+             parameter.magFilter = TextureFilter.Linear;
+-            parameter.characters = FreeTypeFontGenerator.DEFAULT_CHARS + "\u00C1\u00C9\u00CD\u00D3\u00D6\u0150\u00DA\u00DC\u0170\u00E1\u00E9\u00ED\u00F3\u00F6\u0151\u00FA\u00FC\u0171";
++            parameter.characters = FreeTypeFontGenerator.DEFAULT_CHARS + "ÁÉÍÓÖŐÚÜŰáéíóöőúüű";
+             BitmapFont font = generator.generateFont(parameter);
+             generator.dispose();
+             return font;
+diff --git a/core/src/main/java/com/yourstudio/horse/ui/ScreenNavigator.java b/core/src/main/java/com/yourstudio/horse/ui/ScreenNavigator.java
+index 832913c..96d6985 100644
+--- a/core/src/main/java/com/yourstudio/horse/ui/ScreenNavigator.java
++++ b/core/src/main/java/com/yourstudio/horse/ui/ScreenNavigator.java
+@@ -24,12 +24,7 @@ public final class ScreenNavigator {
+     }
+ 
+     public static void toTrackSelect(HorseGame game, Selection selection) {
+-        if (selection == null) {
+-            game.setScreen(new TrackSelectScreen(game, null, null, null));
+-            return;
+-        }
+-        game.setScreen(new TrackSelectScreen(game, selection.horseName, selection.riderName, selection.petName,
+-            selection.horseColor, selection.maneColor, selection.saddleColor, selection.outfitColor));
++        game.setScreen(new TrackSelectScreen(game, selection));
+     }
+ 
+     public static void toRace(HorseGame game, Selection selection, String trackName) {
+diff --git a/docs/tasks.md b/docs/tasks.md
+new file mode 100644
+index 0000000..69550ab
+--- /dev/null
++++ b/docs/tasks.md
+@@ -0,0 +1,85 @@
++# Milestone 2 – Playable Loop Polish (race feel, input, HUD, rewards)
++
++Az alábbi lista a **Playable loop polish** célok aprólékos bontása. A feladatok sorrendje a várható függőségek mentén van rendezve.
++
++## 1. Race feel (vezetési élmény)
++- [ ] (P0) Sebesség görbék finomhangolása
++- [ ] (P0) Iránymódosítás smoothing (fordulás ne legyen „törött” érzés)
++- [ ] (P1) Gyorsulás/lefutás tesztpálya protokoll (rövid köridő + hosszú köridő)
++- [ ] (P1) Ló futás animáció sebességhez igazítása (idle ↔ run átmenet)
++- [ ] (P1) “Sprint” érzés: rövid boost állapot vizuális cue (pl. por / csíkok)
++- [ ] (P2) Apró kamera rásegítés gyorsulásnál (minimális zoom/offset)
++- [ ] (P2) Rázkódás/rezgés mikro‑feedback gyorsításnál (opcionális)
++- [ ] (P1) Ütközésérzet/határ érzés: map szélén lassulás vagy visszapattanás
++
++## 2. Input & irányítás
++- [ ] (P0) Bal/Jobb gombok érintési hitbox ellenőrzés (telefon + tablet)
++- [ ] (P0) Tartós nyomás támogatás (folyamatos irányítás)
++- [ ] (P1) Input prioritások (HUD elemek ne vegyék el az inputot)
++- [ ] (P1) Haptikus feedback: irányváltás / power‑up felvétel külön rezgés
++- [ ] (P2) Opció: gombok mérete és pozíciója beállításban (ha szükséges)
++
++## 3. HUD finomítás
++- [ ] (P0) Sebesség kijelzés: stabilizálás (ne „ugráljon” túl gyorsan)
++- [ ] (P1) Kör számláló: köridő/legjobb idő kijelzés
++- [ ] (P1) Power‑up: ikon + név + hátralévő idő
++- [ ] (P1) Kedvenc bónusz: rövid leírás + ikon
++- [ ] (P2) Célvonal jelző: utolsó kör vizuális figyelmeztetés
++- [ ] (P2) HUD kontraszt finomhangolás (olvashatóság pixel art háttéren)
++
++## 4. Rewards & eredmény
++- [ ] (P0) Verseny végi összegző panel (idő, körök, bónuszok)
++- [ ] (P0) Jutalom (pont/érme) kiszámítási logika
++- [ ] (P1) Újraindítás / pályaválasztás gombok
++- [ ] (P1) “Legjobb idő” mentése és kiírása
++- [ ] (P2) Jutalom animáció (számláló felpörgés)
++
++## 5. Teszt & balansz
++- [ ] (P0) Min/Max sebesség balansz (túl gyors / túl lassú esetek)
++- [ ] (P1) Power‑up időtartam balansz
++- [ ] (P1) Kedvenc bónuszok balansz (előny ne legyen túl nagy)
++- [ ] (P2) 3 kör átlagos idő célértékek rögzítése
++- [ ] (P2) Tapasztalati teszt: „első futam 60 mp‑en belül” cél
++
++## Milestone 2 – Content expansion (more tracks, power-ups, assets)
++
++### 1. Pályák
++- [ ] (P0) Tengerpart pálya (Tiled map + tileset)
++- [ ] (P0) Hegyek pálya (Tiled map + tileset)
++- [ ] (P0) Éjszakai város pálya (Tiled map + tileset)
++- [ ] (P1) Pálya-specifikus díszletek (fák, lámpák, kövek, hullámok)
++- [ ] (P2) Pályákon variánsok (nap/este színpaletta)
++
++### 2. Power-upok
++- [ ] (P0) Tematikus power-upok pályánként (min. 2/pálya)
++- [ ] (P1) Power-up ikonok pixel art (HUD + pickup marker)
++- [ ] (P1) Power-up balansz és időtartamok
++- [ ] (P2) Ritka power-up spawn esély (random)
++
++### 3. Asset bővítés
++- [ ] (P0) Új SFX: boost, pickup variáns, célba érés
++- [ ] (P1) Új UI elemek (icon set a HUD-hoz)
++- [ ] (P1) Race background frissítés pályánként
++- [ ] (P2) Ambient dekorációk (madarak, zászlók, lámpafény)
++
++## Milestone 2 – Customization depth (horse/rider/pet cosmetics + bonuses)
++
++### 1. Ló testreszabás
++- [ ] (P0) Ló minták / foltok (legalább 4 variáns)
++- [ ] (P1) Ló felszerelés: lábvédők / nyeregtakaró
++- [ ] (P2) Extra nyereg variánsok (formák, dísz)
++
++### 2. Lovas testreszabás
++- [ ] (P0) Ruházat több szín és variáns (kabát, sisak)
++- [ ] (P1) Lovas kiegészítők (kesztyű, csizma)
++- [ ] (P2) Egyedi póz/animáció startnál
++
++### 3. Kedvenc / pet testreszabás
++- [ ] (P0) Pet kozmetika: színek + kis kiegészítők
++- [ ] (P1) Kedvenc bónuszok részletes balansz + UI leírás
++- [ ] (P2) Pet animációk (idle / öröm)
++
++### 4. Mentések & loadout
++- [ ] (P0) Mentett loadout előnézet a főmenüben
++- [ ] (P1) Több mentett loadout slot
++- [ ] (P2) “Kedvenc” preset jelölés
+diff --git a/docs/todos.md b/docs/todos.md
+index 4b6994a..3ad6361 100644
+--- a/docs/todos.md
++++ b/docs/todos.md
+@@ -47,12 +47,13 @@ Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladat
+ - [x] APK build script + release pipeline
+ 
+ ## Specifikációs eltérések / issue-k
+-- [ ] Hiányzik a pályaválasztás a flow-ból (spec: lovas/ló/pálya választás).
++- [x] Hiányzik a pályaválasztás a flow-ból (spec: lovas/ló/pálya választás).
+ - [ ] A specifikáció szerinti 4 pálya nincs megvalósítva (jelenleg 1 placeholder map).
+ - [ ] Ló testreszabás még nem készült el (szín, sörény, nyereg).
+ - [ ] Kis kedvenc választás nincs összekötve bónuszokkal.
+ - [ ] Tematikus power-upok és felvételük hiányzik a verseny során.
+ - [ ] Pixel art UI/assetek helyett még csak programozott placeholder színek vannak.
++- [ ] APK android-debug.apk is not compatible with 16 KB devices. Some libraries have LOAD segments not aligned at 16 KB boundaries: lib/arm64-v8a/libgdx-freetype.so, lib/arm64-v8a/libgdx.so
+ 
+ ## Milestone 2 – Teendők
+ 
+diff --git a/gradle/wrapper/gradle-wrapper.properties b/gradle/wrapper/gradle-wrapper.properties
+index b82aa23..37f853b 100644
+--- a/gradle/wrapper/gradle-wrapper.properties
++++ b/gradle/wrapper/gradle-wrapper.properties
+@@ -1,6 +1,6 @@
+ distributionBase=GRADLE_USER_HOME
+ distributionPath=wrapper/dists
+-distributionUrl=https\://services.gradle.org/distributions/gradle-8.7-bin.zip
++distributionUrl=https\://services.gradle.org/distributions/gradle-8.13-bin.zip
+ networkTimeout=10000
+ validateDistributionUrl=true
+ zipStoreBase=GRADLE_USER_HOME
+

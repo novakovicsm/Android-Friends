@@ -1,0 +1,20 @@
+# Gradle
+.gradle/
+**/build/
+
+# Generated outputs
+/core/bin/
+/android/src/main/jniLibs/
+/desktop/bin/
+/.gradle-user/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+
+# Android
+local.properties
