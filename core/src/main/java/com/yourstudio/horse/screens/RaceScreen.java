@@ -31,6 +31,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
@@ -137,6 +141,14 @@ public class RaceScreen extends ScreenAdapter {
     private float scaledMapMaxX;
     private float scaledMapMinY;
     private float scaledMapMaxY;
+    private Image joystickBase;
+    private Image joystickKnob;
+    private Texture joystickBaseTexture;
+    private Texture joystickKnobTexture;
+    private float joystickCenterX;
+    private float joystickCenterY;
+    private float joystickRadius;
+    private int joystickPointer = -1;
 
     public RaceScreen(HorseGame game, String horseName, String riderName, String petName) {
         this.game = game;
@@ -190,18 +202,19 @@ public class RaceScreen extends ScreenAdapter {
 
     @Override
     public void show() {
-            // Minimal transparent joystick setup
-            Texture knobTexture = new Texture("ui/joystick_knob.png");
-            Drawable knobDrawable = new TextureRegionDrawable(knobTexture);
-            Drawable bgDrawable = null; // Fully transparent background
-            com.badlogic.gdx.scenes.scene2d.ui.Touchpad.TouchpadStyle touchpadStyle = new com.badlogic.gdx.scenes.scene2d.ui.Touchpad.TouchpadStyle();
-            touchpadStyle.knob = knobDrawable;
-            touchpadStyle.background = bgDrawable;
-            com.badlogic.gdx.scenes.scene2d.ui.Touchpad touchpad = new com.badlogic.gdx.scenes.scene2d.ui.Touchpad(10f, touchpadStyle);
-            touchpad.setBounds(32, 32, 128, 128);
-            stage.addActor(touchpad);
-            // Read input in render or update: touchpad.getKnobPercentX(), touchpad.getKnobPercentY()
         stage = new Stage(new ScreenViewport());
+        // Floating joystick visuals (with safe fallback if assets are missing).
+        joystickBaseTexture = createJoystickTexture(128, 0.25f);
+        joystickKnobTexture = loadUiTextureOrFallback("ui/joystick_knob.png", 64);
+        joystickBase = new Image(joystickBaseTexture);
+        joystickKnob = new Image(joystickKnobTexture);
+        joystickBase.setVisible(false);
+        joystickKnob.setVisible(false);
+        joystickBase.setTouchable(Touchable.disabled);
+        joystickKnob.setTouchable(Touchable.disabled);
+        stage.addActor(joystickBase);
+        stage.addActor(joystickKnob);
+        joystickRadius = joystickBaseTexture.getWidth() * 0.5f;
         // ...existing code...
         buttonUp = loadUiTexture("ui/button_primary.png");
         buttonDown = loadUiTexture("ui/button_primary_down.png");
@@ -286,31 +299,7 @@ public class RaceScreen extends ScreenAdapter {
         // directionLabel = new Label("Ir\u00E1ny:", labelStyle);
             // Joystick control only, remove left/right buttons from UI
             // directionLabel can remain for feedback if desired
-        // Remove button listeners and implement joystick control
-        stage.addListener(new com.badlogic.gdx.scenes.scene2d.InputListener() {
-            // Joystick controls both X and Y
-            public void touchDragged(InputEvent event, float x, float y, int pointer) {
-                float centerX = Gdx.graphics.getWidth() / 2f;
-                float centerY = Gdx.graphics.getHeight() / 2f;
-                float dx = x - centerX;
-                float dy = y - centerY;
-                joystickX = MathUtils.clamp(dx / centerX, -1f, 1f);
-                joystickY = MathUtils.clamp(dy / centerY, -1f, 1f);
-            }
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                float centerX = Gdx.graphics.getWidth() / 2f;
-                float centerY = Gdx.graphics.getHeight() / 2f;
-                float dx = x - centerX;
-                float dy = y - centerY;
-                joystickX = MathUtils.clamp(dx / centerX, -1f, 1f);
-                joystickY = MathUtils.clamp(dy / centerY, -1f, 1f);
-                return true;
-            }
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                joystickX = 0f;
-                joystickY = 0f;
-            }
-        });
+        // Joystick input now handled via touchpad knob percent in render().
 
         backButton.addListener(new ClickListener() {
             @Override
@@ -361,14 +350,81 @@ public class RaceScreen extends ScreenAdapter {
         stage.addActor(backButtonTable);
         stage.addActor(hudTable);
         stage.addActor(directionTable);
-        Gdx.input.setInputProcessor(stage);
+        InputMultiplexer multiplexer = new InputMultiplexer();
+        multiplexer.addProcessor(new InputAdapter() {
+            @Override
+            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+                if (joystickPointer != -1) {
+                    return false;
+                }
+                joystickPointer = pointer;
+                com.badlogic.gdx.math.Vector2 stageCoords = stage.screenToStageCoordinates(new com.badlogic.gdx.math.Vector2(screenX, screenY));
+                Actor hit = stage.hit(stageCoords.x, stageCoords.y, true);
+                if (hit instanceof TextButton) {
+                    joystickPointer = -1;
+                    return false;
+                }
+                joystickCenterX = stageCoords.x;
+                joystickCenterY = stageCoords.y;
+                joystickBase.setPosition(joystickCenterX - joystickRadius, joystickCenterY - joystickRadius);
+                float knobHalf = joystickKnobTexture.getWidth() * 0.5f;
+                joystickKnob.setPosition(joystickCenterX - knobHalf, joystickCenterY - knobHalf);
+                joystickBase.setVisible(true);
+                joystickKnob.setVisible(true);
+                joystickX = 0f;
+                joystickY = 0f;
+                return false;
+            }
+
+            @Override
+            public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+                if (pointer == joystickPointer) {
+                    joystickPointer = -1;
+                    joystickX = 0f;
+                    joystickY = 0f;
+                    joystickBase.setVisible(false);
+                    joystickKnob.setVisible(false);
+                }
+                return false;
+            }
+
+            @Override
+            public boolean touchDragged(int screenX, int screenY, int pointer) {
+                if (pointer != joystickPointer) {
+                    return false;
+                }
+                com.badlogic.gdx.math.Vector2 stageCoords = stage.screenToStageCoordinates(new com.badlogic.gdx.math.Vector2(screenX, screenY));
+                float dx = stageCoords.x - joystickCenterX;
+                float dy = stageCoords.y - joystickCenterY;
+                float knobHalf = joystickKnobTexture.getWidth() * 0.5f;
+                float maxOffset = joystickRadius - knobHalf;
+                float dist = (float) Math.sqrt(dx * dx + dy * dy);
+                if (dist > maxOffset && dist > 0f) {
+                    float scale = maxOffset / dist;
+                    dx *= scale;
+                    dy *= scale;
+                }
+                joystickKnob.setPosition(joystickCenterX + dx - knobHalf, joystickCenterY + dy - knobHalf);
+                joystickX = MathUtils.clamp(dx / maxOffset, -1f, 1f);
+                joystickY = MathUtils.clamp(dy / maxOffset, -1f, 1f);
+                return false;
+            }
+        });
+        multiplexer.addProcessor(stage);
+        Gdx.input.setInputProcessor(multiplexer);
     }
 
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0f, 0f, 0f, 1f);
         elapsedTime += delta;
-        boolean accelerating = Gdx.input.isTouched();
+        if (Math.abs(joystickX) < 0.01f) {
+            joystickX = 0f;
+        }
+        if (Math.abs(joystickY) < 0.01f) {
+            joystickY = 0f;
+        }
+        boolean accelerating = joystickPointer != -1;
         float effectiveMaxSpeed = maxSpeed + petSpeedBonus;
         float effectiveAccel = acceleration + petAccelBonus;
         if (accelerating) {
@@ -405,6 +461,9 @@ public class RaceScreen extends ScreenAdapter {
             // Free movement: joystick controls both X and Y
             horseX += speed * delta * joystickX;
             horseY += speed * delta * joystickY;
+            if (Math.abs(joystickX) > 0.01f || Math.abs(joystickY) > 0.01f) {
+                horseDirection = joystickX >= 0f ? 1f : -1f;
+            }
             if (mapHasBounds) {
                 float minX = mapBoundsMinX + horseBoundsPadding;
                 float maxX = mapBoundsMaxX - horseBoundsPadding;
@@ -519,6 +578,37 @@ public class RaceScreen extends ScreenAdapter {
 
     private Texture loadUiTexture(String path) {
         Texture texture = new Texture(path);
+        texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+        return texture;
+    }
+
+    private Texture loadUiTextureOrFallback(String path, int size) {
+        if (Gdx.files.internal(path).exists()) {
+            return loadUiTexture(path);
+        }
+        Pixmap pixmap = new Pixmap(size, size, Pixmap.Format.RGBA8888);
+        pixmap.setColor(0f, 0f, 0f, 0f);
+        pixmap.fill();
+        pixmap.setColor(0.1f, 0.1f, 0.1f, 0.5f);
+        pixmap.fillCircle(size / 2, size / 2, size / 3);
+        pixmap.setColor(1f, 1f, 1f, 0.8f);
+        pixmap.drawCircle(size / 2, size / 2, size / 3);
+        Texture texture = new Texture(pixmap);
+        pixmap.dispose();
+        texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+        return texture;
+    }
+
+    private Texture createJoystickTexture(int size, float alpha) {
+        Pixmap pixmap = new Pixmap(size, size, Pixmap.Format.RGBA8888);
+        pixmap.setColor(0f, 0f, 0f, 0f);
+        pixmap.fill();
+        pixmap.setColor(0.1f, 0.1f, 0.1f, alpha);
+        pixmap.fillCircle(size / 2, size / 2, size / 2);
+        pixmap.setColor(1f, 1f, 1f, alpha * 0.6f);
+        pixmap.drawCircle(size / 2, size / 2, size / 2 - 2);
+        Texture texture = new Texture(pixmap);
+        pixmap.dispose();
         texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
         return texture;
     }

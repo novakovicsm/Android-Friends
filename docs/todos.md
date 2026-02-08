@@ -47,9 +47,9 @@ Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladat
 - [x] APK build script + release pipeline
 
 ## Specifikációs eltérések / issue-k
-- [ ] Hiányzik a pályaválasztás a flow-ból (spec: lovas/ló/pálya választás).
-- [ ] A specifikáció szerinti 4 pálya nincs megvalósítva (jelenleg 1 placeholder map).
-- [ ] Ló testreszabás még nem készült el (szín, sörény, nyereg).
+- [x] Hiányzik a pályaválasztás a flow-ból (spec: lovas/ló/pálya választás).
+- [x] A specifikáció szerinti 4 pálya nincs megvalósítva (jelenleg 1 placeholder map).
+- [x] Ló testreszabás még nem készült el (szín, sörény, nyereg).
 - [ ] Kis kedvenc választás nincs összekötve bónuszokkal.
 - [ ] Tematikus power-upok és felvételük hiányzik a verseny során.
 - [ ] Pixel art UI/assetek helyett még csak programozott placeholder színek vannak.
