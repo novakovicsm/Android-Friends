@@ -1,11 +1,11 @@
-# Android-Friends libGDX projekt (VS Code)
+# Versenylovak libGDX projekt (VS Code)
 
 Ez a projekt egy libGDX + VS Code alapú, Android tabletre optimalizált 2D játék kezdő skeletonja. A mappák és modulok a Gradle multi-module felépítést követik, így később könnyen bővíthető és karbantartható.
 
 ## Könyvtárstruktúra (jelenlegi)
 
 ```
-Android-Friends/
+Versenylovak/
 ├─ android/                      # Android-specifikus indítás és erőforrások
 │  ├─ src/main/AndroidManifest.xml
 │  ├─ src/main/java/...
@@ -40,17 +40,9 @@ Android-Friends/
 
 ## Modulok szerepe
 
-- **core**: A teljes játéklogika itt van (modellek, játékmenet, UI, ECS).
-- **android**: Android launcher, manifest, és platform-specifikus integrációk.
-- **desktop**: Gyors fejlesztés/tesztelés asztali környezetben.
-- **assets**: Közös assetek (pixeles grafika, Tiled map, hangok).
 
 ## VS Code ajánlott beállítások
 
-- Java + Gradle kiterjesztés
-- `settings.gradle`-ben a modulok felvétele: `core`, `android`, `desktop`
-- `./gradlew desktop:run` parancs a gyors lokális futtatáshoz (ha van Gradle wrapper)
-- Ha nincs wrapper, használható a helyi `gradle` telepítés is: `gradle desktop:run`
 
 ## Következő lépések
 

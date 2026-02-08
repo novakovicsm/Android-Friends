@@ -1,7 +1,7 @@
-# Android-Friends – Projekt wiki
+# Versenylovak – Projekt wiki
 
 ## Összefoglaló
-Az Android-Friends egy gyerekbarát, 2D pixel art stílusú lóverseny játék Android tabletre. A játékban választható lovas, ló, pálya, valamint kis kedvenc. A pályákon tematikus power-upok gyűjthetők.
+Az Versenylovak egy gyerekbarát, 2D pixel art stílusú lóverseny játék Android tabletre. A játékban választható lovas, ló, pálya, valamint kis kedvenc. A pályákon tematikus power-upok gyűjthetők.
 
 ## Célplatform
 - Android tablet (elsődleges)
