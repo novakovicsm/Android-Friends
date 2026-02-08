@@ -1,4 +1,5 @@
 package com.yourstudio.horse.screens;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
@@ -9,6 +10,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+// import com.badlogic.gdx.graphics.TextureFilter;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -29,11 +31,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.yourstudio.horse.HorseGame;
 import com.yourstudio.horse.ui.ScreenNavigator;
@@ -186,38 +188,7 @@ public class RaceScreen extends ScreenAdapter {
     @Override
     public void show() {
         stage = new Stage(new ScreenViewport());
-        // Prominent debug label to confirm show() execution
-        Label debugLabel = new Label("RaceScreen.show() called!", new Label.LabelStyle(createUIFont(36, 2.5f), Color.RED));
-        debugLabel.setPosition(40f, Gdx.graphics.getHeight() - 80f);
-        debugLabel.setWidth(600f);
-        debugLabel.setAlignment(Align.left);
-        stage.addActor(debugLabel);
-        // Runtime asset access test: log and show available .tmx files in maps directory
-        FileHandle mapsDir = Gdx.files.internal("maps");
-        StringBuilder sb = new StringBuilder();
-        if (mapsDir.exists() && mapsDir.isDirectory()) {
-            FileHandle[] files = mapsDir.list();
-            sb.append("Elérhető pályák:\n");
-            for (FileHandle file : files) {
-                if (file.name().endsWith(".tmx")) {
-                    sb.append(" - ").append(file.name()).append("\n");
-                }
-            }
-            Gdx.app.error("RaceScreen", "[AssetTest] Available .tmx files in maps directory:\n" + sb.toString());
-        } else {
-            sb.append("maps könyvtár nem található vagy nem mappa.");
-            Gdx.app.error("RaceScreen", "[AssetTest] maps directory not found or not a directory.");
-        }
-        // Show asset access results in UI
-        Label assetTestLabel = new Label(sb.toString(), new Label.LabelStyle(bodyFont, Color.YELLOW));
-        assetTestLabel.setFontScale(0.8f);
-        assetTestLabel.setWrap(true);
-        assetTestLabel.setAlignment(Align.left);
-        assetTestLabel.setPosition(24f, 24f);
-        assetTestLabel.setWidth(600f);
-        stage.addActor(assetTestLabel);
-        titleFont = createUIFont(54, 3.1f);
-        bodyFont = createUIFont(28, 1.45f);
+        // ...existing code...
         buttonUp = loadUiTexture("ui/button_primary.png");
         buttonDown = loadUiTexture("ui/button_primary_down.png");
         background = loadUiTexture("ui/bg_race.png");
@@ -256,7 +227,11 @@ public class RaceScreen extends ScreenAdapter {
         mapViewport = new ScreenViewport(camera);
         mapViewport.apply();
         try {
-            map = new TmxMapLoader().load("maps/" + trackName);
+            String mapFile = "maps/" + trackName;
+            if (!Gdx.files.internal(mapFile).exists()) {
+                mapFile = "maps/beach.tmx"; // fallback to a known existing map
+            }
+            map = new TmxMapLoader().load(mapFile);
             mapRenderer = new OrthogonalTiledMapRenderer(map, 1f);
             MapProperties props = map.getProperties();
             Integer mapWidthTiles = props.get("width", Integer.class);
@@ -279,6 +254,8 @@ public class RaceScreen extends ScreenAdapter {
             mapLoaded = false;
         }
 
+        // Initialize bodyFont before using it for LabelStyle and TextButtonStyle
+        bodyFont = createUIFont(24, 1.0f);
         Label.LabelStyle labelStyle = new Label.LabelStyle(bodyFont, Color.WHITE);
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
         buttonStyle.up = toDrawable(buttonUp);
@@ -525,7 +502,7 @@ public class RaceScreen extends ScreenAdapter {
     }
 
     private BitmapFont createUIFont(int size, float fallbackScale) {
-        FileHandle fontFile = Gdx.files.internal("fonts/ArchitectsDaughter.ttf");
+        FileHandle fontFile = Gdx.files.internal("fonts/ui.ttf");
         if (fontFile.exists()) {
             FreeTypeFontGenerator generator = new FreeTypeFontGenerator(fontFile);
             FreeTypeFontParameter parameter = new FreeTypeFontParameter();
