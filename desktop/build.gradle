@@ -32,3 +32,12 @@ tasks.named('run') {
 application {
     mainClass = 'com.yourstudio.horse.desktop.DesktopLauncher'
 }
+
+// Custom task to run PreviewImageGenerator
+tasks.register('runPreviewImageGenerator', JavaExec) {
+    group = 'application'
+    description = 'Run the PreviewImageGenerator class to review preview images.'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.yourstudio.horse.desktop.PreviewImageGeneratorLauncher'
+    workingDir = rootProject.file('assets')
+}

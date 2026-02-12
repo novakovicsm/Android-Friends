@@ -1,29 +1,30 @@
 package com.yourstudio.horse.screens;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
-
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-// import com.badlogic.gdx.graphics.TextureFilter;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.maps.MapProperties;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -31,15 +32,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.yourstudio.horse.HorseGame;
 import com.yourstudio.horse.ui.ScreenNavigator;
@@ -257,17 +254,13 @@ public class RaceScreen extends ScreenAdapter {
         horseTintColor = colorForHorseColor(horseColor);
         riderOutfitColor = colorForOutfitColor(outfitColor);
         riderHairColor = colorForRiderHair(riderName);
-        horsePreviewRegion = idleAnimation != null ? idleAnimation.getKeyFrame(0f) : null;
-        if (horsePreviewRegion == null) {
-            horsePreviewFallback = createHorsePreview(new Color(0.65f, 0.44f, 0.3f, 1f), new Color(0.25f, 0.16f, 0.1f, 1f));
-            horsePreviewRegion = new TextureRegion(horsePreviewFallback);
-        }
-        riderPreviews = createRiderPreviews();
-        petPreviews = createPetPreviews();
-        horsePreviewImage = new Image(horsePreviewRegion);
-        riderPreviewImage = new Image(toDrawable(riderPreviews[riderIndex]));
-        petPreviewImage = new Image(toDrawable(petPreviews[petIndex]));
-        refreshRiderPreview();
+        // Load pixel art assets for previews
+        horsePreviewImage = new Image(new Texture(Gdx.files.internal(getHorsePreviewAsset(horseColor))));
+        riderPreviewImage = new Image(new Texture(Gdx.files.internal(getRiderPreviewAsset(riderName))));
+        petPreviewImage = new Image(new Texture(Gdx.files.internal(getPetPreviewAsset(petName))));
+
+
+
 
         camera = new OrthographicCamera();
         mapViewport = new ScreenViewport(camera);
@@ -356,7 +349,6 @@ public class RaceScreen extends ScreenAdapter {
         backButtonTable.setFillParent(true);
         backButtonTable.top().right().pad(16f);
         backButtonTable.add(backButton).width(220f).height(80f);
-
         Table directionTable = new Table();
         directionTable.setFillParent(true);
         directionTable.bottom().pad(24f);
@@ -365,7 +357,6 @@ public class RaceScreen extends ScreenAdapter {
         directionRow.add(leftButton).width(210f).height(108f).padRight(12f);
         directionRow.add(rightButton).width(210f).height(108f);
         directionTable.add(directionRow);
-
         stage.addActor(backButtonTable);
         stage.addActor(hudTable);
         stage.addActor(directionTable);
@@ -373,66 +364,40 @@ public class RaceScreen extends ScreenAdapter {
         multiplexer.addProcessor(new InputAdapter() {
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                if (joystickPointer != -1) {
-                    return false;
+                if (button == 0) {
+                    com.badlogic.gdx.math.Vector2 stageCoords = stage.screenToStageCoordinates(new com.badlogic.gdx.math.Vector2(screenX, screenY));
+                    Actor hit = stage.hit(stageCoords.x, stageCoords.y, true);
+                    if (hit != null && hit.isTouchable() && hit instanceof TextButton) {
+                        return false;
+                    }
                 }
-                joystickPointer = pointer;
-                com.badlogic.gdx.math.Vector2 stageCoords = stage.screenToStageCoordinates(new com.badlogic.gdx.math.Vector2(screenX, screenY));
-                Actor hit = stage.hit(stageCoords.x, stageCoords.y, true);
-                if (hit instanceof TextButton) {
-                    joystickPointer = -1;
-                    return false;
-                }
-                joystickCenterX = stageCoords.x;
-                joystickCenterY = stageCoords.y;
-                joystickBase.setPosition(joystickCenterX - joystickRadius, joystickCenterY - joystickRadius);
-                float knobHalf = joystickKnobTexture.getWidth() * 0.5f;
-                joystickKnob.setPosition(joystickCenterX - knobHalf, joystickCenterY - knobHalf);
-                joystickBase.setVisible(true);
-                joystickKnob.setVisible(true);
-                joystickX = 0f;
-                joystickY = 0f;
-                return false;
-            }
-
-            @Override
-            public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-                if (pointer == joystickPointer) {
-                    joystickPointer = -1;
-                    joystickX = 0f;
-                    joystickY = 0f;
-                    joystickBase.setVisible(false);
-                    joystickKnob.setVisible(false);
-                }
-                return false;
-            }
-
-            @Override
-            public boolean touchDragged(int screenX, int screenY, int pointer) {
-                if (pointer != joystickPointer) {
-                    return false;
-                }
-                com.badlogic.gdx.math.Vector2 stageCoords = stage.screenToStageCoordinates(new com.badlogic.gdx.math.Vector2(screenX, screenY));
-                float dx = stageCoords.x - joystickCenterX;
-                float dy = stageCoords.y - joystickCenterY;
-                float knobHalf = joystickKnobTexture.getWidth() * 0.5f;
-                float maxOffset = joystickRadius - knobHalf;
-                float dist = (float) Math.sqrt(dx * dx + dy * dy);
-                if (dist > maxOffset && dist > 0f) {
-                    float scale = maxOffset / dist;
-                    dx *= scale;
-                    dy *= scale;
-                }
-                joystickKnob.setPosition(joystickCenterX + dx - knobHalf, joystickCenterY + dy - knobHalf);
-                joystickX = MathUtils.clamp(dx / maxOffset, -1f, 1f);
-                joystickY = MathUtils.clamp(dy / maxOffset, -1f, 1f);
                 return false;
             }
         });
-        multiplexer.addProcessor(stage);
         Gdx.input.setInputProcessor(multiplexer);
     }
 
+    // Helper methods to map selection to asset filenames
+    private String getHorsePreviewAsset(String horseColor) {
+        if (horseColor == null) return "sprites/horse_idle_bay.png";
+        switch (horseColor.toLowerCase()) {
+            case "bay": return "sprites/horse_idle_bay.png";
+            case "chestnut": return "sprites/horse_idle_chestnut.png";
+            case "gray": return "sprites/horse_idle_gray.png";
+            case "palomino": return "sprites/horse_idle_palomino.png";
+            default: return "sprites/horse_idle_bay.png";
+        }
+    }
+
+    private String getRiderPreviewAsset(String riderName) {
+        // Placeholder: always return a default image, update as needed
+        return "ui/panel_logo.png";
+    }
+
+    private String getPetPreviewAsset(String petName) {
+        // Placeholder: always return a default image, update as needed
+        return "ui/panel_menu.png";
+    }
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0f, 0f, 0f, 1f);

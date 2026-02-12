@@ -9,6 +9,14 @@ public class DesktopLauncher {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.setTitle("Android Friends");
         config.setWindowedMode(1280, 720);
+        // Allow running PreviewImageGenerator for preview purposes
+        try {
+            Class<?> previewClass = Class.forName("com.yourstudio.horse.PreviewImageGenerator");
+            if (System.getProperty("preview") != null) {
+                new Lwjgl3Application((com.badlogic.gdx.ApplicationListener) previewClass.getDeclaredConstructor().newInstance(), config);
+                return;
+            }
+        } catch (Exception ignored) {}
         new Lwjgl3Application(new HorseGame(), config);
     }
 }
