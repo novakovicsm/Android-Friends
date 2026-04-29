@@ -9,6 +9,6 @@ public class PreviewImageGeneratorLauncher {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.setTitle("Preview Image Generator");
         config.setWindowedMode(800, 480);
-        new Lwjgl3Application(new PreviewImageGenerator(), config);
+        new Lwjgl3Application((com.badlogic.gdx.ApplicationListener) new PreviewImageGenerator(), config);
     }
 }

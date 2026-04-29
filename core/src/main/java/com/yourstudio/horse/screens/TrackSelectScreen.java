@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -23,8 +24,8 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.yourstudio.horse.HorseGame;
-import com.yourstudio.horse.ui.UiFactory;
 import com.yourstudio.horse.ui.ScreenNavigator;
+import com.yourstudio.horse.ui.UiFactory;
 
 public class TrackSelectScreen extends ScreenAdapter {
     private final HorseGame game;
@@ -40,9 +41,6 @@ public class TrackSelectScreen extends ScreenAdapter {
     private BitmapFont titleFont;
     private BitmapFont labelFont;
     private Texture background;
-    private Texture buttonUp;
-    private Texture buttonDown;
-    private Texture buttonOver;
     private Sound clickSound;
     private Texture[] trackCards;
     private Texture[] trackCardsSelected;
@@ -88,24 +86,16 @@ public class TrackSelectScreen extends ScreenAdapter {
         int labelSize = Math.max(18, Math.round(28f * scale));
         titleFont = createUIFont(titleSize, 3.1f * scale);
         labelFont = createUIFont(labelSize, 1.45f * scale);
+        Skin skin = game.getSkin();
 
         background = loadUiTexture("ui/bg_select.png");
-        buttonUp = loadUiTexture("ui/button_primary.png");
-        buttonDown = loadUiTexture("ui/button_primary_down.png");
-        buttonOver = loadUiTexture("ui/button_primary_over.png");
         clickSound = game.getAssets().get("sfx/click.wav", Sound.class);
 
         loadTrackCards();
 
         Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, Color.WHITE);
         Label.LabelStyle labelStyle = new Label.LabelStyle(labelFont, Color.WHITE);
-
-        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-        buttonStyle.up = toDrawable(buttonUp);
-        buttonStyle.down = toDrawable(buttonDown);
-        buttonStyle.over = toDrawable(buttonOver);
-        buttonStyle.font = labelFont;
-        buttonStyle.fontColor = Color.WHITE;
+        TextButton.TextButtonStyle buttonStyle = skin.get("primary", TextButton.TextButtonStyle.class);
 
         Label title = UiFactory.label("P\u00E1lyav\u00E1laszt\u00E1s", titleStyle);
         trackNameLabel = UiFactory.label(trackNames[trackIndex], titleStyle);
@@ -200,15 +190,6 @@ public class TrackSelectScreen extends ScreenAdapter {
         }
         if (background != null) {
             background.dispose();
-        }
-        if (buttonUp != null) {
-            buttonUp.dispose();
-        }
-        if (buttonDown != null) {
-            buttonDown.dispose();
-        }
-        if (buttonOver != null) {
-            buttonOver.dispose();
         }
         disposeTextureArray(trackCards);
         disposeTextureArray(trackCardsSelected);

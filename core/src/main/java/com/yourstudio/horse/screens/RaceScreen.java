@@ -27,6 +27,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -42,14 +43,22 @@ import com.yourstudio.horse.HorseGame;
 import com.yourstudio.horse.ui.ScreenNavigator;
 
 public class RaceScreen extends ScreenAdapter {
-                // Coin count for player
-                private int playerCoins = 0;
-                // Call this method wherever coins are collected in the game logic
-                public void collectCoin(int baseAmount) {
-                    int amount = Math.round(baseAmount * petCoinMultiplier);
-                    playerCoins += amount;
-                    // Optionally update UI or play sound here
-                }
+        // Updates the coin label with the current coin count
+        private void updateCoinLabel() {
+            if (coinLabel != null) {
+                coinLabel.setText("\u00C9rm\u00E9k: " + playerCoins);
+            }
+        }
+    // Coin count for player
+    private int playerCoins = 0;
+    private Label coinLabel;
+    // Call this method wherever coins are collected in the game logic
+    public void collectCoin(int baseAmount) {
+        int amount = Math.round(baseAmount * petCoinMultiplier);
+        playerCoins += amount;
+        updateCoinLabel();
+        // Optionally update UI or play sound here
+    }
             // Pet bonus fields
             private float petCoinMultiplier = 1f;
             private float petPowerupDurationMultiplier = 1f;
@@ -71,8 +80,6 @@ public class RaceScreen extends ScreenAdapter {
     private Texture background;
     private BitmapFont titleFont;
     private BitmapFont bodyFont;
-    private Texture buttonUp;
-    private Texture buttonDown;
     private Sound clickSound;
     private Sound powerupSound;
     private Sound winSound;
@@ -232,8 +239,6 @@ public class RaceScreen extends ScreenAdapter {
         stage.addActor(joystickKnob);
         joystickRadius = joystickBaseTexture.getWidth() * 0.5f;
         // ...existing code...
-        buttonUp = loadUiTexture("ui/button_primary.png");
-        buttonDown = loadUiTexture("ui/button_primary_down.png");
         background = loadUiTexture("ui/bg_race.png");
         clickSound = game.getAssets().get("sfx/click.wav", Sound.class);
         powerupSound = game.getAssets().get("sfx/powerup.wav", Sound.class);
@@ -296,11 +301,8 @@ public class RaceScreen extends ScreenAdapter {
         // Initialize bodyFont before using it for LabelStyle and TextButtonStyle
         bodyFont = createUIFont(24, 1.0f);
         Label.LabelStyle labelStyle = new Label.LabelStyle(bodyFont, Color.WHITE);
-        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-        buttonStyle.up = toDrawable(buttonUp);
-        buttonStyle.down = toDrawable(buttonDown);
-        buttonStyle.font = bodyFont;
-        buttonStyle.fontColor = Color.WHITE;
+        Skin skin = game.getSkin();
+        TextButton.TextButtonStyle buttonStyle = skin.get("primary", TextButton.TextButtonStyle.class);
 
         TextButton backButton = new TextButton("Vissza", buttonStyle);
 
@@ -308,6 +310,7 @@ public class RaceScreen extends ScreenAdapter {
         lapLabel = new Label("K\u00F6r: 1/3", labelStyle);
         powerupLabel = new Label("B\u00F3nusz: --", labelStyle);
         petBonusLabel = new Label("Kedvenc b\u00F3nusz: --", labelStyle);
+        coinLabel = new Label("\u00C9rm\u00E9k: 0", labelStyle);
         // directionLabel = new Label("Ir\u00E1ny:", labelStyle);
             // Joystick control only, remove left/right buttons from UI
             // directionLabel can remain for feedback if desired
@@ -337,6 +340,8 @@ public class RaceScreen extends ScreenAdapter {
         hudContent.add(powerupLabel).left().padTop(6f);
         hudContent.row();
         hudContent.add(petBonusLabel).left().padTop(6f);
+        hudContent.row();
+        hudContent.add(coinLabel).left().padTop(6f);
         hudContent.row();
         Table previewRow = new Table();
         previewRow.add(horsePreviewImage).size(64f, 48f).padRight(6f);
@@ -436,6 +441,7 @@ public class RaceScreen extends ScreenAdapter {
             powerupLabel.setText("B\u00F3nusz: --");
         }
         animationTime += delta;
+        updateCoinLabel();
         if (mapLoaded && mapRenderer != null && camera != null) {
             // Draw a full-screen background so any unused map area isn't black.
             stage.getBatch().begin();
@@ -506,12 +512,6 @@ public class RaceScreen extends ScreenAdapter {
         }
         if (bodyFont != null) {
             bodyFont.dispose();
-        }
-        if (buttonUp != null) {
-            buttonUp.dispose();
-        }
-        if (buttonDown != null) {
-            buttonDown.dispose();
         }
         if (raceMusic != null) {
             raceMusic.stop();

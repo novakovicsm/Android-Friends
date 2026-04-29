@@ -40,13 +40,49 @@ Versenylovak/
 
 ## Modulok szerepe
 
+- `core/`: Platformfüggetlen játéklogika, minden platform ezt használja.
+- `desktop/`: Fejlesztői/teszt indító, gyors iterációhoz.
+- `android/`: Android platformra forduló launcher.
+- `assets/`: Minden platform által használt assetek.
+- `docs/`: Dokumentáció, design, workflow.
 
-## VS Code ajánlott beállítások
+## Build & Run
 
+A projekt Gradle-t használ. Fordításhoz és futtatáshoz:
 
-## Következő lépések
+### Minden modul buildelése
 
-1. Alap Game + MainMenu Screen már létrehozva a `core` modulban.
-2. Következő Screen-ek létrehozása: CharacterSelect, Race, Results.
-3. Asset pipeline kialakítása (Aseprite → TexturePacker → atlas).
-4. Android launcherhez ikonok és splash később hozzáadható.
+```
+./gradlew build
+```
+
+### Desktop verzió futtatása
+
+```
+./gradlew desktop:run
+```
+
+### Tisztítás és újra build
+
+```
+./gradlew clean build
+```
+
+## Javadoc generálása
+
+Java dokumentáció generálásához:
+
+```
+./gradlew javadoc
+```
+
+Az eredmény a `core/build/docs/javadoc/`, `desktop/build/docs/javadoc/` stb. mappákban lesz.
+
+## Dokumentáció
+
+- Lásd a `docs/` mappát (design, asset workflow, todos).
+- Lásd ezt a README-t a build és használat részleteihez.
+
+## License
+
+Add meg a licencet itt.

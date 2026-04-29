@@ -1,26 +1,55 @@
 {
   "com.badlogic.gdx.graphics.g2d.BitmapFont": {
-    "default-font": {}
+    "default-font": {},
+    "title-font": {
+      "file": "fonts/ArchitectsDaughter.ttf"
+    },
+    "ui-font": {
+      "file": "fonts/ui.ttf"
+    }
   },
   "com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle": {
     "default": {
-      "font": "default-font",
-      "fontColor": "white"
+      "font": "ui-font",
+      "fontColor": "text-primary"
+    },
+    "title": {
+      "font": "title-font",
+      "fontColor": "text-primary"
+    },
+    "secondary": {
+      "font": "ui-font",
+      "fontColor": "text-secondary"
     }
   },
   "com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle": {
     "default": {
       "up": "button-up",
       "down": "button-down",
-      "font": "default-font",
-      "fontColor": "white"
+      "font": "ui-font",
+      "fontColor": "text-primary",
+      "downFontColor": "primary-dark"
+    },
+    "primary": {
+      "up": "button-up",
+      "down": "button-down",
+      "font": "ui-font",
+      "fontColor": "text-primary",
+      "downFontColor": "primary-dark"
+    },
+    "secondary": {
+      "up": "button-up",
+      "down": "button-down",
+      "font": "ui-font",
+      "fontColor": "text-primary",
+      "downFontColor": "secondary-dark"
     }
   },
   "com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle": {
     "default": {
       "background": "panel",
-      "titleFont": "default-font",
-      "titleFontColor": "white"
+      "titleFont": "title-font",
+      "titleFontColor": "text-primary"
     }
   },
   "com.badlogic.gdx.scenes.scene2d.ui.ProgressBar$ProgressBarStyle": {
@@ -29,7 +58,38 @@
       "knob": "highlight"
     }
   },
+  "com.badlogic.gdx.scenes.scene2d.ui.CheckBox$CheckBoxStyle": {
+    "default": {
+      "checkboxOff": "panel",
+      "checkboxOn": "highlight",
+      "font": "ui-font",
+      "fontColor": "text-primary"
+    }
+  },
+  "com.badlogic.gdx.scenes.scene2d.ui.Slider$SliderStyle": {
+    "default": {
+      "background": "panel",
+      "knob": "highlight"
+    }
+  },
   "com.badlogic.gdx.graphics.Color": {
-    "white": "FFFFFFFF"
+    "white": "FFFFFFFF",
+    "black": "000000FF",
+    "primary": "4A90E2FF",
+    "primary-dark": "357ABDFF",
+    "secondary": "7ED321FF",
+    "secondary-dark": "5BA000FF",
+    "accent": "F5A623FF",
+    "error": "D0021BFF",
+    "warning": "F8E71CFF",
+    "success": "7ED321FF",
+    "background": "F5F5F5FF",
+    "surface": "FFFFFFFF",
+    "text-primary": "4A4A4AFF",
+    "text-secondary": "9B9B9BFF",
+    "dark-background": "1A1A1AFF",
+    "dark-surface": "2D2D2DFF",
+    "dark-text-primary": "FFFFFFFF",
+    "dark-text-secondary": "B3B3B3FF"
   }
 }

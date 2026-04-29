@@ -1,8 +1,8 @@
 package com.yourstudio.horse.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
@@ -10,13 +10,14 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -43,8 +44,6 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private Texture background;
     private BitmapFont titleFont;
     private BitmapFont bodyFont;
-    private Texture buttonUp;
-    private Texture buttonDown;
     private Sound clickSound;
     private Texture[] riderPreviews;
     private Texture[] petPreviews;
@@ -133,8 +132,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
         stage = new Stage(new ExtendViewport(1280f, 720f));
         titleFont = createUIFont(54, 3.1f);
         bodyFont = createUIFont(28, 1.45f);
-        buttonUp = loadUiTexture("ui/button_primary.png");
-        buttonDown = loadUiTexture("ui/button_primary_down.png");
+        Skin skin = game.getSkin();
         background = loadUiTexture("ui/bg_select.png");
         clickSound = game.getAssets().get("sfx/click.wav", Sound.class);
         horseColorValues = new Color[] {
@@ -177,11 +175,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
 
         Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, Color.WHITE);
         Label.LabelStyle labelStyle = new Label.LabelStyle(bodyFont, Color.WHITE);
-        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-        buttonStyle.up = toDrawable(buttonUp);
-        buttonStyle.down = toDrawable(buttonDown);
-        buttonStyle.font = bodyFont;
-        buttonStyle.fontColor = Color.WHITE;
+        TextButton.TextButtonStyle buttonStyle = skin.get("primary", TextButton.TextButtonStyle.class);
 
         Label title = new Label("Karakter v\u00E1laszt\u00E1s", titleStyle);
         horseValue = new Label(horses[horseIndex], labelStyle);
@@ -288,12 +282,6 @@ public class CharacterSelectScreen extends ScreenAdapter {
         }
         if (bodyFont != null) {
             bodyFont.dispose();
-        }
-        if (buttonUp != null) {
-            buttonUp.dispose();
-        }
-        if (buttonDown != null) {
-            buttonDown.dispose();
         }
         if (background != null) {
             background.dispose();
