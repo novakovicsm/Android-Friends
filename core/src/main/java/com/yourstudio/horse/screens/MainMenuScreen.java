@@ -15,6 +15,8 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.yourstudio.horse.HorseGame;
+import com.yourstudio.horse.model.MvpProgress;
+import com.yourstudio.horse.model.MvpProgressStore;
 import com.yourstudio.horse.ui.ScreenNavigator;
 
 public class MainMenuScreen extends ScreenAdapter {
@@ -22,6 +24,8 @@ public class MainMenuScreen extends ScreenAdapter {
     private Stage stage;
     private Sound clickSound;
     private Music menuMusic;
+    private MvpProgressStore progressStore;
+    private MvpProgress progress;
 
     public MainMenuScreen(HorseGame game) {
         this.game = game;
@@ -31,6 +35,8 @@ public class MainMenuScreen extends ScreenAdapter {
     public void show() {
         stage = new Stage(new ScreenViewport());
         Skin skin = game.getSkin();
+        progressStore = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME));
+        progress = progressStore.load();
 
         // Get UI styles from the programmed skin
         Label.LabelStyle titleStyle = skin.get("title", Label.LabelStyle.class);
@@ -48,7 +54,7 @@ public class MainMenuScreen extends ScreenAdapter {
         startButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (clickSound != null) {
+                if (!progress.muted && clickSound != null) {
                     clickSound.play(0.6f);
                 }
                 ScreenNavigator.toCharacterSelect(game, null);
@@ -56,10 +62,14 @@ public class MainMenuScreen extends ScreenAdapter {
         });
 
         TextButton settingsButton = new TextButton("Beállítások", skin.get("secondary", TextButton.TextButtonStyle.class));
-        settingsButton.addListener(new ClickListener() {
+        TextButton muteButton = new TextButton(muteButtonText(), skin.get("secondary", TextButton.TextButtonStyle.class));
+        muteButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // TODO: Navigate to settings screen
+                progress.muted = !progress.muted;
+                progressStore.save(progress);
+                muteButton.setText(muteButtonText());
+                applyMenuMusicState();
             }
         });
 
@@ -77,7 +87,7 @@ public class MainMenuScreen extends ScreenAdapter {
         Table menuTable = new Table();
         menuTable.add(description).width(400f).padBottom(24f).row();
         menuTable.add(startButton).width(280f).height(80f).padBottom(16f).row();
-        menuTable.add(settingsButton).width(280f).height(60f);
+        menuTable.add(muteButton).width(280f).height(60f);
 
         // Main layout
         layout.add(logoTable).padBottom(40f).row();
@@ -89,9 +99,22 @@ public class MainMenuScreen extends ScreenAdapter {
         // Load sounds
         clickSound = game.getAssets().get("sfx/click.wav", Sound.class);
         menuMusic = game.getAssets().get("sfx/menu_music.wav", Music.class);
-        if (menuMusic != null) {
-            menuMusic.setLooping(true);
-            menuMusic.setVolume(0.5f);
+        applyMenuMusicState();
+    }
+
+    private String muteButtonText() {
+        return progress != null && progress.muted ? "Hang: kikapcsolva" : "Hang: bekapcsolva";
+    }
+
+    private void applyMenuMusicState() {
+        if (menuMusic == null || progress == null) {
+            return;
+        }
+        menuMusic.setLooping(true);
+        menuMusic.setVolume(progress.muted ? 0f : 0.5f);
+        if (progress.muted) {
+            menuMusic.pause();
+        } else {
             menuMusic.play();
         }
     }

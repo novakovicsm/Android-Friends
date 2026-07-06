@@ -139,6 +139,7 @@ public class RaceScreen extends ScreenAdapter {
     private float jumpCooldownTimer;
     private boolean victoryPlayed;
     private boolean raceFinished;
+    private boolean muted;
     private Viewport mapViewport;
     private boolean mapLoaded;
     private Animation<TextureRegion> idleAnimation;
@@ -245,13 +246,16 @@ public class RaceScreen extends ScreenAdapter {
         joystickRadius = joystickBaseTexture.getWidth() * 0.5f;
         // ...existing code...
         background = loadUiTexture("ui/bg_race.png");
+        muted = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME)).load().muted;
         clickSound = game.getAssets().get("sfx/click.wav", Sound.class);
         powerupSound = game.getAssets().get("sfx/powerup.wav", Sound.class);
         winSound = game.getAssets().get("sfx/win.wav", Sound.class);
         raceMusic = game.getAssets().get("sfx/race_music.wav", Music.class);
         raceMusic.setLooping(true);
-        raceMusic.setVolume(0.5f);
-        raceMusic.play();
+        raceMusic.setVolume(muted ? 0f : 0.5f);
+        if (!muted) {
+            raceMusic.play();
+        }
         hudPanel = loadUiTexture("ui/panel_hud.png");
         loadHorseAnimations();
         idleAnimation.setPlayMode(Animation.PlayMode.LOOP);
@@ -327,7 +331,7 @@ public class RaceScreen extends ScreenAdapter {
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (clickSound != null) {
+                if (!muted && clickSound != null) {
                     clickSound.play(0.6f);
                 }
                 ScreenNavigator.Selection selection = new ScreenNavigator.Selection(
@@ -438,9 +442,11 @@ public class RaceScreen extends ScreenAdapter {
         int lap = Math.min(3, 1 + (int) (distance / lapDistance));
         if (lap != currentLap) {
             currentLap = lap;
-            if (currentLap == 3 && !victoryPlayed && winSound != null) {
+            if (currentLap == 3 && !victoryPlayed) {
                 victoryPlayed = true;
-                winSound.play(0.7f);
+                if (!muted && winSound != null) {
+                    winSound.play(0.7f);
+                }
                 Gdx.input.vibrate(120);
             }
         }
@@ -516,7 +522,7 @@ public class RaceScreen extends ScreenAdapter {
         progressStore.save(progress);
         playerCoins = progress.horseshoes;
         updateCoinLabel();
-        if (winSound != null) {
+        if (!muted && winSound != null) {
             winSound.play(0.7f);
         }
         try {
@@ -920,7 +926,7 @@ public class RaceScreen extends ScreenAdapter {
                 );
                 activePowerupName = "+" + MvpGameConfig.BOOST_POWERUP_CHARGE_PERCENT + "% boost";
                 activePowerupTimer = 1.5f;
-                if (powerupSound != null) {
+                if (!muted && powerupSound != null) {
                     powerupSound.play(0.7f);
                 }
                 try {

@@ -451,7 +451,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
     }
 
     private void playClick() {
-        if (clickSound != null) {
+        MvpProgress progress = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME)).load();
+        if (!progress.muted && clickSound != null) {
             clickSound.play(0.6f);
         }
     }
