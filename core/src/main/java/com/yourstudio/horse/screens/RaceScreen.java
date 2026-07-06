@@ -90,6 +90,7 @@ public class RaceScreen extends ScreenAdapter {
     private Label lapLabel;
     private Label powerupLabel;
     private Label petBonusLabel;
+    private Label jumpLabel;
     private Image horsePreviewImage;
     private Image riderPreviewImage;
     private Image petPreviewImage;
@@ -134,6 +135,8 @@ public class RaceScreen extends ScreenAdapter {
     private float petShieldBonus;
     private float riderAccelerationBonus;
     private float riderBoostChargeBonus;
+    private float jumpTimer;
+    private float jumpCooldownTimer;
     private boolean victoryPlayed;
     private boolean raceFinished;
     private Viewport mapViewport;
@@ -308,11 +311,13 @@ public class RaceScreen extends ScreenAdapter {
         TextButton.TextButtonStyle buttonStyle = skin.get("primary", TextButton.TextButtonStyle.class);
 
         TextButton backButton = new TextButton("Vissza", buttonStyle);
+        TextButton jumpButton = new TextButton("Ugr\u00E1s", buttonStyle);
 
         speedLabel = new Label("Sebess\u00E9g: 0 km/h", labelStyle);
         lapLabel = new Label("K\u00F6r: 1/3", labelStyle);
         powerupLabel = new Label("B\u00F3nusz: --", labelStyle);
         petBonusLabel = new Label("Kedvenc b\u00F3nusz: --", labelStyle);
+        jumpLabel = new Label("Ugr\u00E1s: k\u00E9sz", labelStyle);
         coinLabel = new Label("\u00C9rm\u00E9k: 0", labelStyle);
         // directionLabel = new Label("Ir\u00E1ny:", labelStyle);
             // Joystick control only, remove left/right buttons from UI
@@ -331,6 +336,12 @@ public class RaceScreen extends ScreenAdapter {
                 ScreenNavigator.toCharacterSelect(game, selection);
             }
         });
+        jumpButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                triggerJump();
+            }
+        });
 
         Table hudTable = new Table();
         hudTable.setFillParent(true);
@@ -344,6 +355,8 @@ public class RaceScreen extends ScreenAdapter {
         hudContent.row();
         hudContent.add(petBonusLabel).left().padTop(6f);
         hudContent.row();
+        hudContent.add(jumpLabel).left().padTop(6f);
+        hudContent.row();
         hudContent.add(coinLabel).left().padTop(6f);
         hudContent.row();
         Table previewRow = new Table();
@@ -356,10 +369,12 @@ public class RaceScreen extends ScreenAdapter {
         Table backButtonTable = new Table();
         backButtonTable.setFillParent(true);
         backButtonTable.top().right().pad(16f);
-        backButtonTable.add(backButton).width(220f).height(80f);
+        backButtonTable.add(backButton).width(220f).height(80f).row();
+        backButtonTable.add(jumpButton).width(220f).height(80f).padTop(12f);
         stage.addActor(backButtonTable);
         stage.addActor(hudTable);
         InputMultiplexer multiplexer = new InputMultiplexer();
+        multiplexer.addProcessor(stage);
         multiplexer.addProcessor(new InputAdapter() {
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
@@ -417,6 +432,7 @@ public class RaceScreen extends ScreenAdapter {
         }
         distance += speed * delta;
         updateRaceCompletion();
+        updateJump(delta);
         updatePowerupSpawns(delta);
         updatePowerupPickup(delta);
         int lap = Math.min(3, 1 + (int) (distance / lapDistance));
@@ -507,6 +523,41 @@ public class RaceScreen extends ScreenAdapter {
             Gdx.input.vibrate(120);
         } catch (SecurityException ignored) {
             // VIBRATE permission missing or restricted; ignore to avoid crash.
+        }
+    }
+
+    private void triggerJump() {
+        if (jumpCooldownTimer > 0f) {
+            return;
+        }
+        jumpTimer = 0.45f;
+        jumpCooldownTimer = 0.8f;
+        if (jumpLabel != null) {
+            jumpLabel.setText("Ugr\u00E1s: hopp!");
+        }
+        try {
+            Gdx.input.vibrate(40);
+        } catch (SecurityException ignored) {
+            // VIBRATE permission missing or restricted; ignore to avoid crash.
+        }
+    }
+
+    private void updateJump(float delta) {
+        if (jumpTimer > 0f) {
+            jumpTimer = Math.max(0f, jumpTimer - delta);
+        }
+        if (jumpCooldownTimer > 0f) {
+            jumpCooldownTimer = Math.max(0f, jumpCooldownTimer - delta);
+        }
+        if (jumpLabel == null) {
+            return;
+        }
+        if (jumpTimer > 0f) {
+            jumpLabel.setText("Ugr\u00E1s: hopp!");
+        } else if (jumpCooldownTimer > 0f) {
+            jumpLabel.setText("Ugr\u00E1s: " + (int) Math.ceil(jumpCooldownTimer) + "s");
+        } else {
+            jumpLabel.setText("Ugr\u00E1s: k\u00E9sz");
         }
     }
 
@@ -953,12 +1004,21 @@ public class RaceScreen extends ScreenAdapter {
             x = stage.getViewport().getWorldWidth() * 0.5f - size * 0.5f;
             y = stage.getViewport().getWorldHeight() * 0.25f - size * 0.5f;
         }
+        y += jumpOffset() * scale;
         if (horseDirection >= 0f) {
             batch.draw(frame, x, y, size, size);
         } else {
             batch.draw(frame, x + size, y, -size, size);
         }
         batch.setColor(previousColor);
+    }
+
+    private float jumpOffset() {
+        if (jumpTimer <= 0f) {
+            return 0f;
+        }
+        float progress = 1f - jumpTimer / 0.45f;
+        return MathUtils.sin(progress * MathUtils.PI) * 34f;
     }
 
     private void refreshRiderPreview() {
