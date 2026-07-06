@@ -26,6 +26,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.yourstudio.horse.HorseGame;
+import com.yourstudio.horse.model.MvpGameConfig;
+import com.yourstudio.horse.model.MvpProgress;
+import com.yourstudio.horse.model.MvpProgressStore;
 import com.yourstudio.horse.ui.PixelArtFactory;
 import com.yourstudio.horse.ui.ScreenNavigator;
 
@@ -69,9 +72,9 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private Color[] riderHairColors;
     private Table layout;
 
-    private final String[] horses = {"Gesztenye", "Pej", "Sz\u00FCrke", "Palomino"};
-    private final String[] riders = {"Lili", "Noel", "Mira", "\u00C1ron"};
-    private final String[] pets = {"Kutya", "Cica", "Nyuszi", "Papag\u00E1j", "Kapibara", "Lajhár"};
+    private final String[] horses = horseNamesFromConfig();
+    private final String[] riders = MvpGameConfig.RIDER_NAMES;
+    private final String[] pets = {"Kutya"};
     private final String[] horseColors = {"Meleg barna", "Arany", "Hamvas", "S\u00F6t\u00E9t"};
     private final String[] maneColors = {"Fekete", "Csokol\u00E1d\u00E9", "Sz\u00FCrke", "Sz\u0151ke"};
     private final String[] saddleColors = {"V\u00F6r\u00F6s", "K\u00E9k", "Z\u00F6ld", "Fekete"};
@@ -110,9 +113,10 @@ public class CharacterSelectScreen extends ScreenAdapter {
                                  String horseColor, String maneColor, String saddleColor, String outfitColor) {
         this.game = game;
         Preferences prefs = Gdx.app.getPreferences(PREFS_NAME);
-        String resolvedHorse = horseName != null ? horseName : prefs.getString(PREF_HORSE, null);
-        String resolvedRider = riderName != null ? riderName : prefs.getString(PREF_RIDER, null);
-        String resolvedPet = petName != null ? petName : prefs.getString(PREF_PET, null);
+        MvpProgress progress = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME)).load();
+        String resolvedHorse = horseName != null ? horseName : prefs.getString(PREF_HORSE, progress.selectedHorse);
+        String resolvedRider = riderName != null ? riderName : prefs.getString(PREF_RIDER, progress.selectedRiderName);
+        String resolvedPet = petName != null ? petName : prefs.getString(PREF_PET, progress.selectedPet);
         String resolvedHorseColor = horseColor != null ? horseColor : prefs.getString(PREF_HORSE_COLOR, null);
         String resolvedManeColor = maneColor != null ? maneColor : prefs.getString(PREF_MANE_COLOR, null);
         String resolvedSaddleColor = saddleColor != null ? saddleColor : prefs.getString(PREF_SADDLE_COLOR, null);
@@ -159,12 +163,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
             new Color(0.2f, 0.6f, 0.35f, 1f),
             new Color(0.55f, 0.3f, 0.75f, 1f)
         };
-        riderHairColors = new Color[] {
-            new Color(0.2f, 0.15f, 0.1f, 1f),
-            new Color(0.4f, 0.25f, 0.1f, 1f),
-            new Color(0.1f, 0.08f, 0.05f, 1f),
-            new Color(0.7f, 0.55f, 0.3f, 1f)
-        };
+        riderHairColors = createRiderHairColors(riders.length);
         loadHorsePreviews();
         riderPreviews = createRiderPreviews();
         petPreviews = createPetPreviews();
@@ -421,6 +420,14 @@ public class CharacterSelectScreen extends ScreenAdapter {
         prefs.putString(PREF_SADDLE_COLOR, saddleColors[saddleColorIndex]);
         prefs.putString(PREF_OUTFIT_COLOR, outfitColors[outfitColorIndex]);
         prefs.flush();
+
+        MvpProgressStore progressStore = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME));
+        MvpProgress progress = progressStore.load();
+        progress.selectedHorse = horses[horseIndex];
+        progress.selectedRiderName = riders[riderIndex];
+        progress.selectedPet = pets[petIndex];
+        progress.selectedRiderColor = outfitColors[outfitColorIndex];
+        progressStore.save(progress);
     }
 
     private void playClick() {
@@ -444,6 +451,14 @@ public class CharacterSelectScreen extends ScreenAdapter {
             }
         }
         return 0;
+    }
+
+    private static String[] horseNamesFromConfig() {
+        String[] names = new String[MvpGameConfig.HORSES.length];
+        for (int i = 0; i < MvpGameConfig.HORSES.length; i++) {
+            names[i] = MvpGameConfig.HORSES[i].name;
+        }
+        return names;
     }
 
     private Texture createColorTexture(Color color) {
@@ -501,11 +516,25 @@ public class CharacterSelectScreen extends ScreenAdapter {
             new Color(0.1f, 0.08f, 0.05f, 1f),
             new Color(0.7f, 0.55f, 0.3f, 1f)
         };
-        Texture[] previews = new Texture[outfits.length];
-        for (int i = 0; i < outfits.length; i++) {
-            previews[i] = createRiderPreview(outfits[i], hair[i]);
+        Texture[] previews = new Texture[riders.length];
+        for (int i = 0; i < riders.length; i++) {
+            previews[i] = createRiderPreview(outfits[i % outfits.length], hair[i % hair.length]);
         }
         return previews;
+    }
+
+    private Color[] createRiderHairColors(int count) {
+        Color[] palette = {
+            new Color(0.2f, 0.15f, 0.1f, 1f),
+            new Color(0.4f, 0.25f, 0.1f, 1f),
+            new Color(0.1f, 0.08f, 0.05f, 1f),
+            new Color(0.7f, 0.55f, 0.3f, 1f)
+        };
+        Color[] colors = new Color[count];
+        for (int i = 0; i < count; i++) {
+            colors[i] = palette[i % palette.length];
+        }
+        return colors;
     }
 
     private Texture[] createPetPreviews() {
@@ -610,7 +639,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
             riderPreviewCustom.dispose();
         }
         Color outfit = outfitColorValues[outfitColorIndex];
-        Color hair = riderHairColors[riderIndex];
+        Color hair = riderHairColors[riderIndex % riderHairColors.length];
         riderPreviewCustom = createRiderPreview(outfit, hair);
         riderPreviewImage.setDrawable(toDrawable(riderPreviewCustom));
     }
