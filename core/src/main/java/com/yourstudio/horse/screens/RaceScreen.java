@@ -104,9 +104,9 @@ public class RaceScreen extends ScreenAdapter {
     private int horseIndex;
     private int riderIndex;
     private int petIndex;
-    private final String[] horses = {"Gesztenye", "Pej", "Sz\u00FCrke", "Palomino"};
-    private final String[] riders = {"Lili", "Noel", "Mira", "\u00c1ron"};
-    private final String[] pets = {"Kutya", "Cica", "Nyuszi", "Papag\u00E1j", "Kapibara", "Lajhár"};
+    private final String[] horses = horseNamesFromConfig();
+    private final String[] riders = MvpGameConfig.RIDER_NAMES;
+    private final String[] pets = {"Kutya"};
     private float elapsedTime;
     private int currentLap = 1;
     private float speed;
@@ -671,6 +671,14 @@ public class RaceScreen extends ScreenAdapter {
         return 0;
     }
 
+    private static String[] horseNamesFromConfig() {
+        String[] names = new String[MvpGameConfig.HORSES.length];
+        for (int i = 0; i < MvpGameConfig.HORSES.length; i++) {
+            names[i] = MvpGameConfig.HORSES[i].name;
+        }
+        return names;
+    }
+
     private Texture[] createRiderPreviews() {
         Color[] outfits = {
             new Color(0.35f, 0.6f, 0.85f, 1f),
@@ -684,9 +692,9 @@ public class RaceScreen extends ScreenAdapter {
             new Color(0.1f, 0.08f, 0.05f, 1f),
             new Color(0.7f, 0.55f, 0.3f, 1f)
         };
-        Texture[] previews = new Texture[outfits.length];
-        for (int i = 0; i < outfits.length; i++) {
-            previews[i] = createRiderPreview(outfits[i], hair[i]);
+        Texture[] previews = new Texture[riders.length];
+        for (int i = 0; i < riders.length; i++) {
+            previews[i] = createRiderPreview(outfits[i % outfits.length], hair[i % hair.length]);
         }
         return previews;
     }
