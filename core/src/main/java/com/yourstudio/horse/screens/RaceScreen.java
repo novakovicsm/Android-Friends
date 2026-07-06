@@ -34,12 +34,13 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.JsonReader;
-import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.yourstudio.horse.HorseGame;
+import com.yourstudio.horse.model.MvpGameConfig;
+import com.yourstudio.horse.model.MvpProgress;
+import com.yourstudio.horse.model.MvpProgressStore;
 import com.yourstudio.horse.ui.ScreenNavigator;
 
 public class RaceScreen extends ScreenAdapter {
@@ -89,9 +90,6 @@ public class RaceScreen extends ScreenAdapter {
     private Label lapLabel;
     private Label powerupLabel;
     private Label petBonusLabel;
-    private Label directionLabel;
-    private TextButton leftButton;
-    private TextButton rightButton;
     private Image horsePreviewImage;
     private Image riderPreviewImage;
     private Image petPreviewImage;
@@ -130,10 +128,12 @@ public class RaceScreen extends ScreenAdapter {
     private float nextSpawnDelay = 3.5f;
     private String activePowerupName;
     private float activePowerupTimer;
+    private int boostChargePercent;
     private float petSpeedBonus;
     private float petAccelBonus;
     private float petShieldBonus;
     private boolean victoryPlayed;
+    private boolean raceFinished;
     private Viewport mapViewport;
     private boolean mapLoaded;
     private Animation<TextureRegion> idleAnimation;
@@ -354,17 +354,8 @@ public class RaceScreen extends ScreenAdapter {
         backButtonTable.setFillParent(true);
         backButtonTable.top().right().pad(16f);
         backButtonTable.add(backButton).width(220f).height(80f);
-        Table directionTable = new Table();
-        directionTable.setFillParent(true);
-        directionTable.bottom().pad(24f);
-        Table directionRow = new Table();
-        directionRow.add(directionLabel).padRight(12f);
-        directionRow.add(leftButton).width(210f).height(108f).padRight(12f);
-        directionRow.add(rightButton).width(210f).height(108f);
-        directionTable.add(directionRow);
         stage.addActor(backButtonTable);
         stage.addActor(hudTable);
-        stage.addActor(directionTable);
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(new InputAdapter() {
             @Override
@@ -422,9 +413,10 @@ public class RaceScreen extends ScreenAdapter {
             speed = Math.max(0f, speed - deceleration * delta);
         }
         distance += speed * delta;
+        updateRaceCompletion();
         updatePowerupSpawns(delta);
         updatePowerupPickup(delta);
-        int lap = 1 + ((int) (distance / lapDistance) % 3);
+        int lap = Math.min(3, 1 + (int) (distance / lapDistance));
         if (lap != currentLap) {
             currentLap = lap;
             if (currentLap == 3 && !victoryPlayed && winSound != null) {
@@ -438,7 +430,7 @@ public class RaceScreen extends ScreenAdapter {
         if (activePowerupName != null) {
             powerupLabel.setText("B\u00F3nusz: " + activePowerupName + " (" + (int) Math.ceil(activePowerupTimer) + "s)");
         } else {
-            powerupLabel.setText("B\u00F3nusz: --");
+            powerupLabel.setText("Boost: " + boostChargePercent + "%");
         }
         animationTime += delta;
         updateCoinLabel();
@@ -487,6 +479,58 @@ public class RaceScreen extends ScreenAdapter {
         }
         stage.act(delta);
         stage.draw();
+    }
+
+    private void updateRaceCompletion() {
+        if (raceFinished || distance < lapDistance * 3f) {
+            return;
+        }
+        raceFinished = true;
+        victoryPlayed = true;
+        MvpProgressStore progressStore = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME));
+        MvpProgress progress = progressStore.load();
+        boolean recordBroken = isRecordBroken(progress.recordTime, elapsedTime);
+        progress.applyRaceResult(1, MvpGameConfig.Difficulty.MEDIUM, recordBroken);
+        if (recordBroken) {
+            progress.recordTime = formatRaceTime(elapsedTime);
+        }
+        progressStore.save(progress);
+        playerCoins = progress.horseshoes;
+        updateCoinLabel();
+        if (winSound != null) {
+            winSound.play(0.7f);
+        }
+        try {
+            Gdx.input.vibrate(120);
+        } catch (SecurityException ignored) {
+            // VIBRATE permission missing or restricted; ignore to avoid crash.
+        }
+    }
+
+    private boolean isRecordBroken(String previousRecord, float raceTimeSeconds) {
+        if (previousRecord == null || previousRecord.length() == 0) {
+            return true;
+        }
+        return raceTimeSeconds < parseRaceTime(previousRecord);
+    }
+
+    private float parseRaceTime(String value) {
+        String[] parts = value.split(":");
+        if (parts.length != 2) {
+            return Float.MAX_VALUE;
+        }
+        try {
+            return Integer.parseInt(parts[0]) * 60f + Integer.parseInt(parts[1]);
+        } catch (NumberFormatException ignored) {
+            return Float.MAX_VALUE;
+        }
+    }
+
+    private String formatRaceTime(float seconds) {
+        int totalSeconds = Math.max(0, Math.round(seconds));
+        int minutes = totalSeconds / 60;
+        int remainder = totalSeconds % 60;
+        return String.format("%02d:%02d", minutes, remainder);
     }
 
     @Override
@@ -737,8 +781,8 @@ public class RaceScreen extends ScreenAdapter {
         petSpeedBonus = 0f;
         petAccelBonus = 0f;
         petShieldBonus = 0f;
-        String bonusText = "--";
-        if ("Kutya".equals(petName)) {
+        String bonusText = "csak t\u00e1rs";
+        if ("Kutya_DISABLED".equals(petName)) {
             petSpeedBonus = 6f;
             bonusText = "+6 km/h végsebesség";
         } else if ("Cica".equals(petName)) {
@@ -797,11 +841,9 @@ public class RaceScreen extends ScreenAdapter {
             float dy = spawn.y - horseY;
             if (dx * dx + dy * dy <= 24f * 24f) {
                 powerupSpawns.removeIndex(i);
-                PowerupDef def = findPowerupDef(spawn.id);
-                activePowerupName = def != null ? def.name : "B\u00F3nusz";
-                // Apply pet power-up duration bonus
-                float baseDuration = 4f;
-                activePowerupTimer = baseDuration * petPowerupDurationMultiplier;
+                boostChargePercent = Math.min(100, boostChargePercent + MvpGameConfig.BOOST_POWERUP_CHARGE_PERCENT);
+                activePowerupName = "+" + MvpGameConfig.BOOST_POWERUP_CHARGE_PERCENT + "% boost";
+                activePowerupTimer = 1.5f;
                 if (powerupSound != null) {
                     powerupSound.play(0.7f);
                 }
@@ -812,15 +854,6 @@ public class RaceScreen extends ScreenAdapter {
                 }
             }
         }
-    }
-
-    private PowerupDef findPowerupDef(String id) {
-        for (PowerupDef def : powerupDefs) {
-            if (def.id.equals(id)) {
-                return def;
-            }
-        }
-        return null;
     }
 
     private void drawPowerups(com.badlogic.gdx.graphics.g2d.Batch batch) {
@@ -847,25 +880,8 @@ public class RaceScreen extends ScreenAdapter {
     }
 
     private void loadPowerupDefs() {
-        try {
-            FileHandle powerupsFile = Gdx.files.internal("data/powerups.json");
-            JsonValue root = new JsonReader().parse(powerupsFile.readString("UTF-8"));
-            JsonValue list = root.get("powerups");
-            if (list != null) {
-                for (JsonValue entry : list) {
-                    String id = entry.getString("id", "");
-                    String name = entry.getString("name", id);
-                    powerupDefs.add(new PowerupDef(id, name));
-                }
-            }
-        } catch (RuntimeException exception) {
-            Gdx.app.error("RaceScreen", "Failed to load powerups.json", exception);
-        }
-        if (powerupDefs.size == 0) {
-            powerupDefs.add(new PowerupDef("gyorsitas", "Gyors\u00EDt\u00E1s"));
-            powerupDefs.add(new PowerupDef("pajzs", "Pajzs"));
-            powerupDefs.add(new PowerupDef("villam", "Vill\u00E1m"));
-        }
+        powerupDefs.clear();
+        powerupDefs.add(new PowerupDef("boost_charge", "Boost t\u00f6ltet"));
     }
 
     private static class PowerupDef {
