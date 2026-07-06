@@ -1,6 +1,7 @@
 package com.yourstudio.horse.ui;
 
 import com.yourstudio.horse.HorseGame;
+import com.yourstudio.horse.model.MvpGameConfig;
 import com.yourstudio.horse.screens.CharacterSelectScreen;
 import com.yourstudio.horse.screens.MainMenuScreen;
 import com.yourstudio.horse.screens.RaceScreen;
@@ -30,6 +31,10 @@ public final class ScreenNavigator {
         }
         game.setScreen(new TrackSelectScreen(game, selection.horseName, selection.riderName, selection.petName,
             selection.horseColor, selection.maneColor, selection.saddleColor, selection.outfitColor));
+    }
+
+    public static void toDefaultRace(HorseGame game, Selection selection) {
+        toRace(game, selection, MvpGameConfig.DEFAULT_TRACK);
     }
 
     public static void toRace(HorseGame game, Selection selection, String trackName) {

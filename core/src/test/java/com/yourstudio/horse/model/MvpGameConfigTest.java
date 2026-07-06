@@ -11,6 +11,11 @@ public class MvpGameConfigTest {
     }
 
     @Test
+    public void defaultTrackStartsTheForestRace() {
+        assertEquals("forest.tmx", MvpGameConfig.DEFAULT_TRACK);
+    }
+
+    @Test
     public void hasFourHorseProfiles() {
         assertEquals(4, MvpGameConfig.HORSES.length);
     }

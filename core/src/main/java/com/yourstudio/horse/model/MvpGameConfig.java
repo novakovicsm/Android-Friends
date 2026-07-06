@@ -4,7 +4,7 @@ public final class MvpGameConfig {
     private MvpGameConfig() {
     }
 
-    public static final String DEFAULT_TRACK = "forest";
+    public static final String DEFAULT_TRACK = "forest.tmx";
     public static final int PLAYER_COUNT = 1;
     public static final int NPC_COUNT = 4;
     public static final int TOTAL_RACERS = PLAYER_COUNT + NPC_COUNT;

@@ -241,7 +241,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
                     saddleColors[saddleColorIndex],
                     outfitColors[outfitColorIndex]
                 );
-                ScreenNavigator.toTrackSelect(game, selection);
+                ScreenNavigator.toDefaultRace(game, selection);
             }
         });
 
