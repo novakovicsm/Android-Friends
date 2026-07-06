@@ -61,7 +61,6 @@ public class MainMenuScreen extends ScreenAdapter {
             }
         });
 
-        TextButton settingsButton = new TextButton("Beállítások", skin.get("secondary", TextButton.TextButtonStyle.class));
         TextButton muteButton = new TextButton(muteButtonText(), skin.get("secondary", TextButton.TextButtonStyle.class));
         muteButton.addListener(new ClickListener() {
             @Override
