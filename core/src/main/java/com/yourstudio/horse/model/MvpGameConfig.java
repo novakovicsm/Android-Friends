@@ -28,10 +28,10 @@ public final class MvpGameConfig {
     };
 
     public static final HorseProfile[] HORSES = {
-        new HorseProfile("Vill\u00e1m", StatFocus.SPEED, "Nagyon gyors, de kicsit nehezebben fordul."),
-        new HorseProfile("Pihe", StatFocus.TURNING, "K\u00f6nnyen ir\u00e1ny\u00edthat\u00f3, nyugodt versenyt\u00e1rs."),
-        new HorseProfile("Csillag", StatFocus.BOOST, "Gyorsabban t\u00f6lti a boostot, \u00fcgyes mindenes."),
-        new HorseProfile("Fut\u00f3", StatFocus.ACCELERATION, "Gyorsan indul, j\u00f3l kapja el a rajtot.")
+        new HorseProfile("Vill\u00e1m", StatFocus.SPEED, "Nagyon gyors, de kicsit nehezebben fordul.", 5, 3, 3, 3),
+        new HorseProfile("Pihe", StatFocus.TURNING, "K\u00f6nnyen ir\u00e1ny\u00edthat\u00f3, nyugodt versenyt\u00e1rs.", 3, 5, 3, 3),
+        new HorseProfile("Csillag", StatFocus.BOOST, "Gyorsabban t\u00f6lti a boostot, \u00fcgyes mindenes.", 3, 3, 3, 5),
+        new HorseProfile("Fut\u00f3", StatFocus.ACCELERATION, "Gyorsan indul, j\u00f3l kapja el a rajtot.", 3, 3, 5, 3)
     };
 
     public static final RiderBonus[] RIDER_BONUSES = {
@@ -129,6 +129,13 @@ public final class MvpGameConfig {
         return 20;
     }
 
+    public static RiderBonus riderBonusForIndex(int riderIndex) {
+        if (riderIndex < 0) {
+            throw new IllegalArgumentException("Rider index must be zero or greater.");
+        }
+        return RIDER_BONUSES[riderIndex % RIDER_BONUSES.length];
+    }
+
     public enum Difficulty {
         EASY(10, 0.3f),
         MEDIUM(20, 0.6f),
@@ -159,11 +166,20 @@ public final class MvpGameConfig {
         public final String name;
         public final StatFocus focus;
         public final String description;
+        public final int speed;
+        public final int turning;
+        public final int acceleration;
+        public final int boost;
 
-        private HorseProfile(String name, StatFocus focus, String description) {
+        private HorseProfile(String name, StatFocus focus, String description,
+                             int speed, int turning, int acceleration, int boost) {
             this.name = name;
             this.focus = focus;
             this.description = description;
+            this.speed = speed;
+            this.turning = turning;
+            this.acceleration = acceleration;
+            this.boost = boost;
         }
     }
 

@@ -95,6 +95,10 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private Label maneColorValue;
     private Label saddleColorValue;
     private Label outfitColorValue;
+    private Label horseDescriptionValue;
+    private Label horseStatsValue;
+    private Label riderBonusValue;
+    private Label petInfoValue;
 
     public CharacterSelectScreen(HorseGame game) {
         this(game, null, null, null, null, null, null, null);
@@ -198,14 +202,14 @@ public class CharacterSelectScreen extends ScreenAdapter {
         layout = new Table();
         layout.pad(24f);
 
-        layout.add(title).colspan(3).padBottom(30f);
+        layout.add(title).colspan(5).padBottom(30f);
         layout.row();
 
         Table previewRow = new Table();
         previewRow.add(horsePreviewImage).width(150f).height(110f).pad(6f);
         previewRow.add(riderPreviewImage).width(150f).height(110f).pad(6f);
         previewRow.add(petPreviewImage).width(150f).height(110f).pad(6f);
-        layout.add(previewRow).colspan(4).padBottom(24f);
+        layout.add(previewRow).colspan(5).padBottom(24f);
         layout.row();
 
         addSelectorRow(layout, "L\u00F3", horseValue, buttonStyle, () -> updateHorse(-1), () -> updateHorse(1));
@@ -215,6 +219,19 @@ public class CharacterSelectScreen extends ScreenAdapter {
         addSelectorRow(layout, "Lovas", riderValue, buttonStyle, () -> updateRider(-1), () -> updateRider(1));
         addSelectorRow(layout, "Ruh\u00E1zat", outfitColorValue, outfitColorSwatchImage, buttonStyle, () -> updateOutfitColor(-1), () -> updateOutfitColor(1));
         addSelectorRow(layout, "Kis kedvenc", petValue, buttonStyle, () -> updatePet(-1), () -> updatePet(1));
+
+        horseDescriptionValue = createInfoLabel(labelStyle, horseDescriptionText());
+        horseStatsValue = createInfoLabel(labelStyle, horseStatsText());
+        riderBonusValue = createInfoLabel(labelStyle, riderBonusText());
+        petInfoValue = createInfoLabel(labelStyle, "Kutya: kezd\u0151 kedvenc, b\u00F3nusz n\u00E9lk\u00FCl.");
+        Table infoPanel = new Table();
+        infoPanel.add(horseDescriptionValue).width(420f).left().padRight(24f);
+        infoPanel.add(horseStatsValue).width(280f).left();
+        infoPanel.row();
+        infoPanel.add(riderBonusValue).width(420f).left().padTop(12f).padRight(24f);
+        infoPanel.add(petInfoValue).width(280f).left().padTop(12f);
+        layout.add(infoPanel).colspan(5).padTop(4f).padBottom(8f);
+        layout.row();
 
         layout.row().padTop(30f);
         TextButton backButton = new TextButton("Vissza", buttonStyle);
@@ -360,6 +377,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private void updateHorse(int delta) {
         horseIndex = wrapIndex(horseIndex + delta, horses.length);
         horseValue.setText(horses[horseIndex]);
+        horseDescriptionValue.setText(horseDescriptionText());
+        horseStatsValue.setText(horseStatsText());
         refreshHorsePreview();
         saveSelectionPrefs();
     }
@@ -399,6 +418,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private void updateRider(int delta) {
         riderIndex = wrapIndex(riderIndex + delta, riders.length);
         riderValue.setText(riders[riderIndex]);
+        riderBonusValue.setText(riderBonusText());
         refreshRiderPreview();
         saveSelectionPrefs();
     }
@@ -459,6 +479,42 @@ public class CharacterSelectScreen extends ScreenAdapter {
             names[i] = MvpGameConfig.HORSES[i].name;
         }
         return names;
+    }
+
+    private Label createInfoLabel(Label.LabelStyle labelStyle, String text) {
+        Label label = new Label(text, labelStyle);
+        label.setWrap(true);
+        return label;
+    }
+
+    private String horseDescriptionText() {
+        MvpGameConfig.HorseProfile horse = MvpGameConfig.HORSES[horseIndex];
+        return horse.name + ": " + horse.description;
+    }
+
+    private String horseStatsText() {
+        MvpGameConfig.HorseProfile horse = MvpGameConfig.HORSES[horseIndex];
+        return "L\u00F3 statok\n"
+            + "Gyorsas\u00E1g: " + statBar(horse.speed) + "\n"
+            + "Fordul\u00E1s: " + statBar(horse.turning) + "\n"
+            + "Gyorsul\u00E1s: " + statBar(horse.acceleration) + "\n"
+            + "Boost: " + statBar(horse.boost);
+    }
+
+    private String riderBonusText() {
+        MvpGameConfig.RiderBonus bonus = MvpGameConfig.riderBonusForIndex(riderIndex);
+        if (bonus.type == MvpGameConfig.RiderBonusType.ACCELERATION) {
+            return "Lovas b\u00F3nusz: +1% gyorsul\u00E1s.";
+        }
+        return "Lovas b\u00F3nusz: +1% boost t\u00F6lt\u00E9s.";
+    }
+
+    private String statBar(int value) {
+        StringBuilder builder = new StringBuilder(5);
+        for (int i = 1; i <= 5; i++) {
+            builder.append(i <= value ? '#' : '.');
+        }
+        return builder.toString();
     }
 
     private Texture createColorTexture(Color color) {

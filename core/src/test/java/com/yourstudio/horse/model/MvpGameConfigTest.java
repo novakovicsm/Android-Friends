@@ -21,6 +21,21 @@ public class MvpGameConfigTest {
     }
 
     @Test
+    public void horseProfilesExposeMvpStatBars() {
+        assertEquals(5, MvpGameConfig.HORSES[0].speed);
+        assertEquals(5, MvpGameConfig.HORSES[1].turning);
+        assertEquals(5, MvpGameConfig.HORSES[2].boost);
+        assertEquals(5, MvpGameConfig.HORSES[3].acceleration);
+    }
+
+    @Test
+    public void riderBonusesAlternateBetweenAccelerationAndBoostCharge() {
+        assertEquals(MvpGameConfig.RiderBonusType.ACCELERATION, MvpGameConfig.riderBonusForIndex(0).type);
+        assertEquals(MvpGameConfig.RiderBonusType.BOOST_CHARGE, MvpGameConfig.riderBonusForIndex(1).type);
+        assertEquals(MvpGameConfig.RiderBonusType.ACCELERATION, MvpGameConfig.riderBonusForIndex(2).type);
+    }
+
+    @Test
     public void hasFourForestObstacles() {
         assertEquals(4, MvpGameConfig.FOREST_OBSTACLES.length);
     }
