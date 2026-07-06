@@ -128,10 +128,12 @@ public class RaceScreen extends ScreenAdapter {
     private float nextSpawnDelay = 3.5f;
     private String activePowerupName;
     private float activePowerupTimer;
-    private int boostChargePercent;
+    private float boostChargePercent;
     private float petSpeedBonus;
     private float petAccelBonus;
     private float petShieldBonus;
+    private float riderAccelerationBonus;
+    private float riderBoostChargeBonus;
     private boolean victoryPlayed;
     private boolean raceFinished;
     private Viewport mapViewport;
@@ -256,6 +258,7 @@ public class RaceScreen extends ScreenAdapter {
         horseIndex = findIndex(horses, horseName);
         riderIndex = findIndex(riders, riderName);
         petIndex = findIndex(pets, petName);
+        applyRiderBonus();
         horseTintColor = colorForHorseColor(horseColor);
         riderOutfitColor = colorForOutfitColor(outfitColor);
         riderHairColor = colorForRiderHair(riderName);
@@ -406,7 +409,7 @@ public class RaceScreen extends ScreenAdapter {
         }
         boolean accelerating = joystickPointer != -1;
         float effectiveMaxSpeed = maxSpeed + petSpeedBonus;
-        float effectiveAccel = acceleration + petAccelBonus;
+        float effectiveAccel = (acceleration + petAccelBonus) * (1f + riderAccelerationBonus);
         if (accelerating) {
             speed = Math.min(effectiveMaxSpeed, speed + effectiveAccel * delta);
         } else {
@@ -430,7 +433,7 @@ public class RaceScreen extends ScreenAdapter {
         if (activePowerupName != null) {
             powerupLabel.setText("B\u00F3nusz: " + activePowerupName + " (" + (int) Math.ceil(activePowerupTimer) + "s)");
         } else {
-            powerupLabel.setText("Boost: " + boostChargePercent + "%");
+            powerupLabel.setText("Boost: " + Math.round(boostChargePercent) + "%");
         }
         animationTime += delta;
         updateCoinLabel();
@@ -815,6 +818,17 @@ public class RaceScreen extends ScreenAdapter {
         }
     }
 
+    private void applyRiderBonus() {
+        riderAccelerationBonus = 0f;
+        riderBoostChargeBonus = 0f;
+        MvpGameConfig.RiderBonus bonus = MvpGameConfig.riderBonusForIndex(riderIndex);
+        if (bonus.type == MvpGameConfig.RiderBonusType.ACCELERATION) {
+            riderAccelerationBonus = bonus.value;
+        } else if (bonus.type == MvpGameConfig.RiderBonusType.BOOST_CHARGE) {
+            riderBoostChargeBonus = bonus.value;
+        }
+    }
+
     private void updatePowerupSpawns(float delta) {
         spawnTimer += delta;
         if (powerupDefs.size == 0) {
@@ -849,7 +863,10 @@ public class RaceScreen extends ScreenAdapter {
             float dy = spawn.y - horseY;
             if (dx * dx + dy * dy <= 24f * 24f) {
                 powerupSpawns.removeIndex(i);
-                boostChargePercent = Math.min(100, boostChargePercent + MvpGameConfig.BOOST_POWERUP_CHARGE_PERCENT);
+                boostChargePercent = Math.min(
+                    100f,
+                    boostChargePercent + MvpGameConfig.BOOST_POWERUP_CHARGE_PERCENT * (1f + riderBoostChargeBonus)
+                );
                 activePowerupName = "+" + MvpGameConfig.BOOST_POWERUP_CHARGE_PERCENT + "% boost";
                 activePowerupTimer = 1.5f;
                 if (powerupSound != null) {

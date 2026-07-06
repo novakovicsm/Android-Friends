@@ -31,7 +31,9 @@ public class MvpGameConfigTest {
     @Test
     public void riderBonusesAlternateBetweenAccelerationAndBoostCharge() {
         assertEquals(MvpGameConfig.RiderBonusType.ACCELERATION, MvpGameConfig.riderBonusForIndex(0).type);
+        assertEquals(0.01f, MvpGameConfig.riderBonusForIndex(0).value, 0.0001f);
         assertEquals(MvpGameConfig.RiderBonusType.BOOST_CHARGE, MvpGameConfig.riderBonusForIndex(1).type);
+        assertEquals(0.01f, MvpGameConfig.riderBonusForIndex(1).value, 0.0001f);
         assertEquals(MvpGameConfig.RiderBonusType.ACCELERATION, MvpGameConfig.riderBonusForIndex(2).type);
     }
 
