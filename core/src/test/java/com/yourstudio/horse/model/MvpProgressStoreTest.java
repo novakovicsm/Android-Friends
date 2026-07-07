@@ -21,6 +21,7 @@ public class MvpProgressStoreTest {
         assertEquals("Kutya", progress.selectedPet);
         assertEquals(MvpGameConfig.Difficulty.EASY, progress.selectedDifficulty);
         assertEquals(0, progress.upgradeLevels[0]);
+        assertEquals(0, progress.selectedSkinIndex);
         assertTrue(progress.unlockedSkins[0]);
         assertTrue(progress.unlockedPets[0]);
         assertEquals(1, progress.playerLevel);
@@ -36,6 +37,7 @@ public class MvpProgressStoreTest {
         progress.playerLevel = 4;
         progress.petXp = 200;
         progress.petLevel = 3;
+        progress.selectedSkinIndex = 2;
         progress.upgradeLevels[0] = 2;
         progress.upgradeLevels[3] = 1;
         progress.unlockedSkins[2] = true;
@@ -57,6 +59,7 @@ public class MvpProgressStoreTest {
         assertEquals(4, loaded.playerLevel);
         assertEquals(200, loaded.petXp);
         assertEquals(3, loaded.petLevel);
+        assertEquals(2, loaded.selectedSkinIndex);
         assertEquals(2, loaded.upgradeLevels[0]);
         assertEquals(1, loaded.upgradeLevels[3]);
         assertTrue(loaded.unlockedSkins[0]);

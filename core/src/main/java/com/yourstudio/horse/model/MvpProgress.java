@@ -6,6 +6,7 @@ public final class MvpProgress {
     public int playerLevel;
     public int petXp;
     public int petLevel;
+    public int selectedSkinIndex;
     public int[] upgradeLevels;
     public boolean[] unlockedSkins;
     public boolean[] unlockedPets;
@@ -25,6 +26,7 @@ public final class MvpProgress {
         progress.playerLevel = 1;
         progress.petXp = 0;
         progress.petLevel = 1;
+        progress.selectedSkinIndex = 0;
         progress.upgradeLevels = new int[MvpGameConfig.UPGRADE_CATEGORIES.length];
         progress.unlockedSkins = new boolean[MvpGameConfig.SKIN_LABELS.length];
         progress.unlockedSkins[0] = true;
@@ -101,6 +103,19 @@ public final class MvpProgress {
         }
         horseshoes -= cost;
         unlockedSkins[skinIndex] = true;
+        selectedSkinIndex = skinIndex;
+        return true;
+    }
+
+    public boolean selectSkin(int skinIndex) {
+        if (skinIndex < 0 || skinIndex >= MvpGameConfig.SKIN_LABELS.length) {
+            throw new IllegalArgumentException("Skin index is out of range.");
+        }
+        ensureUnlockedSkins();
+        if (!unlockedSkins[skinIndex]) {
+            return false;
+        }
+        selectedSkinIndex = skinIndex;
         return true;
     }
 

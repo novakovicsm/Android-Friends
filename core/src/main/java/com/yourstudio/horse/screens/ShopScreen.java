@@ -145,6 +145,9 @@ public class ShopScreen extends ScreenAdapter {
                 && i < progress.unlockedSkins.length
                 && progress.unlockedSkins[i]);
             String statusText = unlocked ? "megvan" : MvpGameConfig.skinPrice(i) + " patk\u00F3";
+            if (unlocked && progress.selectedSkinIndex == i) {
+                statusText = "kiv\u00E1lasztva";
+            }
             skinLabels[i].setText(MvpGameConfig.SKIN_LABELS[i] + " - " + statusText);
         }
         for (int i = 0; i < MvpGameConfig.PET_LABELS.length; i++) {
@@ -172,7 +175,10 @@ public class ShopScreen extends ScreenAdapter {
 
     private void purchaseSkin(int skinIndex) {
         if (isSkinUnlocked(skinIndex)) {
-            statusLabel.setText("Ez a skin m\u00E1r megvan.");
+            progress.selectSkin(skinIndex);
+            progressStore.save(progress);
+            statusLabel.setText("Skin kiv\u00E1lasztva.");
+            refreshLabels();
             return;
         }
         if (progress.horseshoes < MvpGameConfig.skinPrice(skinIndex)) {
