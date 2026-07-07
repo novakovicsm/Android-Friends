@@ -13,6 +13,9 @@ public final class MvpGameConfig {
     public static final int MAX_PLAYER_LEVEL = 4;
     public static final int MAX_PET_LEVEL = 10;
     public static final int PET_XP_PER_LEVEL = 100;
+    public static final int BOOST_ACTIVATION_COST_PERCENT = 20;
+    public static final float BOOST_ACTIVE_SECONDS = 1.1f;
+    public static final float BOOST_SPEED_MULTIPLIER = 1.35f;
     public static final float OBSTACLE_SLOWDOWN_MULTIPLIER = 0.55f;
     public static final float OBSTACLE_SLOWDOWN_SECONDS = 1.2f;
 

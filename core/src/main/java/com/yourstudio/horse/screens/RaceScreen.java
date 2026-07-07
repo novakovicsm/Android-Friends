@@ -137,6 +137,7 @@ public class RaceScreen extends ScreenAdapter {
     private float nextObstacleSpawnDelay = 2.5f;
     private String activePowerupName;
     private float activePowerupTimer;
+    private float boostActiveTimer;
     private String activeObstacleName;
     private float activeObstacleTimer;
     private float obstacleSlowTimer;
@@ -339,6 +340,7 @@ public class RaceScreen extends ScreenAdapter {
         TextButton.TextButtonStyle buttonStyle = skin.get("primary", TextButton.TextButtonStyle.class);
 
         TextButton backButton = new TextButton("Vissza", buttonStyle);
+        TextButton boostButton = new TextButton("Boost", buttonStyle);
         TextButton jumpButton = new TextButton("Ugr\u00E1s", buttonStyle);
 
         speedLabel = new Label("Sebess\u00E9g: 0 km/h", labelStyle);
@@ -372,6 +374,12 @@ public class RaceScreen extends ScreenAdapter {
                 triggerJump();
             }
         });
+        boostButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                triggerBoost();
+            }
+        });
 
         Table hudTable = new Table();
         hudTable.setFillParent(true);
@@ -403,6 +411,7 @@ public class RaceScreen extends ScreenAdapter {
         backButtonTable.setFillParent(true);
         backButtonTable.top().right().pad(16f);
         backButtonTable.add(backButton).width(220f).height(80f).row();
+        backButtonTable.add(boostButton).width(220f).height(80f).padTop(12f).row();
         backButtonTable.add(jumpButton).width(220f).height(80f).padTop(12f);
         stage.addActor(backButtonTable);
         stage.addActor(hudTable);
@@ -457,8 +466,9 @@ public class RaceScreen extends ScreenAdapter {
         }
         boolean accelerating = joystickPointer != -1;
         float slowMultiplier = obstacleSlowTimer > 0f ? MvpGameConfig.OBSTACLE_SLOWDOWN_MULTIPLIER : 1f;
-        float effectiveMaxSpeed = (maxSpeed + petSpeedBonus) * slowMultiplier;
-        float effectiveAccel = (acceleration + petAccelBonus) * (1f + riderAccelerationBonus);
+        float boostMultiplier = boostActiveTimer > 0f ? MvpGameConfig.BOOST_SPEED_MULTIPLIER : 1f;
+        float effectiveMaxSpeed = (maxSpeed + petSpeedBonus) * slowMultiplier * boostMultiplier;
+        float effectiveAccel = (acceleration + petAccelBonus) * (1f + riderAccelerationBonus) * boostMultiplier;
         if (accelerating) {
             speed = Math.min(effectiveMaxSpeed, speed + effectiveAccel * delta);
         } else {
@@ -467,6 +477,7 @@ public class RaceScreen extends ScreenAdapter {
         distance += speed * delta;
         updateRaceCompletion();
         updateJump(delta);
+        updateBoost(delta);
         updateObstacleSlowdown(delta);
         updatePowerupSpawns(delta);
         updatePowerupPickup(delta);
@@ -489,6 +500,8 @@ public class RaceScreen extends ScreenAdapter {
             powerupLabel.setText("Akad\u00E1ly: " + activeObstacleName + " (" + (int) Math.ceil(activeObstacleTimer) + "s)");
         } else if (activePowerupName != null) {
             powerupLabel.setText("B\u00F3nusz: " + activePowerupName + " (" + (int) Math.ceil(activePowerupTimer) + "s)");
+        } else if (boostActiveTimer > 0f) {
+            powerupLabel.setText("Boost akt\u00EDv: " + (int) Math.ceil(boostActiveTimer) + "s");
         } else {
             powerupLabel.setText("Boost: " + Math.round(boostChargePercent) + "%");
         }
@@ -601,6 +614,28 @@ public class RaceScreen extends ScreenAdapter {
             jumpLabel.setText("Ugr\u00E1s: " + (int) Math.ceil(jumpCooldownTimer) + "s");
         } else {
             jumpLabel.setText("Ugr\u00E1s: k\u00E9sz");
+        }
+    }
+
+    private void triggerBoost() {
+        if (boostActiveTimer > 0f || boostChargePercent < MvpGameConfig.BOOST_ACTIVATION_COST_PERCENT) {
+            return;
+        }
+        boostChargePercent = Math.max(0f, boostChargePercent - MvpGameConfig.BOOST_ACTIVATION_COST_PERCENT);
+        boostActiveTimer = MvpGameConfig.BOOST_ACTIVE_SECONDS;
+        if (!muted && powerupSound != null) {
+            powerupSound.play(0.7f);
+        }
+        try {
+            Gdx.input.vibrate(55);
+        } catch (SecurityException ignored) {
+            // VIBRATE permission missing or restricted; ignore to avoid crash.
+        }
+    }
+
+    private void updateBoost(float delta) {
+        if (boostActiveTimer > 0f) {
+            boostActiveTimer = Math.max(0f, boostActiveTimer - delta);
         }
     }
 
