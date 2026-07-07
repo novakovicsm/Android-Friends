@@ -10,6 +10,7 @@ public final class MvpProgress {
     public String selectedRiderName;
     public String selectedPet;
     public String selectedRiderColor;
+    public MvpGameConfig.Difficulty selectedDifficulty;
     public String recordTime;
     public boolean tutorialComplete;
     public boolean muted;
@@ -25,6 +26,7 @@ public final class MvpProgress {
         progress.selectedRiderName = MvpGameConfig.RIDER_NAMES[0];
         progress.selectedPet = "Kutya";
         progress.selectedRiderColor = "Piros";
+        progress.selectedDifficulty = MvpGameConfig.Difficulty.EASY;
         progress.recordTime = "";
         progress.tutorialComplete = false;
         progress.muted = false;

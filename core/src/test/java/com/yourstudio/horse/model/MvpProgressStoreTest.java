@@ -19,6 +19,7 @@ public class MvpProgressStoreTest {
         assertEquals("Vill\u00e1m", progress.selectedHorse);
         assertEquals("Peti", progress.selectedRiderName);
         assertEquals("Kutya", progress.selectedPet);
+        assertEquals(MvpGameConfig.Difficulty.EASY, progress.selectedDifficulty);
         assertEquals(1, progress.playerLevel);
     }
 
@@ -36,6 +37,7 @@ public class MvpProgressStoreTest {
         progress.selectedRiderName = "Szandi";
         progress.selectedPet = "Kutya";
         progress.selectedRiderColor = "K\u00e9k";
+        progress.selectedDifficulty = MvpGameConfig.Difficulty.HARD;
         progress.recordTime = "01:23";
         progress.tutorialComplete = true;
         progress.muted = true;
@@ -52,6 +54,7 @@ public class MvpProgressStoreTest {
         assertEquals("Szandi", loaded.selectedRiderName);
         assertEquals("Kutya", loaded.selectedPet);
         assertEquals("K\u00e9k", loaded.selectedRiderColor);
+        assertEquals(MvpGameConfig.Difficulty.HARD, loaded.selectedDifficulty);
         assertEquals("01:23", loaded.recordTime);
         assertTrue(loaded.tutorialComplete);
         assertTrue(loaded.muted);

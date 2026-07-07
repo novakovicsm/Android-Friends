@@ -18,6 +18,7 @@ public class MvpProgressTest {
         assertEquals("Vill\u00e1m", progress.selectedHorse);
         assertEquals("Peti", progress.selectedRiderName);
         assertEquals("Kutya", progress.selectedPet);
+        assertEquals(MvpGameConfig.Difficulty.EASY, progress.selectedDifficulty);
         assertFalse(progress.tutorialComplete);
         assertFalse(progress.muted);
     }

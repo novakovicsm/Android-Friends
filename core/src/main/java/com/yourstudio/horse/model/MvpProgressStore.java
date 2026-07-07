@@ -14,6 +14,7 @@ public final class MvpProgressStore {
     private static final String KEY_SELECTED_RIDER_NAME = "selectedRiderName";
     private static final String KEY_SELECTED_PET = "selectedPet";
     private static final String KEY_SELECTED_RIDER_COLOR = "selectedRiderColor";
+    private static final String KEY_SELECTED_DIFFICULTY = "selectedDifficulty";
     private static final String KEY_RECORD_TIME = "recordTime";
     private static final String KEY_TUTORIAL_COMPLETE = "tutorialComplete";
     private static final String KEY_MUTED = "muted";
@@ -36,6 +37,10 @@ public final class MvpProgressStore {
         progress.selectedRiderName = preferences.getString(KEY_SELECTED_RIDER_NAME, defaults.selectedRiderName);
         progress.selectedPet = preferences.getString(KEY_SELECTED_PET, defaults.selectedPet);
         progress.selectedRiderColor = preferences.getString(KEY_SELECTED_RIDER_COLOR, defaults.selectedRiderColor);
+        progress.selectedDifficulty = difficultyFromName(
+            preferences.getString(KEY_SELECTED_DIFFICULTY, defaults.selectedDifficulty.name()),
+            defaults.selectedDifficulty
+        );
         progress.recordTime = preferences.getString(KEY_RECORD_TIME, defaults.recordTime);
         progress.tutorialComplete = preferences.getBoolean(KEY_TUTORIAL_COMPLETE, defaults.tutorialComplete);
         progress.muted = preferences.getBoolean(KEY_MUTED, defaults.muted);
@@ -52,9 +57,21 @@ public final class MvpProgressStore {
         preferences.putString(KEY_SELECTED_RIDER_NAME, progress.selectedRiderName);
         preferences.putString(KEY_SELECTED_PET, progress.selectedPet);
         preferences.putString(KEY_SELECTED_RIDER_COLOR, progress.selectedRiderColor);
+        MvpGameConfig.Difficulty difficulty = progress.selectedDifficulty != null
+            ? progress.selectedDifficulty
+            : MvpGameConfig.Difficulty.EASY;
+        preferences.putString(KEY_SELECTED_DIFFICULTY, difficulty.name());
         preferences.putString(KEY_RECORD_TIME, progress.recordTime);
         preferences.putBoolean(KEY_TUTORIAL_COMPLETE, progress.tutorialComplete);
         preferences.putBoolean(KEY_MUTED, progress.muted);
         preferences.flush();
+    }
+
+    private MvpGameConfig.Difficulty difficultyFromName(String name, MvpGameConfig.Difficulty fallback) {
+        try {
+            return MvpGameConfig.Difficulty.valueOf(name);
+        } catch (IllegalArgumentException exception) {
+            return fallback;
+        }
     }
 }

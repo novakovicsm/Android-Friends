@@ -76,6 +76,7 @@ public class RaceScreen extends ScreenAdapter {
     private final String maneColor;
     private final String saddleColor;
     private final String outfitColor;
+    private final MvpGameConfig.Difficulty difficulty;
 
     private Stage stage;
     private Texture background;
@@ -92,6 +93,7 @@ public class RaceScreen extends ScreenAdapter {
     private Label petBonusLabel;
     private Label jumpLabel;
     private Label npcLabel;
+    private Label difficultyLabel;
     private Image horsePreviewImage;
     private Image riderPreviewImage;
     private Image petPreviewImage;
@@ -190,6 +192,7 @@ public class RaceScreen extends ScreenAdapter {
         this.maneColor = null;
         this.saddleColor = null;
         this.outfitColor = null;
+        this.difficulty = MvpGameConfig.Difficulty.EASY;
     }
     
     public RaceScreen(HorseGame game, String horseName, String riderName, String petName, String trackName) {
@@ -202,6 +205,7 @@ public class RaceScreen extends ScreenAdapter {
         this.maneColor = null;
         this.saddleColor = null;
         this.outfitColor = null;
+        this.difficulty = MvpGameConfig.Difficulty.EASY;
     }
 
     public RaceScreen(HorseGame game, String horseName, String riderName, String petName, String trackName,
@@ -215,10 +219,18 @@ public class RaceScreen extends ScreenAdapter {
         this.maneColor = maneColor;
         this.saddleColor = saddleColor;
         this.outfitColor = null;
+        this.difficulty = MvpGameConfig.Difficulty.EASY;
     }
 
     public RaceScreen(HorseGame game, String horseName, String riderName, String petName, String trackName,
                       String horseColor, String maneColor, String saddleColor, String outfitColor) {
+        this(game, horseName, riderName, petName, trackName, horseColor, maneColor, saddleColor, outfitColor,
+            MvpGameConfig.Difficulty.EASY);
+    }
+
+    public RaceScreen(HorseGame game, String horseName, String riderName, String petName, String trackName,
+                      String horseColor, String maneColor, String saddleColor, String outfitColor,
+                      MvpGameConfig.Difficulty difficulty) {
         this.game = game;
         this.horseName = horseName;
         this.riderName = riderName;
@@ -228,6 +240,7 @@ public class RaceScreen extends ScreenAdapter {
         this.maneColor = maneColor;
         this.saddleColor = saddleColor;
         this.outfitColor = outfitColor;
+        this.difficulty = difficulty != null ? difficulty : MvpGameConfig.Difficulty.EASY;
     }
 
     @Override
@@ -334,6 +347,7 @@ public class RaceScreen extends ScreenAdapter {
         petBonusLabel = new Label("Kedvenc b\u00F3nusz: --", labelStyle);
         jumpLabel = new Label("Ugr\u00E1s: k\u00E9sz", labelStyle);
         npcLabel = new Label(npcLabelText(), labelStyle);
+        difficultyLabel = new Label("Neh\u00E9zs\u00E9g: " + difficultyLabelText(), labelStyle);
         coinLabel = new Label("\u00C9rm\u00E9k: 0", labelStyle);
         // directionLabel = new Label("Ir\u00E1ny:", labelStyle);
             // Joystick control only, remove left/right buttons from UI
@@ -347,7 +361,7 @@ public class RaceScreen extends ScreenAdapter {
                     clickSound.play(0.6f);
                 }
                 ScreenNavigator.Selection selection = new ScreenNavigator.Selection(
-                    horseName, riderName, petName, horseColor, maneColor, saddleColor, outfitColor
+                    horseName, riderName, petName, horseColor, maneColor, saddleColor, outfitColor, difficulty
                 );
                 ScreenNavigator.toCharacterSelect(game, selection);
             }
@@ -367,6 +381,7 @@ public class RaceScreen extends ScreenAdapter {
         hudContent.pad(12f);
         hudContent.add(speedLabel).left().row();
         hudContent.add(lapLabel).left().padTop(6f).row();
+        hudContent.add(difficultyLabel).left().padTop(6f).row();
         hudContent.add(powerupLabel).left().padTop(6f);
         hudContent.row();
         hudContent.add(petBonusLabel).left().padTop(6f);
@@ -537,7 +552,7 @@ public class RaceScreen extends ScreenAdapter {
         MvpProgressStore progressStore = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME));
         MvpProgress progress = progressStore.load();
         boolean recordBroken = isRecordBroken(progress.recordTime, elapsedTime);
-        progress.applyRaceResult(1, MvpGameConfig.Difficulty.MEDIUM, recordBroken);
+        progress.applyRaceResult(1, difficulty, recordBroken);
         if (recordBroken) {
             progress.recordTime = formatRaceTime(elapsedTime);
         }
@@ -923,6 +938,16 @@ public class RaceScreen extends ScreenAdapter {
             builder.append(npcNames[i]);
         }
         return builder.toString();
+    }
+
+    private String difficultyLabelText() {
+        if (difficulty == MvpGameConfig.Difficulty.HARD) {
+            return "Neh\u00E9z";
+        }
+        if (difficulty == MvpGameConfig.Difficulty.MEDIUM) {
+            return "K\u00F6zepes";
+        }
+        return "K\u00F6nny\u0171";
     }
 
     private void updatePowerupSpawns(float delta) {

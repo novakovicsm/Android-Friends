@@ -21,7 +21,8 @@ public final class ScreenNavigator {
             return;
         }
         game.setScreen(new CharacterSelectScreen(game, selection.horseName, selection.riderName, selection.petName,
-            selection.horseColor, selection.maneColor, selection.saddleColor, selection.outfitColor));
+            selection.horseColor, selection.maneColor, selection.saddleColor, selection.outfitColor,
+            selection.difficulty));
     }
 
     public static void toTrackSelect(HorseGame game, Selection selection) {
@@ -43,7 +44,8 @@ public final class ScreenNavigator {
             return;
         }
         game.setScreen(new RaceScreen(game, selection.horseName, selection.riderName, selection.petName, trackName,
-            selection.horseColor, selection.maneColor, selection.saddleColor, selection.outfitColor));
+            selection.horseColor, selection.maneColor, selection.saddleColor, selection.outfitColor,
+            selection.difficulty));
     }
 
     public static final class Selection {
@@ -54,9 +56,17 @@ public final class ScreenNavigator {
         public final String maneColor;
         public final String saddleColor;
         public final String outfitColor;
+        public final MvpGameConfig.Difficulty difficulty;
 
         public Selection(String horseName, String riderName, String petName,
                          String horseColor, String maneColor, String saddleColor, String outfitColor) {
+            this(horseName, riderName, petName, horseColor, maneColor, saddleColor, outfitColor,
+                MvpGameConfig.Difficulty.EASY);
+        }
+
+        public Selection(String horseName, String riderName, String petName,
+                         String horseColor, String maneColor, String saddleColor, String outfitColor,
+                         MvpGameConfig.Difficulty difficulty) {
             this.horseName = horseName;
             this.riderName = riderName;
             this.petName = petName;
@@ -64,6 +74,7 @@ public final class ScreenNavigator {
             this.maneColor = maneColor;
             this.saddleColor = saddleColor;
             this.outfitColor = outfitColor;
+            this.difficulty = difficulty != null ? difficulty : MvpGameConfig.Difficulty.EASY;
         }
     }
 }

@@ -80,6 +80,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private final String[] maneColors = {"Fekete", "Csokol\u00E1d\u00E9", "Sz\u00FCrke", "Sz\u0151ke"};
     private final String[] saddleColors = {"V\u00F6r\u00F6s", "K\u00E9k", "Z\u00F6ld", "Fekete"};
     private final String[] outfitColors = {"Piros", "K\u00E9k", "Z\u00F6ld", "Lila"};
+    private final MvpGameConfig.Difficulty[] difficulties = MvpGameConfig.Difficulty.values();
+    private final String[] difficultyLabels = {"K\u00F6nny\u0171", "K\u00F6zepes", "Neh\u00E9z"};
 
     private int horseIndex;
     private int riderIndex;
@@ -88,6 +90,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private int maneColorIndex;
     private int saddleColorIndex;
     private int outfitColorIndex;
+    private int difficultyIndex;
 
     private Label horseValue;
     private Label riderValue;
@@ -96,6 +99,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private Label maneColorValue;
     private Label saddleColorValue;
     private Label outfitColorValue;
+    private Label difficultyValue;
     private Label horseDescriptionValue;
     private Label horseStatsValue;
     private Label riderBonusValue;
@@ -116,6 +120,12 @@ public class CharacterSelectScreen extends ScreenAdapter {
 
     public CharacterSelectScreen(HorseGame game, String horseName, String riderName, String petName,
                                  String horseColor, String maneColor, String saddleColor, String outfitColor) {
+        this(game, horseName, riderName, petName, horseColor, maneColor, saddleColor, outfitColor, null);
+    }
+
+    public CharacterSelectScreen(HorseGame game, String horseName, String riderName, String petName,
+                                 String horseColor, String maneColor, String saddleColor, String outfitColor,
+                                 MvpGameConfig.Difficulty difficulty) {
         this.game = game;
         Preferences prefs = Gdx.app.getPreferences(PREFS_NAME);
         MvpProgress progress = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME)).load();
@@ -126,6 +136,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
         String resolvedManeColor = maneColor != null ? maneColor : prefs.getString(PREF_MANE_COLOR, null);
         String resolvedSaddleColor = saddleColor != null ? saddleColor : prefs.getString(PREF_SADDLE_COLOR, null);
         String resolvedOutfitColor = outfitColor != null ? outfitColor : prefs.getString(PREF_OUTFIT_COLOR, null);
+        MvpGameConfig.Difficulty resolvedDifficulty = difficulty != null ? difficulty : progress.selectedDifficulty;
 
         this.horseIndex = findIndex(horses, resolvedHorse);
         this.riderIndex = findIndex(riders, resolvedRider);
@@ -134,6 +145,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
         this.maneColorIndex = findIndex(maneColors, resolvedManeColor);
         this.saddleColorIndex = findIndex(saddleColors, resolvedSaddleColor);
         this.outfitColorIndex = findIndex(outfitColors, resolvedOutfitColor);
+        this.difficultyIndex = findDifficultyIndex(resolvedDifficulty);
     }
 
     @Override
@@ -189,6 +201,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
         maneColorValue = new Label(maneColors[maneColorIndex], labelStyle);
         saddleColorValue = new Label(saddleColors[saddleColorIndex], labelStyle);
         outfitColorValue = new Label(outfitColors[outfitColorIndex], labelStyle);
+        difficultyValue = new Label(difficultyLabels[difficultyIndex], labelStyle);
 
         horsePreviewImage = new Image(horsePreviewRegions[horseIndex]);
         riderPreviewImage = new Image(toDrawable(riderPreviews[riderIndex]));
@@ -230,6 +243,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
         layout.row();
         addSelectorRow(layout, "Ruh\u00E1zat", outfitColorValue, outfitColorSwatchImage, buttonStyle, () -> updateOutfitColor(-1), () -> updateOutfitColor(1));
         addSelectorRow(layout, "Kis kedvenc", petValue, buttonStyle, () -> updatePet(-1), () -> updatePet(1));
+        addSelectorRow(layout, "Neh\u00E9zs\u00E9g", difficultyValue, buttonStyle, () -> updateDifficulty(-1), () -> updateDifficulty(1));
 
         horseDescriptionValue = createInfoLabel(labelStyle, horseDescriptionText());
         horseStatsValue = createInfoLabel(labelStyle, horseStatsText());
@@ -266,7 +280,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
                     horseColors[horseColorIndex],
                     maneColors[maneColorIndex],
                     saddleColors[saddleColorIndex],
-                    outfitColors[outfitColorIndex]
+                    outfitColors[outfitColorIndex],
+                    difficulties[difficultyIndex]
                 );
                 ScreenNavigator.toDefaultRace(game, selection);
             }
@@ -456,6 +471,12 @@ public class CharacterSelectScreen extends ScreenAdapter {
         saveSelectionPrefs();
     }
 
+    private void updateDifficulty(int delta) {
+        difficultyIndex = wrapIndex(difficultyIndex + delta, difficulties.length);
+        difficultyValue.setText(difficultyLabels[difficultyIndex]);
+        saveSelectionPrefs();
+    }
+
     private void saveSelectionPrefs() {
         Preferences prefs = Gdx.app.getPreferences(PREFS_NAME);
         prefs.putString(PREF_HORSE, horses[horseIndex]);
@@ -473,6 +494,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
         progress.selectedRiderName = riders[riderIndex];
         progress.selectedPet = pets[petIndex];
         progress.selectedRiderColor = outfitColors[outfitColorIndex];
+        progress.selectedDifficulty = difficulties[difficultyIndex];
         progressStore.save(progress);
     }
 
@@ -506,6 +528,15 @@ public class CharacterSelectScreen extends ScreenAdapter {
             names[i] = MvpGameConfig.HORSES[i].name;
         }
         return names;
+    }
+
+    private int findDifficultyIndex(MvpGameConfig.Difficulty difficulty) {
+        for (int i = 0; i < difficulties.length; i++) {
+            if (difficulties[i] == difficulty) {
+                return i;
+            }
+        }
+        return 0;
     }
 
     private Label createInfoLabel(Label.LabelStyle labelStyle, String text) {
