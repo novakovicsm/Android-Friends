@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -217,6 +218,16 @@ public class CharacterSelectScreen extends ScreenAdapter {
         addSelectorRow(layout, "S\u00F6r\u00E9ny", maneColorValue, maneColorSwatchImage, buttonStyle, () -> updateManeColor(-1), () -> updateManeColor(1));
         addSelectorRow(layout, "Nyereg", saddleColorValue, saddleColorSwatchImage, buttonStyle, () -> updateSaddleColor(-1), () -> updateSaddleColor(1));
         addSelectorRow(layout, "Lovas", riderValue, buttonStyle, () -> updateRider(-1), () -> updateRider(1));
+        TextButton randomRiderButton = new TextButton("V\u00E9letlen n\u00E9v", buttonStyle);
+        randomRiderButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                playClick();
+                randomizeRiderName();
+            }
+        });
+        layout.add(randomRiderButton).colspan(5).width(260f).height(60f).padBottom(18f);
+        layout.row();
         addSelectorRow(layout, "Ruh\u00E1zat", outfitColorValue, outfitColorSwatchImage, buttonStyle, () -> updateOutfitColor(-1), () -> updateOutfitColor(1));
         addSelectorRow(layout, "Kis kedvenc", petValue, buttonStyle, () -> updatePet(-1), () -> updatePet(1));
 
@@ -417,6 +428,21 @@ public class CharacterSelectScreen extends ScreenAdapter {
 
     private void updateRider(int delta) {
         riderIndex = wrapIndex(riderIndex + delta, riders.length);
+        riderValue.setText(riders[riderIndex]);
+        riderBonusValue.setText(riderBonusText());
+        refreshRiderPreview();
+        saveSelectionPrefs();
+    }
+
+    private void randomizeRiderName() {
+        if (riders.length <= 1) {
+            return;
+        }
+        int nextIndex = riderIndex;
+        while (nextIndex == riderIndex) {
+            nextIndex = MathUtils.random(riders.length - 1);
+        }
+        riderIndex = nextIndex;
         riderValue.setText(riders[riderIndex]);
         riderBonusValue.setText(riderBonusText());
         refreshRiderPreview();
