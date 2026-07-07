@@ -49,6 +49,9 @@ public class MainMenuScreen extends ScreenAdapter {
         Label description = new Label("Válaszd ki a lovadat és indulj versenyre barátaiddal!", bodyStyle);
         description.setWrap(true);
         description.setAlignment(Align.center);
+        Label progressLabel = new Label(progressSummaryText(), bodyStyle);
+        progressLabel.setWrap(true);
+        progressLabel.setAlignment(Align.center);
 
         TextButton startButton = new TextButton("Játék Indítása", buttonStyle);
         startButton.addListener(new ClickListener() {
@@ -85,6 +88,7 @@ public class MainMenuScreen extends ScreenAdapter {
         // Menu section
         Table menuTable = new Table();
         menuTable.add(description).width(400f).padBottom(24f).row();
+        menuTable.add(progressLabel).width(400f).padBottom(20f).row();
         menuTable.add(startButton).width(280f).height(80f).padBottom(16f).row();
         menuTable.add(muteButton).width(280f).height(60f);
 
@@ -103,6 +107,15 @@ public class MainMenuScreen extends ScreenAdapter {
 
     private String muteButtonText() {
         return progress != null && progress.muted ? "Hang: kikapcsolva" : "Hang: bekapcsolva";
+    }
+
+    private String progressSummaryText() {
+        if (progress == null) {
+            return "Aranypatk\u00F3: 0 | Szint: 1 | Kutya: 1";
+        }
+        return "Aranypatk\u00F3: " + progress.horseshoes
+            + " | Szint: " + progress.playerLevel
+            + " | Kutya: " + progress.petLevel;
     }
 
     private void applyMenuMusicState() {
