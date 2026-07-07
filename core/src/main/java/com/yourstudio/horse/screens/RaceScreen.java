@@ -97,6 +97,7 @@ public class RaceScreen extends ScreenAdapter {
     private Label npcLabel;
     private Label difficultyLabel;
     private Label resultLabel;
+    private TextButton restartButton;
     private Image horsePreviewImage;
     private Image riderPreviewImage;
     private Image petPreviewImage;
@@ -358,6 +359,8 @@ public class RaceScreen extends ScreenAdapter {
         TextButton backButton = new TextButton("Vissza", buttonStyle);
         TextButton boostButton = new TextButton("Boost", buttonStyle);
         TextButton jumpButton = new TextButton("Ugr\u00E1s", buttonStyle);
+        restartButton = new TextButton("\u00DAj futam", buttonStyle);
+        restartButton.setVisible(false);
 
         speedLabel = new Label("Sebess\u00E9g: 0 km/h", labelStyle);
         lapLabel = new Label("K\u00F6r: 1/3", labelStyle);
@@ -397,6 +400,18 @@ public class RaceScreen extends ScreenAdapter {
                 triggerBoost();
             }
         });
+        restartButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (!muted && clickSound != null) {
+                    clickSound.play(0.6f);
+                }
+                ScreenNavigator.Selection selection = new ScreenNavigator.Selection(
+                    horseName, riderName, petName, horseColor, maneColor, saddleColor, outfitColor, difficulty
+                );
+                ScreenNavigator.toDefaultRace(game, selection);
+            }
+        });
 
         Table hudTable = new Table();
         hudTable.setFillParent(true);
@@ -431,7 +446,8 @@ public class RaceScreen extends ScreenAdapter {
         backButtonTable.top().right().pad(16f);
         backButtonTable.add(backButton).width(220f).height(80f).row();
         backButtonTable.add(boostButton).width(220f).height(80f).padTop(12f).row();
-        backButtonTable.add(jumpButton).width(220f).height(80f).padTop(12f);
+        backButtonTable.add(jumpButton).width(220f).height(80f).padTop(12f).row();
+        backButtonTable.add(restartButton).width(220f).height(80f).padTop(12f);
         stage.addActor(backButtonTable);
         stage.addActor(hudTable);
         InputMultiplexer multiplexer = new InputMultiplexer();
@@ -600,7 +616,11 @@ public class RaceScreen extends ScreenAdapter {
         playerCoins = progress.horseshoes;
         updateCoinLabel();
         if (resultLabel != null) {
-            resultLabel.setText("Eredm\u00E9ny: 1. hely, +" + horseshoeReward + " patk\u00F3, +" + xpReward + " XP");
+            resultLabel.setText("Eredm\u00E9ny: 1. hely, +" + horseshoeReward + " patk\u00F3, +" + xpReward + " XP"
+                + (recordBroken ? ", \u00FAj rekord!" : ""));
+        }
+        if (restartButton != null) {
+            restartButton.setVisible(true);
         }
         if (!muted && winSound != null) {
             winSound.play(0.7f);
