@@ -134,6 +134,8 @@ public class RaceScreen extends ScreenAdapter {
     private Array<ObstacleSpawn> obstacleSpawns = new Array<>();
     private Texture powerupMarker;
     private Texture obstacleMarker;
+    private Texture treeMarker;
+    private Texture shadowMarker;
     private float spawnTimer;
     private float obstacleSpawnTimer;
     private float nextSpawnDelay = 3.5f;
@@ -297,6 +299,8 @@ public class RaceScreen extends ScreenAdapter {
         runAnimation.setPlayMode(Animation.PlayMode.LOOP);
         powerupMarker = createPowerupMarker();
         obstacleMarker = createObstacleMarker();
+        treeMarker = createTreeMarker();
+        shadowMarker = createShadowMarker();
         loadPowerupDefs();
         horseIndex = findIndex(horses, horseName);
         riderIndex = findIndex(riders, riderName);
@@ -557,16 +561,20 @@ public class RaceScreen extends ScreenAdapter {
             mapRenderer.setView(camera);
             mapRenderer.render();
             mapRenderer.getBatch().begin();
+            drawForestDecorations(mapRenderer.getBatch(), true, false);
             drawPowerups(mapRenderer.getBatch());
             drawObstacles(mapRenderer.getBatch());
             drawHorseAnimation(mapRenderer.getBatch(), true);
+            drawForestDecorations(mapRenderer.getBatch(), true, true);
             mapRenderer.getBatch().end();
         } else {
             stage.getBatch().begin();
             drawBackgroundFit(stage.getBatch());
+            drawForestDecorations(stage.getBatch(), false, false);
             drawPowerups(stage.getBatch());
             drawObstacles(stage.getBatch());
             drawHorseAnimation(stage.getBatch(), false);
+            drawForestDecorations(stage.getBatch(), false, true);
             stage.getBatch().end();
         }
         stage.act(delta);
@@ -723,6 +731,12 @@ public class RaceScreen extends ScreenAdapter {
         }
         if (obstacleMarker != null) {
             obstacleMarker.dispose();
+        }
+        if (treeMarker != null) {
+            treeMarker.dispose();
+        }
+        if (shadowMarker != null) {
+            shadowMarker.dispose();
         }
         if (hudPanel != null) {
             hudPanel.dispose();
@@ -1161,6 +1175,7 @@ public class RaceScreen extends ScreenAdapter {
         for (PowerupSpawn spawn : powerupSpawns) {
             float x = spawn.x * scale;
             float y = spawn.y * scale;
+            drawEntityShadow(batch, x, y - 7f * scale, 14f * scale, 5f * scale, 0.18f);
             batch.draw(powerupMarker, x - 10f * scale, y - 10f * scale, 20f * scale, 20f * scale);
         }
     }
@@ -1173,7 +1188,37 @@ public class RaceScreen extends ScreenAdapter {
         for (ObstacleSpawn spawn : obstacleSpawns) {
             float x = spawn.x * scale;
             float y = spawn.y * scale;
+            drawEntityShadow(batch, x, y - 10f * scale, 28f * scale, 8f * scale, 0.22f);
             batch.draw(obstacleMarker, x - 16f * scale, y - 12f * scale, 32f * scale, 24f * scale);
+        }
+    }
+
+    private void drawForestDecorations(com.badlogic.gdx.graphics.g2d.Batch batch, boolean mapSpace, boolean foreground) {
+        if (treeMarker == null) {
+            return;
+        }
+        float scale = mapSpace ? mapScale : 1f;
+        float baseX = mapSpace ? 0f : stage.getViewport().getWorldWidth() * 0.5f - 320f;
+        float baseY = mapSpace ? 0f : stage.getViewport().getWorldHeight() * 0.25f - 120f;
+        float[][] decorations = {
+            {90f, 90f, 0.80f}, {210f, 145f, 0.90f}, {365f, 105f, 0.82f},
+            {520f, 185f, 1.00f}, {650f, 120f, 0.88f}, {760f, 230f, 1.08f},
+            {130f, 315f, 1.10f}, {300f, 365f, 1.18f}, {475f, 330f, 1.08f},
+            {620f, 395f, 1.24f}, {820f, 345f, 1.16f}, {945f, 430f, 1.32f}
+        };
+        for (int i = 0; i < decorations.length; i++) {
+            float y = decorations[i][1];
+            boolean isForeground = y > 300f;
+            if (isForeground != foreground) {
+                continue;
+            }
+            float x = baseX + decorations[i][0] * scale;
+            float worldY = baseY + y * scale;
+            float depthScale = decorations[i][2] * scale;
+            float width = 48f * depthScale;
+            float height = 64f * depthScale;
+            drawEntityShadow(batch, x, worldY - 3f * scale, width * 0.70f, 9f * depthScale, 0.18f);
+            batch.draw(treeMarker, x - width * 0.5f, worldY - 10f * depthScale, width, height);
         }
     }
 
@@ -1200,6 +1245,41 @@ public class RaceScreen extends ScreenAdapter {
         pixmap.fillRectangle(2, 5, 6, 4);
         pixmap.fillRectangle(24, 5, 6, 4);
         Texture texture = new Texture(pixmap);
+        pixmap.dispose();
+        return texture;
+    }
+
+    private Texture createTreeMarker() {
+        Pixmap pixmap = new Pixmap(48, 64, Pixmap.Format.RGBA8888);
+        pixmap.setColor(0f, 0f, 0f, 0f);
+        pixmap.fill();
+        pixmap.setColor(0.32f, 0.18f, 0.08f, 1f);
+        pixmap.fillRectangle(21, 24, 7, 28);
+        pixmap.setColor(0.20f, 0.42f, 0.20f, 1f);
+        pixmap.fillCircle(24, 20, 18);
+        pixmap.setColor(0.12f, 0.32f, 0.15f, 1f);
+        pixmap.fillCircle(13, 25, 13);
+        pixmap.fillCircle(35, 27, 14);
+        pixmap.setColor(0.36f, 0.58f, 0.25f, 1f);
+        pixmap.fillCircle(25, 13, 10);
+        pixmap.setColor(0.10f, 0.24f, 0.12f, 1f);
+        pixmap.drawCircle(24, 20, 18);
+        Texture texture = new Texture(pixmap);
+        texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+        pixmap.dispose();
+        return texture;
+    }
+
+    private Texture createShadowMarker() {
+        Pixmap pixmap = new Pixmap(32, 12, Pixmap.Format.RGBA8888);
+        pixmap.setColor(0f, 0f, 0f, 0f);
+        pixmap.fill();
+        pixmap.setColor(0f, 0f, 0f, 0.45f);
+        pixmap.fillRectangle(8, 3, 16, 6);
+        pixmap.fillCircle(8, 6, 3);
+        pixmap.fillCircle(24, 6, 3);
+        Texture texture = new Texture(pixmap);
+        texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
         pixmap.dispose();
         return texture;
     }
@@ -1267,12 +1347,26 @@ public class RaceScreen extends ScreenAdapter {
             x = stage.getViewport().getWorldWidth() * 0.5f - size * 0.5f;
             y = stage.getViewport().getWorldHeight() * 0.25f - size * 0.5f;
         }
-        y += jumpOffset() * scale;
+        float jump = jumpOffset() * scale;
+        float shadowAlpha = 0.28f - Math.min(0.14f, jump * 0.0035f);
+        drawEntityShadow(batch, x + size * 0.5f, y + size * 0.18f, size * 0.58f, size * 0.10f, shadowAlpha);
+        y += jump;
         if (horseDirection >= 0f) {
             batch.draw(frame, x, y, size, size);
         } else {
             batch.draw(frame, x + size, y, -size, size);
         }
+        batch.setColor(previousColor);
+    }
+
+    private void drawEntityShadow(com.badlogic.gdx.graphics.g2d.Batch batch, float centerX, float centerY,
+                                  float width, float height, float alpha) {
+        if (shadowMarker == null) {
+            return;
+        }
+        Color previousColor = new Color(batch.getColor());
+        batch.setColor(0f, 0f, 0f, alpha);
+        batch.draw(shadowMarker, centerX - width * 0.5f, centerY - height * 0.5f, width, height);
         batch.setColor(previousColor);
     }
 
