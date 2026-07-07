@@ -85,6 +85,8 @@ public class RaceScreen extends ScreenAdapter {
     private Sound clickSound;
     private Sound powerupSound;
     private Sound winSound;
+    private Sound jumpSound;
+    private Sound obstacleSound;
     private Music raceMusic;
     private Texture hudPanel;
     private Label speedLabel;
@@ -281,6 +283,8 @@ public class RaceScreen extends ScreenAdapter {
         clickSound = game.getAssets().get("sfx/click.wav", Sound.class);
         powerupSound = game.getAssets().get("sfx/powerup.wav", Sound.class);
         winSound = game.getAssets().get("sfx/win.wav", Sound.class);
+        jumpSound = clickSound;
+        obstacleSound = powerupSound;
         raceMusic = game.getAssets().get("sfx/race_music.wav", Music.class);
         raceMusic.setLooping(true);
         raceMusic.setVolume(muted ? 0f : 0.5f);
@@ -606,6 +610,7 @@ public class RaceScreen extends ScreenAdapter {
         }
         jumpTimer = 0.45f;
         jumpCooldownTimer = Math.max(0.4f, 0.8f - upgradeJumpCooldownReduction);
+        playSound(jumpSound, 0.55f);
         if (jumpLabel != null) {
             jumpLabel.setText("Ugr\u00E1s: hopp!");
         }
@@ -1131,6 +1136,7 @@ public class RaceScreen extends ScreenAdapter {
                     obstacleSlowTimer = MvpGameConfig.OBSTACLE_SLOWDOWN_SECONDS;
                     activeObstacleName = spawn.label + " lass\u00EDt";
                     activeObstacleTimer = MvpGameConfig.OBSTACLE_SLOWDOWN_SECONDS;
+                    playSound(obstacleSound, 0.45f);
                     try {
                         Gdx.input.vibrate(70);
                     } catch (SecurityException ignored) {
@@ -1138,6 +1144,12 @@ public class RaceScreen extends ScreenAdapter {
                     }
                 }
             }
+        }
+    }
+
+    private void playSound(Sound sound, float volume) {
+        if (!muted && sound != null) {
+            sound.play(volume);
         }
     }
 
