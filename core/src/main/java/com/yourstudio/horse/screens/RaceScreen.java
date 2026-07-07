@@ -150,6 +150,11 @@ public class RaceScreen extends ScreenAdapter {
     private float riderBoostChargeBonus;
     private float jumpTimer;
     private float jumpCooldownTimer;
+    private float upgradeMaxSpeedBonus;
+    private float upgradeTurnMultiplier = 1f;
+    private float upgradeJumpCooldownReduction;
+    private float upgradeBoostMultiplierBonus;
+    private float upgradeObstacleSlowMultiplier = MvpGameConfig.OBSTACLE_SLOWDOWN_MULTIPLIER;
     private boolean victoryPlayed;
     private boolean raceFinished;
     private boolean muted;
@@ -270,7 +275,9 @@ public class RaceScreen extends ScreenAdapter {
         joystickRadius = joystickBaseTexture.getWidth() * 0.5f;
         // ...existing code...
         background = loadUiTexture("ui/bg_race.png");
-        muted = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME)).load().muted;
+        MvpProgress savedProgress = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME)).load();
+        muted = savedProgress.muted;
+        applyUpgradeBonuses(savedProgress);
         clickSound = game.getAssets().get("sfx/click.wav", Sound.class);
         powerupSound = game.getAssets().get("sfx/powerup.wav", Sound.class);
         winSound = game.getAssets().get("sfx/win.wav", Sound.class);
@@ -469,9 +476,11 @@ public class RaceScreen extends ScreenAdapter {
             joystickY = 0f;
         }
         boolean accelerating = joystickPointer != -1;
-        float slowMultiplier = obstacleSlowTimer > 0f ? MvpGameConfig.OBSTACLE_SLOWDOWN_MULTIPLIER : 1f;
-        float boostMultiplier = boostActiveTimer > 0f ? MvpGameConfig.BOOST_SPEED_MULTIPLIER : 1f;
-        float effectiveMaxSpeed = (maxSpeed + petSpeedBonus) * slowMultiplier * boostMultiplier;
+        float slowMultiplier = obstacleSlowTimer > 0f ? upgradeObstacleSlowMultiplier : 1f;
+        float boostMultiplier = boostActiveTimer > 0f
+            ? MvpGameConfig.BOOST_SPEED_MULTIPLIER + upgradeBoostMultiplierBonus
+            : 1f;
+        float effectiveMaxSpeed = (maxSpeed + petSpeedBonus + upgradeMaxSpeedBonus) * slowMultiplier * boostMultiplier;
         float effectiveAccel = (acceleration + petAccelBonus) * (1f + riderAccelerationBonus) * boostMultiplier;
         if (accelerating) {
             speed = Math.min(effectiveMaxSpeed, speed + effectiveAccel * delta);
@@ -518,8 +527,8 @@ public class RaceScreen extends ScreenAdapter {
             stage.getBatch().end();
 
             // Free movement: joystick controls both X and Y
-            horseX += speed * delta * joystickX;
-            horseY += speed * delta * joystickY;
+            horseX += speed * delta * joystickX * upgradeTurnMultiplier;
+            horseY += speed * delta * joystickY * upgradeTurnMultiplier;
             if (Math.abs(joystickX) > 0.01f || Math.abs(joystickY) > 0.01f) {
                 horseDirection = joystickX >= 0f ? 1f : -1f;
             }
@@ -596,7 +605,7 @@ public class RaceScreen extends ScreenAdapter {
             return;
         }
         jumpTimer = 0.45f;
-        jumpCooldownTimer = 0.8f;
+        jumpCooldownTimer = Math.max(0.4f, 0.8f - upgradeJumpCooldownReduction);
         if (jumpLabel != null) {
             jumpLabel.setText("Ugr\u00E1s: hopp!");
         }
@@ -970,6 +979,34 @@ public class RaceScreen extends ScreenAdapter {
         }
     }
 
+    private void applyUpgradeBonuses(MvpProgress progress) {
+        upgradeMaxSpeedBonus = 0f;
+        upgradeTurnMultiplier = 1f;
+        upgradeJumpCooldownReduction = 0f;
+        upgradeBoostMultiplierBonus = 0f;
+        upgradeObstacleSlowMultiplier = MvpGameConfig.OBSTACLE_SLOWDOWN_MULTIPLIER;
+        if (progress == null || progress.upgradeLevels == null) {
+            return;
+        }
+        int speedLevel = upgradeLevel(progress, 0);
+        int turningLevel = upgradeLevel(progress, 1);
+        int jumpLevel = upgradeLevel(progress, 2);
+        int boostLevel = upgradeLevel(progress, 3);
+        int slowReductionLevel = upgradeLevel(progress, 4);
+        upgradeMaxSpeedBonus = speedLevel * 3f;
+        upgradeTurnMultiplier = 1f + turningLevel * 0.06f;
+        upgradeJumpCooldownReduction = jumpLevel * 0.12f;
+        upgradeBoostMultiplierBonus = boostLevel * 0.08f;
+        upgradeObstacleSlowMultiplier = Math.min(0.85f, MvpGameConfig.OBSTACLE_SLOWDOWN_MULTIPLIER + slowReductionLevel * 0.10f);
+    }
+
+    private int upgradeLevel(MvpProgress progress, int index) {
+        if (index < 0 || index >= progress.upgradeLevels.length) {
+            return 0;
+        }
+        return Math.max(0, progress.upgradeLevels[index]);
+    }
+
     private String npcLabelText() {
         if (npcNames == null || npcNames.length == 0) {
             return "Ellenfelek: --";
@@ -1090,7 +1127,7 @@ public class RaceScreen extends ScreenAdapter {
                     activeObstacleName = spawn.label + " \u00E1tugorva";
                     activeObstacleTimer = 0.8f;
                 } else {
-                    speed *= MvpGameConfig.OBSTACLE_SLOWDOWN_MULTIPLIER;
+                    speed *= upgradeObstacleSlowMultiplier;
                     obstacleSlowTimer = MvpGameConfig.OBSTACLE_SLOWDOWN_SECONDS;
                     activeObstacleName = spawn.label + " lass\u00EDt";
                     activeObstacleTimer = MvpGameConfig.OBSTACLE_SLOWDOWN_SECONDS;
