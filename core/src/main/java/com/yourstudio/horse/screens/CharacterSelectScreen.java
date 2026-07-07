@@ -21,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -104,6 +105,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private Label horseStatsValue;
     private Label riderBonusValue;
     private Label petInfoValue;
+    private TextField riderNameField;
+    private String initialRiderName;
 
     public CharacterSelectScreen(HorseGame game) {
         this(game, null, null, null, null, null, null, null);
@@ -131,6 +134,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
         MvpProgress progress = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME)).load();
         String resolvedHorse = horseName != null ? horseName : prefs.getString(PREF_HORSE, progress.selectedHorse);
         String resolvedRider = riderName != null ? riderName : prefs.getString(PREF_RIDER, progress.selectedRiderName);
+        this.initialRiderName = resolvedRider;
         String resolvedPet = petName != null ? petName : prefs.getString(PREF_PET, progress.selectedPet);
         String resolvedHorseColor = horseColor != null ? horseColor : prefs.getString(PREF_HORSE_COLOR, null);
         String resolvedManeColor = maneColor != null ? maneColor : prefs.getString(PREF_MANE_COLOR, null);
@@ -196,6 +200,9 @@ public class CharacterSelectScreen extends ScreenAdapter {
         Label title = new Label("Karakter v\u00E1laszt\u00E1s", titleStyle);
         horseValue = new Label(horses[horseIndex], labelStyle);
         riderValue = new Label(riders[riderIndex], labelStyle);
+        riderNameField = new TextField(initialRiderName != null ? initialRiderName : riders[riderIndex], skin);
+        riderNameField.setMaxLength(MvpGameConfig.MAX_CUSTOM_RIDER_NAME_LENGTH);
+        riderNameField.setMessageText("Lovas neve");
         petValue = new Label(pets[petIndex], labelStyle);
         horseColorValue = new Label(horseColors[horseColorIndex], labelStyle);
         maneColorValue = new Label(maneColors[maneColorIndex], labelStyle);
@@ -231,6 +238,10 @@ public class CharacterSelectScreen extends ScreenAdapter {
         addSelectorRow(layout, "S\u00F6r\u00E9ny", maneColorValue, maneColorSwatchImage, buttonStyle, () -> updateManeColor(-1), () -> updateManeColor(1));
         addSelectorRow(layout, "Nyereg", saddleColorValue, saddleColorSwatchImage, buttonStyle, () -> updateSaddleColor(-1), () -> updateSaddleColor(1));
         addSelectorRow(layout, "Lovas", riderValue, buttonStyle, () -> updateRider(-1), () -> updateRider(1));
+        Label customNameLabel = new Label("Saj\u00E1t n\u00E9v", new Label.LabelStyle(bodyFont, Color.WHITE));
+        layout.add(customNameLabel).left().padBottom(18f);
+        layout.add(riderNameField).colspan(4).width(420f).height(60f).padBottom(18f);
+        layout.row();
         TextButton randomRiderButton = new TextButton("V\u00E9letlen n\u00E9v", buttonStyle);
         randomRiderButton.addListener(new ClickListener() {
             @Override
@@ -273,9 +284,10 @@ public class CharacterSelectScreen extends ScreenAdapter {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 playClick();
+                saveSelectionPrefs();
                 ScreenNavigator.Selection selection = new ScreenNavigator.Selection(
                     horses[horseIndex],
-                    riders[riderIndex],
+                    selectedRiderName(),
                     pets[petIndex],
                     horseColors[horseColorIndex],
                     maneColors[maneColorIndex],
@@ -444,6 +456,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private void updateRider(int delta) {
         riderIndex = wrapIndex(riderIndex + delta, riders.length);
         riderValue.setText(riders[riderIndex]);
+        riderNameField.setText(riders[riderIndex]);
         riderBonusValue.setText(riderBonusText());
         refreshRiderPreview();
         saveSelectionPrefs();
@@ -459,6 +472,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
         }
         riderIndex = nextIndex;
         riderValue.setText(riders[riderIndex]);
+        riderNameField.setText(riders[riderIndex]);
         riderBonusValue.setText(riderBonusText());
         refreshRiderPreview();
         saveSelectionPrefs();
@@ -480,7 +494,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private void saveSelectionPrefs() {
         Preferences prefs = Gdx.app.getPreferences(PREFS_NAME);
         prefs.putString(PREF_HORSE, horses[horseIndex]);
-        prefs.putString(PREF_RIDER, riders[riderIndex]);
+        prefs.putString(PREF_RIDER, selectedRiderName());
         prefs.putString(PREF_PET, pets[petIndex]);
         prefs.putString(PREF_HORSE_COLOR, horseColors[horseColorIndex]);
         prefs.putString(PREF_MANE_COLOR, maneColors[maneColorIndex]);
@@ -491,7 +505,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
         MvpProgressStore progressStore = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME));
         MvpProgress progress = progressStore.load();
         progress.selectedHorse = horses[horseIndex];
-        progress.selectedRiderName = riders[riderIndex];
+        progress.selectedRiderName = selectedRiderName();
         progress.selectedPet = pets[petIndex];
         progress.selectedRiderColor = outfitColors[outfitColorIndex];
         progress.selectedDifficulty = difficulties[difficultyIndex];
@@ -503,6 +517,14 @@ public class CharacterSelectScreen extends ScreenAdapter {
         if (!progress.muted && clickSound != null) {
             clickSound.play(0.6f);
         }
+    }
+
+    private String selectedRiderName() {
+        if (riderNameField == null) {
+            return riders[riderIndex];
+        }
+        String typedName = riderNameField.getText().trim();
+        return typedName.length() == 0 ? riders[riderIndex] : typedName;
     }
 
     private int wrapIndex(int value, int size) {
