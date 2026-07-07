@@ -2,6 +2,7 @@ package com.yourstudio.horse.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -21,6 +22,9 @@ import com.yourstudio.horse.ui.ScreenNavigator;
 public class TutorialScreen extends ScreenAdapter {
     private final HorseGame game;
     private Stage stage;
+    private Sound clickSound;
+    private MvpProgress progress;
+    private MvpProgressStore store;
 
     public TutorialScreen(HorseGame game) {
         this.game = game;
@@ -30,6 +34,9 @@ public class TutorialScreen extends ScreenAdapter {
     public void show() {
         stage = new Stage(new ScreenViewport());
         Skin skin = game.getSkin();
+        clickSound = game.getAssets().get("sfx/click.wav", Sound.class);
+        store = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME));
+        progress = store.load();
         Label.LabelStyle titleStyle = skin.get("title", Label.LabelStyle.class);
         Label.LabelStyle labelStyle = skin.get("default", Label.LabelStyle.class);
         TextButton.TextButtonStyle buttonStyle = skin.get("primary", TextButton.TextButtonStyle.class);
@@ -43,8 +50,11 @@ public class TutorialScreen extends ScreenAdapter {
         Label body = new Label(
             "Mozg\u00E1s: h\u00FAzd a joystickot.\n"
                 + "Ugr\u00E1s: nyomd meg az Ugr\u00E1s gombot az akad\u00E1lyokn\u00E1l.\n"
-                + "Boost: gy\u0171jts s\u00E1rga b\u00F3nuszt, majd haszn\u00E1ld a Boost gombot.\n"
-                + "C\u00E9l: fuss 3 k\u00F6rt, gy\u0171jts XP-t \u00E9s aranypatk\u00F3t.",
+                + "Akad\u00E1ly: ha nem ugrasz, a l\u00F3 r\u00F6vid id\u0151re lassul.\n"
+                + "Power-up: a s\u00E1rga b\u00F3nusz +20% boost t\u00F6ltetet ad.\n"
+                + "Boost: ha van t\u00F6ltet, haszn\u00E1ld a Boost gombot.\n"
+                + "Jutalom: 3 k\u00F6r ut\u00E1n XP-t \u00E9s aranypatk\u00F3t kapsz.\n"
+                + "Ist\u00E1ll\u00F3: az aranypatk\u00F3b\u00F3l skint, petet \u00E9s upgrade-et vehetsz.",
             labelStyle
         );
         body.setAlignment(Align.center);
@@ -54,8 +64,7 @@ public class TutorialScreen extends ScreenAdapter {
         doneButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                MvpProgressStore store = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME));
-                MvpProgress progress = store.load();
+                playClick();
                 progress.tutorialComplete = true;
                 store.save(progress);
                 ScreenNavigator.toMainMenu(game);
@@ -67,6 +76,12 @@ public class TutorialScreen extends ScreenAdapter {
         layout.add(doneButton).width(260f).height(72f);
         stage.addActor(layout);
         Gdx.input.setInputProcessor(stage);
+    }
+
+    private void playClick() {
+        if (!progress.muted && clickSound != null) {
+            clickSound.play(0.6f);
+        }
     }
 
     @Override
