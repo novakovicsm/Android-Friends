@@ -11,6 +11,18 @@ public class MvpGameConfigTest {
     }
 
     @Test
+    public void createsFourDeterministicNpcNamesFromSeed() {
+        String[] first = MvpGameConfig.npcNamesForSeed(7L);
+        String[] second = MvpGameConfig.npcNamesForSeed(7L);
+
+        assertEquals(MvpGameConfig.NPC_COUNT, first.length);
+        assertEquals(first[0], second[0]);
+        assertEquals(first[1], second[1]);
+        assertEquals(first[2], second[2]);
+        assertEquals(first[3], second[3]);
+    }
+
+    @Test
     public void defaultTrackStartsTheForestRace() {
         assertEquals("forest.tmx", MvpGameConfig.DEFAULT_TRACK);
     }

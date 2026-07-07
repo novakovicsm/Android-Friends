@@ -91,6 +91,7 @@ public class RaceScreen extends ScreenAdapter {
     private Label powerupLabel;
     private Label petBonusLabel;
     private Label jumpLabel;
+    private Label npcLabel;
     private Image horsePreviewImage;
     private Image riderPreviewImage;
     private Image petPreviewImage;
@@ -105,6 +106,7 @@ public class RaceScreen extends ScreenAdapter {
     private int horseIndex;
     private int riderIndex;
     private int petIndex;
+    private String[] npcNames;
     private final String[] horses = horseNamesFromConfig();
     private final String[] riders = MvpGameConfig.RIDER_NAMES;
     private final String[] pets = {"Kutya"};
@@ -273,6 +275,7 @@ public class RaceScreen extends ScreenAdapter {
         horseIndex = findIndex(horses, horseName);
         riderIndex = findIndex(riders, riderName);
         petIndex = findIndex(pets, petName);
+        npcNames = MvpGameConfig.npcNamesForSeed(trackName != null ? trackName.hashCode() : 0L);
         applyRiderBonus();
         horseTintColor = colorForHorseColor(horseColor);
         riderOutfitColor = colorForOutfitColor(outfitColor);
@@ -330,6 +333,7 @@ public class RaceScreen extends ScreenAdapter {
         powerupLabel = new Label("B\u00F3nusz: --", labelStyle);
         petBonusLabel = new Label("Kedvenc b\u00F3nusz: --", labelStyle);
         jumpLabel = new Label("Ugr\u00E1s: k\u00E9sz", labelStyle);
+        npcLabel = new Label(npcLabelText(), labelStyle);
         coinLabel = new Label("\u00C9rm\u00E9k: 0", labelStyle);
         // directionLabel = new Label("Ir\u00E1ny:", labelStyle);
             // Joystick control only, remove left/right buttons from UI
@@ -368,6 +372,8 @@ public class RaceScreen extends ScreenAdapter {
         hudContent.add(petBonusLabel).left().padTop(6f);
         hudContent.row();
         hudContent.add(jumpLabel).left().padTop(6f);
+        hudContent.row();
+        hudContent.add(npcLabel).left().padTop(6f);
         hudContent.row();
         hudContent.add(coinLabel).left().padTop(6f);
         hudContent.row();
@@ -903,6 +909,20 @@ public class RaceScreen extends ScreenAdapter {
         } else if (bonus.type == MvpGameConfig.RiderBonusType.BOOST_CHARGE) {
             riderBoostChargeBonus = bonus.value;
         }
+    }
+
+    private String npcLabelText() {
+        if (npcNames == null || npcNames.length == 0) {
+            return "Ellenfelek: --";
+        }
+        StringBuilder builder = new StringBuilder("Ellenfelek: ");
+        for (int i = 0; i < npcNames.length; i++) {
+            if (i > 0) {
+                builder.append(", ");
+            }
+            builder.append(npcNames[i]);
+        }
+        return builder.toString();
     }
 
     private void updatePowerupSpawns(float delta) {

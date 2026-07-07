@@ -29,6 +29,21 @@ public final class MvpGameConfig {
         "Levi"
     };
 
+    public static final String[] NPC_NAMES = {
+        "Anna",
+        "Bence",
+        "Dorka",
+        "Misi",
+        "Nori",
+        "Tomi",
+        "Fanni",
+        "Balazs",
+        "Reka",
+        "Zalan",
+        "Emma",
+        "Samu"
+    };
+
     public static final HorseProfile[] HORSES = {
         new HorseProfile("Vill\u00e1m", StatFocus.SPEED, "Nagyon gyors, de kicsit nehezebben fordul.", 5, 3, 3, 3),
         new HorseProfile("Pihe", StatFocus.TURNING, "K\u00f6nnyen ir\u00e1ny\u00edthat\u00f3, nyugodt versenyt\u00e1rs.", 3, 5, 3, 3),
@@ -136,6 +151,15 @@ public final class MvpGameConfig {
             throw new IllegalArgumentException("Rider index must be zero or greater.");
         }
         return RIDER_BONUSES[riderIndex % RIDER_BONUSES.length];
+    }
+
+    public static String[] npcNamesForSeed(long seed) {
+        String[] names = new String[NPC_COUNT];
+        int start = (int) Math.floorMod(seed, NPC_NAMES.length);
+        for (int i = 0; i < NPC_COUNT; i++) {
+            names[i] = NPC_NAMES[(start + i * 3) % NPC_NAMES.length];
+        }
+        return names;
     }
 
     public enum Difficulty {
