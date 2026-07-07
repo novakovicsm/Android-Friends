@@ -98,13 +98,24 @@ public class RaceScreenTest {
     @Test
     public void explicitHorseColorOverridesSelectedSkin() {
         MvpProgress progress = MvpProgress.newGame();
-        progress.selectedSkinIndex = 1;
 
         Object resolved = invokePrivate(raceScreen, "resolveHorseColor",
             new Class<?>[] {String.class, MvpProgress.class},
             new Object[] {"Hamvas", progress});
 
         assertEquals("Hamvas", resolved);
+    }
+
+    @Test
+    public void purchasedSkinOverridesExplicitHorseColor() {
+        MvpProgress progress = MvpProgress.newGame();
+        progress.selectedSkinIndex = 1;
+
+        Object resolved = invokePrivate(raceScreen, "resolveHorseColor",
+            new Class<?>[] {String.class, MvpProgress.class},
+            new Object[] {"Hamvas", progress});
+
+        assertEquals("Arany", resolved);
     }
 
     private void invokePrivate(Object target, String methodName) {

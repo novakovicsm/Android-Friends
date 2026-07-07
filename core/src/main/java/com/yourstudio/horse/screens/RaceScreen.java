@@ -1312,6 +1312,9 @@ public class RaceScreen extends ScreenAdapter {
     }
 
     private String resolveHorseColor(String explicitHorseColor, MvpProgress progress) {
+        if (progress != null && progress.selectedSkinIndex > 0) {
+            return MvpGameConfig.skinHorseColor(progress.selectedSkinIndex);
+        }
         if (explicitHorseColor != null) {
             return explicitHorseColor;
         }
