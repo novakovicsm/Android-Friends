@@ -118,6 +118,20 @@ public class RaceScreenTest {
         assertEquals("Arany", resolved);
     }
 
+    @Test
+    public void obstacleMarkersFollowMvpObstacleOrder() {
+        assertEquals(0, invokePrivateInt(raceScreen, "obstacleMarkerIndex",
+            new Class<?>[] {String.class}, new Object[] {"kidolt_fa"}));
+        assertEquals(1, invokePrivateInt(raceScreen, "obstacleMarkerIndex",
+            new Class<?>[] {String.class}, new Object[] {"kerites"}));
+        assertEquals(2, invokePrivateInt(raceScreen, "obstacleMarkerIndex",
+            new Class<?>[] {String.class}, new Object[] {"folyo"}));
+        assertEquals(3, invokePrivateInt(raceScreen, "obstacleMarkerIndex",
+            new Class<?>[] {String.class}, new Object[] {"pocsolya"}));
+        assertEquals(-1, invokePrivateInt(raceScreen, "obstacleMarkerIndex",
+            new Class<?>[] {String.class}, new Object[] {"ismeretlen"}));
+    }
+
     private void invokePrivate(Object target, String methodName) {
         invokePrivate(target, methodName, new Class<?>[0], new Object[0]);
     }
@@ -130,6 +144,10 @@ public class RaceScreenTest {
         } catch (Exception exception) {
             throw new RuntimeException(exception);
         }
+    }
+
+    private int invokePrivateInt(Object target, String methodName, Class<?>[] parameterTypes, Object[] args) {
+        return (Integer) invokePrivate(target, methodName, parameterTypes, args);
     }
 
     private Object getObjectField(Object target, String fieldName) {
