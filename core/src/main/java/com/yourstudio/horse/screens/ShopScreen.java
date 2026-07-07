@@ -28,6 +28,7 @@ public class ShopScreen extends ScreenAdapter {
     private MvpProgress progress;
     private Sound purchaseSound;
     private Label horseshoeLabel;
+    private Label statusLabel;
     private final Label[] skinLabels = new Label[MvpGameConfig.SKIN_LABELS.length];
     private final Label[] petLabels = new Label[MvpGameConfig.PET_LABELS.length];
     private final Label[] upgradeLabels = new Label[MvpGameConfig.UPGRADE_CATEGORIES.length];
@@ -59,9 +60,12 @@ public class ShopScreen extends ScreenAdapter {
         title.setAlignment(Align.center);
         horseshoeLabel = new Label("", labelStyle);
         horseshoeLabel.setAlignment(Align.center);
+        statusLabel = new Label("", labelStyle);
+        statusLabel.setAlignment(Align.center);
 
         layout.add(title).colspan(2).padBottom(18f).row();
-        layout.add(horseshoeLabel).colspan(2).padBottom(20f).row();
+        layout.add(horseshoeLabel).colspan(2).padBottom(8f).row();
+        layout.add(statusLabel).colspan(2).padBottom(20f).row();
 
         Label skinTitle = new Label("Skinek", labelStyle);
         layout.add(skinTitle).colspan(2).left().padBottom(12f).row();
@@ -73,11 +77,7 @@ public class ShopScreen extends ScreenAdapter {
             buyButton.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    if (progress.purchaseSkin(skinIndex)) {
-                        progressStore.save(progress);
-                        playPurchaseSound();
-                        refreshLabels();
-                    }
+                    purchaseSkin(skinIndex);
                 }
             });
 
@@ -95,11 +95,7 @@ public class ShopScreen extends ScreenAdapter {
             buyButton.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    if (progress.purchasePet(petIndex)) {
-                        progressStore.save(progress);
-                        playPurchaseSound();
-                        refreshLabels();
-                    }
+                    purchasePet(petIndex);
                 }
             });
 
@@ -117,11 +113,7 @@ public class ShopScreen extends ScreenAdapter {
             buyButton.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    if (progress.purchaseUpgrade(categoryIndex)) {
-                        progressStore.save(progress);
-                        playPurchaseSound();
-                        refreshLabels();
-                    }
+                    purchaseUpgrade(categoryIndex);
                 }
             });
 
@@ -176,6 +168,69 @@ public class ShopScreen extends ScreenAdapter {
         if (!progress.muted && purchaseSound != null) {
             purchaseSound.play(0.7f);
         }
+    }
+
+    private void purchaseSkin(int skinIndex) {
+        if (isSkinUnlocked(skinIndex)) {
+            statusLabel.setText("Ez a skin m\u00E1r megvan.");
+            return;
+        }
+        if (progress.horseshoes < MvpGameConfig.skinPrice(skinIndex)) {
+            statusLabel.setText("Nincs el\u00E9g aranypatk\u00F3.");
+            return;
+        }
+        if (progress.purchaseSkin(skinIndex)) {
+            finishSuccessfulPurchase("Skin megv\u00E1s\u00E1rolva.");
+        }
+    }
+
+    private void purchasePet(int petIndex) {
+        if (isPetUnlocked(petIndex)) {
+            statusLabel.setText("Ez a kedvenc m\u00E1r megvan.");
+            return;
+        }
+        if (progress.horseshoes < MvpGameConfig.PET_UNLOCK_PRICE) {
+            statusLabel.setText("Nincs el\u00E9g aranypatk\u00F3.");
+            return;
+        }
+        if (progress.purchasePet(petIndex)) {
+            finishSuccessfulPurchase("Kedvenc megv\u00E1s\u00E1rolva.");
+        }
+    }
+
+    private void purchaseUpgrade(int categoryIndex) {
+        MvpGameConfig.UpgradeCategory category = MvpGameConfig.UPGRADE_CATEGORIES[categoryIndex];
+        int level = progress.upgradeLevels[categoryIndex];
+        if (level >= category.upgradeCount) {
+            statusLabel.setText("Ez az upgrade m\u00E1r maxon van.");
+            return;
+        }
+        if (progress.horseshoes < MvpGameConfig.upgradeCost(nextUpgradeNumber(categoryIndex, level))) {
+            statusLabel.setText("Nincs el\u00E9g aranypatk\u00F3.");
+            return;
+        }
+        if (progress.purchaseUpgrade(categoryIndex)) {
+            finishSuccessfulPurchase("Upgrade megv\u00E1s\u00E1rolva.");
+        }
+    }
+
+    private void finishSuccessfulPurchase(String message) {
+        progressStore.save(progress);
+        playPurchaseSound();
+        statusLabel.setText(message);
+        refreshLabels();
+    }
+
+    private boolean isSkinUnlocked(int skinIndex) {
+        return skinIndex == 0 || (progress.unlockedSkins != null
+            && skinIndex < progress.unlockedSkins.length
+            && progress.unlockedSkins[skinIndex]);
+    }
+
+    private boolean isPetUnlocked(int petIndex) {
+        return petIndex == 0 || (progress.unlockedPets != null
+            && petIndex < progress.unlockedPets.length
+            && progress.unlockedPets[petIndex]);
     }
 
     private int nextUpgradeNumber(int categoryIndex, int currentLevel) {
