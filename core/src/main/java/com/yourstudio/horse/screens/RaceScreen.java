@@ -499,27 +499,33 @@ public class RaceScreen extends ScreenAdapter {
         if (Math.abs(joystickY) < 0.01f) {
             joystickY = 0f;
         }
-        boolean accelerating = joystickPointer != -1;
+        boolean accelerating = joystickPointer != -1 && !raceFinished;
         float slowMultiplier = obstacleSlowTimer > 0f ? upgradeObstacleSlowMultiplier : 1f;
         float boostMultiplier = boostActiveTimer > 0f
             ? MvpGameConfig.BOOST_SPEED_MULTIPLIER + upgradeBoostMultiplierBonus
             : 1f;
         float effectiveMaxSpeed = (maxSpeed + petSpeedBonus + upgradeMaxSpeedBonus) * slowMultiplier * boostMultiplier;
         float effectiveAccel = (acceleration + petAccelBonus) * (1f + riderAccelerationBonus) * boostMultiplier;
-        if (accelerating) {
+        if (raceFinished) {
+            speed = Math.max(0f, speed - deceleration * delta);
+        } else if (accelerating) {
             speed = Math.min(effectiveMaxSpeed, speed + effectiveAccel * delta);
         } else {
             speed = Math.max(0f, speed - deceleration * delta);
         }
-        distance += speed * delta;
-        updateRaceCompletion();
+        if (!raceFinished) {
+            distance += speed * delta;
+            updateRaceCompletion();
+        }
         updateJump(delta);
         updateBoost(delta);
         updateObstacleSlowdown(delta);
-        updatePowerupSpawns(delta);
-        updatePowerupPickup(delta);
-        updateObstacleSpawns(delta);
-        updateObstacleHits();
+        if (!raceFinished) {
+            updatePowerupSpawns(delta);
+            updatePowerupPickup(delta);
+            updateObstacleSpawns(delta);
+            updateObstacleHits();
+        }
         int lap = Math.min(3, 1 + (int) (distance / lapDistance));
         if (lap != currentLap) {
             currentLap = lap;
