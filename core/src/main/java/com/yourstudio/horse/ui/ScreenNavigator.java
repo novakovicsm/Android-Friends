@@ -7,6 +7,7 @@ import com.yourstudio.horse.screens.MainMenuScreen;
 import com.yourstudio.horse.screens.RaceScreen;
 import com.yourstudio.horse.screens.ShopScreen;
 import com.yourstudio.horse.screens.TrackSelectScreen;
+import com.yourstudio.horse.screens.TutorialScreen;
 
 public final class ScreenNavigator {
     private ScreenNavigator() {
@@ -28,6 +29,10 @@ public final class ScreenNavigator {
 
     public static void toShop(HorseGame game) {
         game.setScreen(new ShopScreen(game));
+    }
+
+    public static void toTutorial(HorseGame game) {
+        game.setScreen(new TutorialScreen(game));
     }
 
     public static void toTrackSelect(HorseGame game, Selection selection) {
