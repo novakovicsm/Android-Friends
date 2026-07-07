@@ -77,6 +77,18 @@ public class MvpProgressStoreTest {
         assertTrue(preferences.flushed);
     }
 
+    @Test
+    public void loadFallsBackWhenSelectedSkinIsLocked() {
+        FakePreferences preferences = new FakePreferences();
+        preferences.putInteger("selectedSkinIndex", 2);
+        preferences.putString("unlockedSkins", "1,0,0,0");
+        MvpProgressStore store = new MvpProgressStore(preferences);
+
+        MvpProgress loaded = store.load();
+
+        assertEquals(0, loaded.selectedSkinIndex);
+    }
+
     private static final class FakePreferences implements Preferences {
         private final Map<String, Object> values = new HashMap<>();
         private boolean flushed;

@@ -37,9 +37,12 @@ public final class MvpProgressStore {
         progress.playerLevel = preferences.getInteger(KEY_PLAYER_LEVEL, defaults.playerLevel);
         progress.petXp = preferences.getInteger(KEY_PET_XP, defaults.petXp);
         progress.petLevel = preferences.getInteger(KEY_PET_LEVEL, defaults.petLevel);
-        progress.selectedSkinIndex = safeSelectedSkinIndex(preferences.getInteger(KEY_SELECTED_SKIN_INDEX, defaults.selectedSkinIndex));
         progress.upgradeLevels = parseUpgradeLevels(preferences.getString(KEY_UPGRADE_LEVELS, ""));
         progress.unlockedSkins = parseUnlockedSkins(preferences.getString(KEY_UNLOCKED_SKINS, ""));
+        progress.selectedSkinIndex = safeSelectedSkinIndex(
+            preferences.getInteger(KEY_SELECTED_SKIN_INDEX, defaults.selectedSkinIndex),
+            progress.unlockedSkins
+        );
         progress.unlockedPets = parseUnlockedPets(preferences.getString(KEY_UNLOCKED_PETS, ""));
         progress.selectedHorse = preferences.getString(KEY_SELECTED_HORSE, defaults.selectedHorse);
         progress.selectedRiderName = preferences.getString(KEY_SELECTED_RIDER_NAME, defaults.selectedRiderName);
@@ -61,7 +64,7 @@ public final class MvpProgressStore {
         preferences.putInteger(KEY_PLAYER_LEVEL, progress.playerLevel);
         preferences.putInteger(KEY_PET_XP, progress.petXp);
         preferences.putInteger(KEY_PET_LEVEL, progress.petLevel);
-        preferences.putInteger(KEY_SELECTED_SKIN_INDEX, safeSelectedSkinIndex(progress.selectedSkinIndex));
+        preferences.putInteger(KEY_SELECTED_SKIN_INDEX, safeSelectedSkinIndex(progress.selectedSkinIndex, progress.unlockedSkins));
         preferences.putString(KEY_UPGRADE_LEVELS, formatUpgradeLevels(progress.upgradeLevels));
         preferences.putString(KEY_UNLOCKED_SKINS, formatUnlockedSkins(progress.unlockedSkins));
         preferences.putString(KEY_UNLOCKED_PETS, formatUnlockedPets(progress.unlockedPets));
@@ -119,8 +122,11 @@ public final class MvpProgressStore {
         return builder.toString();
     }
 
-    private int safeSelectedSkinIndex(int skinIndex) {
+    private int safeSelectedSkinIndex(int skinIndex, boolean[] unlockedSkins) {
         if (skinIndex < 0 || skinIndex >= MvpGameConfig.SKIN_LABELS.length) {
+            return 0;
+        }
+        if (unlockedSkins == null || skinIndex >= unlockedSkins.length || !unlockedSkins[skinIndex]) {
             return 0;
         }
         return skinIndex;
