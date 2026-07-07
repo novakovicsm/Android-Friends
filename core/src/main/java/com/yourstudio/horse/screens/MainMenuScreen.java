@@ -64,6 +64,17 @@ public class MainMenuScreen extends ScreenAdapter {
             }
         });
 
+        TextButton shopButton = new TextButton("Ist\u00E1ll\u00F3", buttonStyle);
+        shopButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (!progress.muted && clickSound != null) {
+                    clickSound.play(0.6f);
+                }
+                ScreenNavigator.toShop(game);
+            }
+        });
+
         TextButton muteButton = new TextButton(muteButtonText(), skin.get("secondary", TextButton.TextButtonStyle.class));
         muteButton.addListener(new ClickListener() {
             @Override
@@ -90,6 +101,7 @@ public class MainMenuScreen extends ScreenAdapter {
         menuTable.add(description).width(400f).padBottom(24f).row();
         menuTable.add(progressLabel).width(400f).padBottom(20f).row();
         menuTable.add(startButton).width(280f).height(80f).padBottom(16f).row();
+        menuTable.add(shopButton).width(280f).height(70f).padBottom(16f).row();
         menuTable.add(muteButton).width(280f).height(60f);
 
         // Main layout

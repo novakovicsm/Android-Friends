@@ -5,6 +5,7 @@ import com.yourstudio.horse.model.MvpGameConfig;
 import com.yourstudio.horse.screens.CharacterSelectScreen;
 import com.yourstudio.horse.screens.MainMenuScreen;
 import com.yourstudio.horse.screens.RaceScreen;
+import com.yourstudio.horse.screens.ShopScreen;
 import com.yourstudio.horse.screens.TrackSelectScreen;
 
 public final class ScreenNavigator {
@@ -23,6 +24,10 @@ public final class ScreenNavigator {
         game.setScreen(new CharacterSelectScreen(game, selection.horseName, selection.riderName, selection.petName,
             selection.horseColor, selection.maneColor, selection.saddleColor, selection.outfitColor,
             selection.difficulty));
+    }
+
+    public static void toShop(HorseGame game) {
+        game.setScreen(new ShopScreen(game));
     }
 
     public static void toTrackSelect(HorseGame game, Selection selection) {
