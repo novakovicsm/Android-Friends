@@ -124,11 +124,18 @@ public class RaceScreen extends ScreenAdapter {
     private OrthographicCamera camera;
     private Array<PowerupDef> powerupDefs = new Array<>();
     private Array<PowerupSpawn> powerupSpawns = new Array<>();
+    private Array<ObstacleSpawn> obstacleSpawns = new Array<>();
     private Texture powerupMarker;
+    private Texture obstacleMarker;
     private float spawnTimer;
+    private float obstacleSpawnTimer;
     private float nextSpawnDelay = 3.5f;
+    private float nextObstacleSpawnDelay = 2.5f;
     private String activePowerupName;
     private float activePowerupTimer;
+    private String activeObstacleName;
+    private float activeObstacleTimer;
+    private float obstacleSlowTimer;
     private float boostChargePercent;
     private float petSpeedBonus;
     private float petAccelBonus;
@@ -261,6 +268,7 @@ public class RaceScreen extends ScreenAdapter {
         idleAnimation.setPlayMode(Animation.PlayMode.LOOP);
         runAnimation.setPlayMode(Animation.PlayMode.LOOP);
         powerupMarker = createPowerupMarker();
+        obstacleMarker = createObstacleMarker();
         loadPowerupDefs();
         horseIndex = findIndex(horses, horseName);
         riderIndex = findIndex(riders, riderName);
@@ -427,7 +435,8 @@ public class RaceScreen extends ScreenAdapter {
             joystickY = 0f;
         }
         boolean accelerating = joystickPointer != -1;
-        float effectiveMaxSpeed = maxSpeed + petSpeedBonus;
+        float slowMultiplier = obstacleSlowTimer > 0f ? MvpGameConfig.OBSTACLE_SLOWDOWN_MULTIPLIER : 1f;
+        float effectiveMaxSpeed = (maxSpeed + petSpeedBonus) * slowMultiplier;
         float effectiveAccel = (acceleration + petAccelBonus) * (1f + riderAccelerationBonus);
         if (accelerating) {
             speed = Math.min(effectiveMaxSpeed, speed + effectiveAccel * delta);
@@ -437,8 +446,11 @@ public class RaceScreen extends ScreenAdapter {
         distance += speed * delta;
         updateRaceCompletion();
         updateJump(delta);
+        updateObstacleSlowdown(delta);
         updatePowerupSpawns(delta);
         updatePowerupPickup(delta);
+        updateObstacleSpawns(delta);
+        updateObstacleHits();
         int lap = Math.min(3, 1 + (int) (distance / lapDistance));
         if (lap != currentLap) {
             currentLap = lap;
@@ -452,7 +464,9 @@ public class RaceScreen extends ScreenAdapter {
         }
         speedLabel.setText("Sebess\u00E9g: " + (int) speed + " km/h");
         lapLabel.setText("K\u00F6r: " + currentLap + "/3");
-        if (activePowerupName != null) {
+        if (activeObstacleName != null) {
+            powerupLabel.setText("Akad\u00E1ly: " + activeObstacleName + " (" + (int) Math.ceil(activeObstacleTimer) + "s)");
+        } else if (activePowerupName != null) {
             powerupLabel.setText("B\u00F3nusz: " + activePowerupName + " (" + (int) Math.ceil(activePowerupTimer) + "s)");
         } else {
             powerupLabel.setText("Boost: " + Math.round(boostChargePercent) + "%");
@@ -493,12 +507,14 @@ public class RaceScreen extends ScreenAdapter {
             mapRenderer.render();
             mapRenderer.getBatch().begin();
             drawPowerups(mapRenderer.getBatch());
+            drawObstacles(mapRenderer.getBatch());
             drawHorseAnimation(mapRenderer.getBatch(), true);
             mapRenderer.getBatch().end();
         } else {
             stage.getBatch().begin();
             drawBackgroundFit(stage.getBatch());
             drawPowerups(stage.getBatch());
+            drawObstacles(stage.getBatch());
             drawHorseAnimation(stage.getBatch(), false);
             stage.getBatch().end();
         }
@@ -625,6 +641,9 @@ public class RaceScreen extends ScreenAdapter {
         }
         if (powerupMarker != null) {
             powerupMarker.dispose();
+        }
+        if (obstacleMarker != null) {
+            obstacleMarker.dispose();
         }
         if (hudPanel != null) {
             hudPanel.dispose();
@@ -938,6 +957,64 @@ public class RaceScreen extends ScreenAdapter {
         }
     }
 
+    private void updateObstacleSlowdown(float delta) {
+        if (obstacleSlowTimer > 0f) {
+            obstacleSlowTimer = Math.max(0f, obstacleSlowTimer - delta);
+        }
+        if (activeObstacleTimer > 0f) {
+            activeObstacleTimer = Math.max(0f, activeObstacleTimer - delta);
+            if (activeObstacleTimer == 0f) {
+                activeObstacleName = null;
+            }
+        }
+    }
+
+    private void updateObstacleSpawns(float delta) {
+        obstacleSpawnTimer += delta;
+        if (MvpGameConfig.FOREST_OBSTACLES.length == 0) {
+            return;
+        }
+        if (obstacleSpawnTimer >= nextObstacleSpawnDelay) {
+            obstacleSpawnTimer = 0f;
+            nextObstacleSpawnDelay = MathUtils.random(4f, 7f);
+            if (obstacleSpawns.size < 4) {
+                MvpGameConfig.ObstacleType type = MvpGameConfig.FOREST_OBSTACLES[MathUtils.random(MvpGameConfig.FOREST_OBSTACLES.length - 1)];
+                float x = horseX + MathUtils.random(180f, 420f);
+                float y = horseY + MathUtils.random(-70f, 70f);
+                if (mapHasBounds) {
+                    x = MathUtils.clamp(x, mapBoundsMinX + horseBoundsPadding, mapBoundsMaxX - horseBoundsPadding);
+                    y = MathUtils.clamp(y, mapBoundsMinY + horseBoundsPadding, mapBoundsMaxY - horseBoundsPadding);
+                }
+                obstacleSpawns.add(new ObstacleSpawn(type.id, type.label, x, y));
+            }
+        }
+    }
+
+    private void updateObstacleHits() {
+        for (int i = obstacleSpawns.size - 1; i >= 0; i--) {
+            ObstacleSpawn spawn = obstacleSpawns.get(i);
+            float dx = spawn.x - horseX;
+            float dy = spawn.y - horseY;
+            if (dx * dx + dy * dy <= 28f * 28f) {
+                obstacleSpawns.removeIndex(i);
+                if (jumpTimer > 0f) {
+                    activeObstacleName = spawn.label + " \u00E1tugorva";
+                    activeObstacleTimer = 0.8f;
+                } else {
+                    speed *= MvpGameConfig.OBSTACLE_SLOWDOWN_MULTIPLIER;
+                    obstacleSlowTimer = MvpGameConfig.OBSTACLE_SLOWDOWN_SECONDS;
+                    activeObstacleName = spawn.label + " lass\u00EDt";
+                    activeObstacleTimer = MvpGameConfig.OBSTACLE_SLOWDOWN_SECONDS;
+                    try {
+                        Gdx.input.vibrate(70);
+                    } catch (SecurityException ignored) {
+                        // VIBRATE permission missing or restricted; ignore to avoid crash.
+                    }
+                }
+            }
+        }
+    }
+
     private void drawPowerups(com.badlogic.gdx.graphics.g2d.Batch batch) {
         if (powerupMarker == null) {
             return;
@@ -950,12 +1027,40 @@ public class RaceScreen extends ScreenAdapter {
         }
     }
 
+    private void drawObstacles(com.badlogic.gdx.graphics.g2d.Batch batch) {
+        if (obstacleMarker == null) {
+            return;
+        }
+        float scale = mapLoaded ? mapScale : 1f;
+        for (ObstacleSpawn spawn : obstacleSpawns) {
+            float x = spawn.x * scale;
+            float y = spawn.y * scale;
+            batch.draw(obstacleMarker, x - 16f * scale, y - 12f * scale, 32f * scale, 24f * scale);
+        }
+    }
+
     private Texture createPowerupMarker() {
         Pixmap pixmap = new Pixmap(24, 24, Pixmap.Format.RGBA8888);
         pixmap.setColor(0.95f, 0.8f, 0.2f, 1f);
         pixmap.fillCircle(12, 12, 10);
         pixmap.setColor(0.35f, 0.25f, 0.05f, 1f);
         pixmap.drawCircle(12, 12, 10);
+        Texture texture = new Texture(pixmap);
+        pixmap.dispose();
+        return texture;
+    }
+
+    private Texture createObstacleMarker() {
+        Pixmap pixmap = new Pixmap(32, 24, Pixmap.Format.RGBA8888);
+        pixmap.setColor(0.42f, 0.24f, 0.12f, 1f);
+        pixmap.fillRectangle(4, 9, 24, 8);
+        pixmap.setColor(0.25f, 0.14f, 0.08f, 1f);
+        pixmap.drawRectangle(4, 9, 24, 8);
+        pixmap.fillCircle(7, 13, 3);
+        pixmap.fillCircle(25, 13, 3);
+        pixmap.setColor(0.18f, 0.42f, 0.2f, 1f);
+        pixmap.fillRectangle(2, 5, 6, 4);
+        pixmap.fillRectangle(24, 5, 6, 4);
         Texture texture = new Texture(pixmap);
         pixmap.dispose();
         return texture;
@@ -983,6 +1088,20 @@ public class RaceScreen extends ScreenAdapter {
 
         PowerupSpawn(String id, float x, float y) {
             this.id = id;
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    private static class ObstacleSpawn {
+        final String id;
+        final String label;
+        final float x;
+        final float y;
+
+        ObstacleSpawn(String id, String label, float x, float y) {
+            this.id = id;
+            this.label = label;
             this.x = x;
             this.y = y;
         }

@@ -43,6 +43,12 @@ public class MvpGameConfigTest {
     }
 
     @Test
+    public void obstaclesSlowWithoutPointPenaltyInMvp() {
+        assertEquals(0.55f, MvpGameConfig.OBSTACLE_SLOWDOWN_MULTIPLIER, 0.0001f);
+        assertEquals(1.2f, MvpGameConfig.OBSTACLE_SLOWDOWN_SECONDS, 0.0001f);
+    }
+
+    @Test
     public void hasFiveUpgradeCategoriesWithTwoUpgradesEach() {
         assertEquals(5, MvpGameConfig.UPGRADE_CATEGORIES.length);
         for (MvpGameConfig.UpgradeCategory category : MvpGameConfig.UPGRADE_CATEGORIES) {
