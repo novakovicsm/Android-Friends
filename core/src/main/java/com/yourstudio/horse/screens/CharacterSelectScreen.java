@@ -107,6 +107,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private Label petInfoValue;
     private TextField riderNameField;
     private String initialRiderName;
+    private int savedPetXp;
+    private int savedPetLevel;
 
     public CharacterSelectScreen(HorseGame game) {
         this(game, null, null, null, null, null, null, null);
@@ -133,6 +135,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
         Preferences prefs = Gdx.app.getPreferences(PREFS_NAME);
         MvpProgress progress = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME)).load();
         this.pets = unlockedPetNames(progress);
+        this.savedPetXp = progress.petXp;
+        this.savedPetLevel = progress.petLevel;
         String resolvedHorse = horseName != null ? horseName : prefs.getString(PREF_HORSE, progress.selectedHorse);
         String resolvedRider = riderName != null ? riderName : prefs.getString(PREF_RIDER, progress.selectedRiderName);
         this.initialRiderName = resolvedRider;
@@ -260,7 +264,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
         horseDescriptionValue = createInfoLabel(labelStyle, horseDescriptionText());
         horseStatsValue = createInfoLabel(labelStyle, horseStatsText());
         riderBonusValue = createInfoLabel(labelStyle, riderBonusText());
-        petInfoValue = createInfoLabel(labelStyle, "Kutya: kezd\u0151 kedvenc, b\u00F3nusz n\u00E9lk\u00FCl.");
+        petInfoValue = createInfoLabel(labelStyle, petInfoText());
         Table infoPanel = new Table();
         infoPanel.add(horseDescriptionValue).width(420f).left().padRight(24f);
         infoPanel.add(horseStatsValue).width(280f).left();
@@ -483,6 +487,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
         petIndex = wrapIndex(petIndex + delta, pets.length);
         petValue.setText(pets[petIndex]);
         petPreviewImage.setDrawable(toDrawable(petPreviews[petIndex]));
+        petInfoValue.setText(petInfoText());
         saveSelectionPrefs();
     }
 
@@ -610,6 +615,11 @@ public class CharacterSelectScreen extends ScreenAdapter {
             return "Lovas b\u00F3nusz: +1% gyorsul\u00E1s.";
         }
         return "Lovas b\u00F3nusz: +1% boost t\u00F6lt\u00E9s.";
+    }
+
+    private String petInfoText() {
+        return pets[petIndex] + ": szint " + savedPetLevel + ", XP " + savedPetXp
+            + ". Kedves t\u00E1rs a versenyen.";
     }
 
     private String statBar(int value) {

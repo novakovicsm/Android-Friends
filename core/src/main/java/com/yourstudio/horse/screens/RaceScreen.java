@@ -114,7 +114,7 @@ public class RaceScreen extends ScreenAdapter {
     private String[] npcNames;
     private final String[] horses = horseNamesFromConfig();
     private final String[] riders = MvpGameConfig.RIDER_NAMES;
-    private final String[] pets = {"Kutya"};
+    private final String[] pets = MvpGameConfig.PET_LABELS;
     private float elapsedTime;
     private int currentLap = 1;
     private float speed;
