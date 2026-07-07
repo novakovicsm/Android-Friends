@@ -2,8 +2,51 @@ plugins {
     id 'com.android.application'
 }
 
+import org.gradle.api.DefaultTask
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.TaskAction
+
+import java.util.zip.ZipFile
+
 configurations {
     natives
+}
+
+abstract class CopyAndroidNativesTask extends DefaultTask {
+    @InputFiles
+    @PathSensitive(PathSensitivity.NAME_ONLY)
+    abstract ConfigurableFileCollection getNatives()
+
+    @OutputDirectory
+    abstract DirectoryProperty getOutputDir()
+
+    @TaskAction
+    void copyNatives() {
+        File rootDir = outputDir.get().asFile
+        rootDir.mkdirs()
+        natives.files.each { File jarFile ->
+            def matcher = jarFile.name =~ /-natives-(.+)\.jar$/
+            if (!matcher.find()) {
+                return
+            }
+            File abiDir = new File(rootDir, matcher.group(1))
+            abiDir.mkdirs()
+            new ZipFile(jarFile).withCloseable { zip ->
+                zip.entries().each { entry ->
+                    if (!entry.name.endsWith('.so')) {
+                        return
+                    }
+                    File target = new File(abiDir, new File(entry.name).name)
+                    target.bytes = zip.getInputStream(entry).bytes
+                }
+            }
+        }
+    }
 }
 
 android {
@@ -58,27 +101,12 @@ dependencies {
     natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-x86_64"
 }
 
-def jniLibsDir = file('src/main/jniLibs')
+def nativesConfiguration = configurations.named('natives')
+def jniLibsDir = layout.projectDirectory.dir('src/main/jniLibs')
 
-tasks.register('copyAndroidNatives') {
-    inputs.files(configurations.natives)
-    outputs.dir(jniLibsDir)
-    doLast {
-        jniLibsDir.mkdirs()
-        configurations.natives.files.each { jarFile ->
-            def matcher = jarFile.name =~ /-natives-(.+)\.jar$/
-            if (matcher.find()) {
-                def abi = matcher.group(1)
-                def abiDir = new File(jniLibsDir, abi)
-                abiDir.mkdirs()
-                copy {
-                    from zipTree(jarFile)
-                    into abiDir
-                    include '**/*.so'
-                }
-            }
-        }
-    }
+tasks.register('copyAndroidNatives', CopyAndroidNativesTask) {
+    natives.from(nativesConfiguration)
+    outputDir.set(jniLibsDir)
 }
 
 tasks.named('preBuild') {
