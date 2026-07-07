@@ -11,6 +11,7 @@ public final class MvpProgressStore {
     private static final String KEY_PET_XP = "petXp";
     private static final String KEY_PET_LEVEL = "petLevel";
     private static final String KEY_UPGRADE_LEVELS = "upgradeLevels";
+    private static final String KEY_UNLOCKED_SKINS = "unlockedSkins";
     private static final String KEY_SELECTED_HORSE = "selectedHorse";
     private static final String KEY_SELECTED_RIDER_NAME = "selectedRiderName";
     private static final String KEY_SELECTED_PET = "selectedPet";
@@ -35,6 +36,7 @@ public final class MvpProgressStore {
         progress.petXp = preferences.getInteger(KEY_PET_XP, defaults.petXp);
         progress.petLevel = preferences.getInteger(KEY_PET_LEVEL, defaults.petLevel);
         progress.upgradeLevels = parseUpgradeLevels(preferences.getString(KEY_UPGRADE_LEVELS, ""));
+        progress.unlockedSkins = parseUnlockedSkins(preferences.getString(KEY_UNLOCKED_SKINS, ""));
         progress.selectedHorse = preferences.getString(KEY_SELECTED_HORSE, defaults.selectedHorse);
         progress.selectedRiderName = preferences.getString(KEY_SELECTED_RIDER_NAME, defaults.selectedRiderName);
         progress.selectedPet = preferences.getString(KEY_SELECTED_PET, defaults.selectedPet);
@@ -56,6 +58,7 @@ public final class MvpProgressStore {
         preferences.putInteger(KEY_PET_XP, progress.petXp);
         preferences.putInteger(KEY_PET_LEVEL, progress.petLevel);
         preferences.putString(KEY_UPGRADE_LEVELS, formatUpgradeLevels(progress.upgradeLevels));
+        preferences.putString(KEY_UNLOCKED_SKINS, formatUnlockedSkins(progress.unlockedSkins));
         preferences.putString(KEY_SELECTED_HORSE, progress.selectedHorse);
         preferences.putString(KEY_SELECTED_RIDER_NAME, progress.selectedRiderName);
         preferences.putString(KEY_SELECTED_PET, progress.selectedPet);
@@ -106,6 +109,33 @@ public final class MvpProgressStore {
             int level = i < safeLevels.length ? safeLevels[i] : 0;
             int maxLevel = MvpGameConfig.UPGRADE_CATEGORIES[i].upgradeCount;
             builder.append(Math.max(0, Math.min(level, maxLevel)));
+        }
+        return builder.toString();
+    }
+
+    private boolean[] parseUnlockedSkins(String value) {
+        boolean[] skins = new boolean[MvpGameConfig.SKIN_LABELS.length];
+        skins[0] = true;
+        if (value == null || value.length() == 0) {
+            return skins;
+        }
+        String[] parts = value.split(",");
+        for (int i = 0; i < skins.length && i < parts.length; i++) {
+            skins[i] = "1".equals(parts[i]) || "true".equalsIgnoreCase(parts[i]);
+        }
+        skins[0] = true;
+        return skins;
+    }
+
+    private String formatUnlockedSkins(boolean[] skins) {
+        boolean[] safeSkins = skins != null ? skins : new boolean[0];
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < MvpGameConfig.SKIN_LABELS.length; i++) {
+            if (i > 0) {
+                builder.append(',');
+            }
+            boolean unlocked = i == 0 || (i < safeSkins.length && safeSkins[i]);
+            builder.append(unlocked ? '1' : '0');
         }
         return builder.toString();
     }

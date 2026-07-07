@@ -7,6 +7,7 @@ public final class MvpProgress {
     public int petXp;
     public int petLevel;
     public int[] upgradeLevels;
+    public boolean[] unlockedSkins;
     public String selectedHorse;
     public String selectedRiderName;
     public String selectedPet;
@@ -24,6 +25,8 @@ public final class MvpProgress {
         progress.petXp = 0;
         progress.petLevel = 1;
         progress.upgradeLevels = new int[MvpGameConfig.UPGRADE_CATEGORIES.length];
+        progress.unlockedSkins = new boolean[MvpGameConfig.SKIN_LABELS.length];
+        progress.unlockedSkins[0] = true;
         progress.selectedHorse = MvpGameConfig.HORSES[0].name;
         progress.selectedRiderName = MvpGameConfig.RIDER_NAMES[0];
         progress.selectedPet = "Kutya";
@@ -81,9 +84,39 @@ public final class MvpProgress {
         return true;
     }
 
+    public boolean purchaseSkin(int skinIndex) {
+        if (skinIndex < 0 || skinIndex >= MvpGameConfig.SKIN_LABELS.length) {
+            throw new IllegalArgumentException("Skin index is out of range.");
+        }
+        ensureUnlockedSkins();
+        if (unlockedSkins[skinIndex]) {
+            return false;
+        }
+        int cost = MvpGameConfig.skinPrice(skinIndex);
+        if (horseshoes < cost) {
+            return false;
+        }
+        horseshoes -= cost;
+        unlockedSkins[skinIndex] = true;
+        return true;
+    }
+
     private void ensureUpgradeLevels() {
         if (upgradeLevels == null || upgradeLevels.length != MvpGameConfig.UPGRADE_CATEGORIES.length) {
             upgradeLevels = new int[MvpGameConfig.UPGRADE_CATEGORIES.length];
+        }
+    }
+
+    private void ensureUnlockedSkins() {
+        if (unlockedSkins == null || unlockedSkins.length != MvpGameConfig.SKIN_LABELS.length) {
+            boolean[] oldSkins = unlockedSkins;
+            unlockedSkins = new boolean[MvpGameConfig.SKIN_LABELS.length];
+            unlockedSkins[0] = true;
+            if (oldSkins != null) {
+                for (int i = 0; i < unlockedSkins.length && i < oldSkins.length; i++) {
+                    unlockedSkins[i] = unlockedSkins[i] || oldSkins[i];
+                }
+            }
         }
     }
 

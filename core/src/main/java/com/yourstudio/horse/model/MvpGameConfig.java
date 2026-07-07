@@ -66,6 +66,15 @@ public final class MvpGameConfig {
         new ObstacleType("pocsolya", "Pocsolya")
     };
 
+    public static final String[] SKIN_LABELS = {
+        "Alap sz\u00EDn",
+        "Erdei csill\u00E1m",
+        "Napf\u00E9nyes s\u00F6r\u00E9ny",
+        "Bajnok d\u00EDsz"
+    };
+
+    public static final int[] SKIN_PRICES = {5, 10, 15, 20};
+
     public static final UpgradeCategory[] UPGRADE_CATEGORIES = {
         new UpgradeCategory("gyorsasag", "Gyorsas\u00e1g", 2),
         new UpgradeCategory("fordulas", "Fordul\u00e1s", 2),
@@ -147,6 +156,13 @@ public final class MvpGameConfig {
             return 15;
         }
         return 20;
+    }
+
+    public static int skinPrice(int skinIndex) {
+        if (skinIndex < 0 || skinIndex >= SKIN_PRICES.length) {
+            throw new IllegalArgumentException("Skin index is out of range.");
+        }
+        return SKIN_PRICES[skinIndex];
     }
 
     public static RiderBonus riderBonusForIndex(int riderIndex) {

@@ -21,6 +21,7 @@ public class MvpProgressStoreTest {
         assertEquals("Kutya", progress.selectedPet);
         assertEquals(MvpGameConfig.Difficulty.EASY, progress.selectedDifficulty);
         assertEquals(0, progress.upgradeLevels[0]);
+        assertTrue(progress.unlockedSkins[0]);
         assertEquals(1, progress.playerLevel);
     }
 
@@ -36,6 +37,7 @@ public class MvpProgressStoreTest {
         progress.petLevel = 3;
         progress.upgradeLevels[0] = 2;
         progress.upgradeLevels[3] = 1;
+        progress.unlockedSkins[2] = true;
         progress.selectedHorse = "Pihe";
         progress.selectedRiderName = "Szandi";
         progress.selectedPet = "Kutya";
@@ -55,6 +57,8 @@ public class MvpProgressStoreTest {
         assertEquals(3, loaded.petLevel);
         assertEquals(2, loaded.upgradeLevels[0]);
         assertEquals(1, loaded.upgradeLevels[3]);
+        assertTrue(loaded.unlockedSkins[0]);
+        assertTrue(loaded.unlockedSkins[2]);
         assertEquals("Pihe", loaded.selectedHorse);
         assertEquals("Szandi", loaded.selectedRiderName);
         assertEquals("Kutya", loaded.selectedPet);
