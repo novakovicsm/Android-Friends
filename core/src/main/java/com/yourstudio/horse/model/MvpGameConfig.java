@@ -18,6 +18,7 @@ public final class MvpGameConfig {
     public static final float BOOST_SPEED_MULTIPLIER = 1.35f;
     public static final float OBSTACLE_SLOWDOWN_MULTIPLIER = 0.55f;
     public static final float OBSTACLE_SLOWDOWN_SECONDS = 1.2f;
+    public static final int PET_UNLOCK_PRICE = 20;
 
     public static final String[] RIDER_NAMES = {
         "Peti",
@@ -74,6 +75,13 @@ public final class MvpGameConfig {
     };
 
     public static final int[] SKIN_PRICES = {5, 10, 15, 20};
+
+    public static final String[] PET_LABELS = {
+        "Kutya",
+        "Cica",
+        "Nyuszi",
+        "Papag\u00E1j"
+    };
 
     public static final UpgradeCategory[] UPGRADE_CATEGORIES = {
         new UpgradeCategory("gyorsasag", "Gyorsas\u00e1g", 2),

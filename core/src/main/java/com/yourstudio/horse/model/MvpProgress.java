@@ -8,6 +8,7 @@ public final class MvpProgress {
     public int petLevel;
     public int[] upgradeLevels;
     public boolean[] unlockedSkins;
+    public boolean[] unlockedPets;
     public String selectedHorse;
     public String selectedRiderName;
     public String selectedPet;
@@ -27,6 +28,8 @@ public final class MvpProgress {
         progress.upgradeLevels = new int[MvpGameConfig.UPGRADE_CATEGORIES.length];
         progress.unlockedSkins = new boolean[MvpGameConfig.SKIN_LABELS.length];
         progress.unlockedSkins[0] = true;
+        progress.unlockedPets = new boolean[MvpGameConfig.PET_LABELS.length];
+        progress.unlockedPets[0] = true;
         progress.selectedHorse = MvpGameConfig.HORSES[0].name;
         progress.selectedRiderName = MvpGameConfig.RIDER_NAMES[0];
         progress.selectedPet = "Kutya";
@@ -101,6 +104,22 @@ public final class MvpProgress {
         return true;
     }
 
+    public boolean purchasePet(int petIndex) {
+        if (petIndex < 0 || petIndex >= MvpGameConfig.PET_LABELS.length) {
+            throw new IllegalArgumentException("Pet index is out of range.");
+        }
+        ensureUnlockedPets();
+        if (unlockedPets[petIndex]) {
+            return false;
+        }
+        if (horseshoes < MvpGameConfig.PET_UNLOCK_PRICE) {
+            return false;
+        }
+        horseshoes -= MvpGameConfig.PET_UNLOCK_PRICE;
+        unlockedPets[petIndex] = true;
+        return true;
+    }
+
     private void ensureUpgradeLevels() {
         if (upgradeLevels == null || upgradeLevels.length != MvpGameConfig.UPGRADE_CATEGORIES.length) {
             upgradeLevels = new int[MvpGameConfig.UPGRADE_CATEGORIES.length];
@@ -115,6 +134,19 @@ public final class MvpProgress {
             if (oldSkins != null) {
                 for (int i = 0; i < unlockedSkins.length && i < oldSkins.length; i++) {
                     unlockedSkins[i] = unlockedSkins[i] || oldSkins[i];
+                }
+            }
+        }
+    }
+
+    private void ensureUnlockedPets() {
+        if (unlockedPets == null || unlockedPets.length != MvpGameConfig.PET_LABELS.length) {
+            boolean[] oldPets = unlockedPets;
+            unlockedPets = new boolean[MvpGameConfig.PET_LABELS.length];
+            unlockedPets[0] = true;
+            if (oldPets != null) {
+                for (int i = 0; i < unlockedPets.length && i < oldPets.length; i++) {
+                    unlockedPets[i] = unlockedPets[i] || oldPets[i];
                 }
             }
         }

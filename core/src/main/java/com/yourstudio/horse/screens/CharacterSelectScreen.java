@@ -76,7 +76,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
 
     private final String[] horses = horseNamesFromConfig();
     private final String[] riders = MvpGameConfig.RIDER_NAMES;
-    private final String[] pets = {"Kutya"};
+    private final String[] pets;
     private final String[] horseColors = {"Meleg barna", "Arany", "Hamvas", "S\u00F6t\u00E9t"};
     private final String[] maneColors = {"Fekete", "Csokol\u00E1d\u00E9", "Sz\u00FCrke", "Sz\u0151ke"};
     private final String[] saddleColors = {"V\u00F6r\u00F6s", "K\u00E9k", "Z\u00F6ld", "Fekete"};
@@ -132,6 +132,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
         this.game = game;
         Preferences prefs = Gdx.app.getPreferences(PREFS_NAME);
         MvpProgress progress = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME)).load();
+        this.pets = unlockedPetNames(progress);
         String resolvedHorse = horseName != null ? horseName : prefs.getString(PREF_HORSE, progress.selectedHorse);
         String resolvedRider = riderName != null ? riderName : prefs.getString(PREF_RIDER, progress.selectedRiderName);
         this.initialRiderName = resolvedRider;
@@ -548,6 +549,28 @@ public class CharacterSelectScreen extends ScreenAdapter {
         String[] names = new String[MvpGameConfig.HORSES.length];
         for (int i = 0; i < MvpGameConfig.HORSES.length; i++) {
             names[i] = MvpGameConfig.HORSES[i].name;
+        }
+        return names;
+    }
+
+    private static String[] unlockedPetNames(MvpProgress progress) {
+        int count = 0;
+        for (int i = 0; i < MvpGameConfig.PET_LABELS.length; i++) {
+            if (i == 0 || (progress.unlockedPets != null
+                && i < progress.unlockedPets.length
+                && progress.unlockedPets[i])) {
+                count++;
+            }
+        }
+        String[] names = new String[count];
+        int target = 0;
+        for (int i = 0; i < MvpGameConfig.PET_LABELS.length; i++) {
+            if (i == 0 || (progress.unlockedPets != null
+                && i < progress.unlockedPets.length
+                && progress.unlockedPets[i])) {
+                names[target] = MvpGameConfig.PET_LABELS[i];
+                target++;
+            }
         }
         return names;
     }

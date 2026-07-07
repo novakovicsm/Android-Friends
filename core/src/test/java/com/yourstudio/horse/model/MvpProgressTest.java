@@ -20,6 +20,9 @@ public class MvpProgressTest {
         assertEquals(MvpGameConfig.SKIN_LABELS.length, progress.unlockedSkins.length);
         assertEquals(true, progress.unlockedSkins[0]);
         assertFalse(progress.unlockedSkins[1]);
+        assertEquals(MvpGameConfig.PET_LABELS.length, progress.unlockedPets.length);
+        assertEquals(true, progress.unlockedPets[0]);
+        assertFalse(progress.unlockedPets[1]);
         assertEquals("Vill\u00e1m", progress.selectedHorse);
         assertEquals("Peti", progress.selectedRiderName);
         assertEquals("Kutya", progress.selectedPet);
@@ -84,5 +87,18 @@ public class MvpProgressTest {
 
         assertEquals(false, progress.purchaseSkin(1));
         assertEquals(10, progress.horseshoes);
+    }
+
+    @Test
+    public void purchasePetSpendsHorseshoesAndUnlocksOnce() {
+        MvpProgress progress = MvpProgress.newGame();
+        progress.horseshoes = 40;
+
+        assertEquals(true, progress.purchasePet(1));
+        assertEquals(20, progress.horseshoes);
+        assertEquals(true, progress.unlockedPets[1]);
+
+        assertEquals(false, progress.purchasePet(1));
+        assertEquals(20, progress.horseshoes);
     }
 }

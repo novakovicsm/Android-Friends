@@ -122,6 +122,8 @@ public class MvpGameConfigTest {
     public void petAndPowerupValuesMatchMvpSpec() {
         assertEquals(10, MvpGameConfig.MAX_PET_LEVEL);
         assertEquals(100, MvpGameConfig.PET_XP_PER_LEVEL);
+        assertEquals(20, MvpGameConfig.PET_UNLOCK_PRICE);
+        assertEquals(4, MvpGameConfig.PET_LABELS.length);
         assertEquals(20, MvpGameConfig.BOOST_POWERUP_CHARGE_PERCENT);
         assertEquals(20, MvpGameConfig.BOOST_ACTIVATION_COST_PERCENT);
         assertEquals(1.1f, MvpGameConfig.BOOST_ACTIVE_SECONDS, 0.0001f);

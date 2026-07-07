@@ -27,6 +27,7 @@ public class ShopScreen extends ScreenAdapter {
     private MvpProgress progress;
     private Label horseshoeLabel;
     private final Label[] skinLabels = new Label[MvpGameConfig.SKIN_LABELS.length];
+    private final Label[] petLabels = new Label[MvpGameConfig.PET_LABELS.length];
     private final Label[] upgradeLabels = new Label[MvpGameConfig.UPGRADE_CATEGORIES.length];
 
     public ShopScreen(HorseGame game) {
@@ -80,6 +81,27 @@ public class ShopScreen extends ScreenAdapter {
             layout.add(buyButton).width(220f).height(52f).row();
         }
 
+        Label petTitle = new Label("Kedvencek", labelStyle);
+        layout.add(petTitle).colspan(2).left().padTop(8f).padBottom(12f).row();
+
+        for (int i = 0; i < MvpGameConfig.PET_LABELS.length; i++) {
+            final int petIndex = i;
+            petLabels[i] = new Label("", labelStyle);
+            TextButton buyButton = new TextButton("V\u00E1s\u00E1rl\u00E1s", buttonStyle);
+            buyButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    if (progress.purchasePet(petIndex)) {
+                        progressStore.save(progress);
+                        refreshLabels();
+                    }
+                }
+            });
+
+            layout.add(petLabels[i]).width(360f).left();
+            layout.add(buyButton).width(220f).height(52f).row();
+        }
+
         Label upgradeTitle = new Label("Upgrade-ek", labelStyle);
         layout.add(upgradeTitle).colspan(2).left().padTop(8f).padBottom(12f).row();
 
@@ -126,6 +148,13 @@ public class ShopScreen extends ScreenAdapter {
                 && progress.unlockedSkins[i]);
             String statusText = unlocked ? "megvan" : MvpGameConfig.skinPrice(i) + " patk\u00F3";
             skinLabels[i].setText(MvpGameConfig.SKIN_LABELS[i] + " - " + statusText);
+        }
+        for (int i = 0; i < MvpGameConfig.PET_LABELS.length; i++) {
+            boolean unlocked = i == 0 || (progress.unlockedPets != null
+                && i < progress.unlockedPets.length
+                && progress.unlockedPets[i]);
+            String statusText = unlocked ? "megvan" : MvpGameConfig.PET_UNLOCK_PRICE + " patk\u00F3";
+            petLabels[i].setText(MvpGameConfig.PET_LABELS[i] + " - " + statusText);
         }
         for (int i = 0; i < MvpGameConfig.UPGRADE_CATEGORIES.length; i++) {
             MvpGameConfig.UpgradeCategory category = MvpGameConfig.UPGRADE_CATEGORIES[i];

@@ -12,6 +12,7 @@ public final class MvpProgressStore {
     private static final String KEY_PET_LEVEL = "petLevel";
     private static final String KEY_UPGRADE_LEVELS = "upgradeLevels";
     private static final String KEY_UNLOCKED_SKINS = "unlockedSkins";
+    private static final String KEY_UNLOCKED_PETS = "unlockedPets";
     private static final String KEY_SELECTED_HORSE = "selectedHorse";
     private static final String KEY_SELECTED_RIDER_NAME = "selectedRiderName";
     private static final String KEY_SELECTED_PET = "selectedPet";
@@ -37,6 +38,7 @@ public final class MvpProgressStore {
         progress.petLevel = preferences.getInteger(KEY_PET_LEVEL, defaults.petLevel);
         progress.upgradeLevels = parseUpgradeLevels(preferences.getString(KEY_UPGRADE_LEVELS, ""));
         progress.unlockedSkins = parseUnlockedSkins(preferences.getString(KEY_UNLOCKED_SKINS, ""));
+        progress.unlockedPets = parseUnlockedPets(preferences.getString(KEY_UNLOCKED_PETS, ""));
         progress.selectedHorse = preferences.getString(KEY_SELECTED_HORSE, defaults.selectedHorse);
         progress.selectedRiderName = preferences.getString(KEY_SELECTED_RIDER_NAME, defaults.selectedRiderName);
         progress.selectedPet = preferences.getString(KEY_SELECTED_PET, defaults.selectedPet);
@@ -59,6 +61,7 @@ public final class MvpProgressStore {
         preferences.putInteger(KEY_PET_LEVEL, progress.petLevel);
         preferences.putString(KEY_UPGRADE_LEVELS, formatUpgradeLevels(progress.upgradeLevels));
         preferences.putString(KEY_UNLOCKED_SKINS, formatUnlockedSkins(progress.unlockedSkins));
+        preferences.putString(KEY_UNLOCKED_PETS, formatUnlockedPets(progress.unlockedPets));
         preferences.putString(KEY_SELECTED_HORSE, progress.selectedHorse);
         preferences.putString(KEY_SELECTED_RIDER_NAME, progress.selectedRiderName);
         preferences.putString(KEY_SELECTED_PET, progress.selectedPet);
@@ -135,6 +138,33 @@ public final class MvpProgressStore {
                 builder.append(',');
             }
             boolean unlocked = i == 0 || (i < safeSkins.length && safeSkins[i]);
+            builder.append(unlocked ? '1' : '0');
+        }
+        return builder.toString();
+    }
+
+    private boolean[] parseUnlockedPets(String value) {
+        boolean[] pets = new boolean[MvpGameConfig.PET_LABELS.length];
+        pets[0] = true;
+        if (value == null || value.length() == 0) {
+            return pets;
+        }
+        String[] parts = value.split(",");
+        for (int i = 0; i < pets.length && i < parts.length; i++) {
+            pets[i] = "1".equals(parts[i]) || "true".equalsIgnoreCase(parts[i]);
+        }
+        pets[0] = true;
+        return pets;
+    }
+
+    private String formatUnlockedPets(boolean[] pets) {
+        boolean[] safePets = pets != null ? pets : new boolean[0];
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < MvpGameConfig.PET_LABELS.length; i++) {
+            if (i > 0) {
+                builder.append(',');
+            }
+            boolean unlocked = i == 0 || (i < safePets.length && safePets[i]);
             builder.append(unlocked ? '1' : '0');
         }
         return builder.toString();
