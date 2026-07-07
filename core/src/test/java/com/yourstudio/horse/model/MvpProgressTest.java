@@ -15,6 +15,8 @@ public class MvpProgressTest {
         assertEquals(1, progress.playerLevel);
         assertEquals(0, progress.petXp);
         assertEquals(1, progress.petLevel);
+        assertEquals(MvpGameConfig.UPGRADE_CATEGORIES.length, progress.upgradeLevels.length);
+        assertEquals(0, progress.upgradeLevels[0]);
         assertEquals("Vill\u00e1m", progress.selectedHorse);
         assertEquals("Peti", progress.selectedRiderName);
         assertEquals("Kutya", progress.selectedPet);
@@ -48,5 +50,23 @@ public class MvpProgressTest {
         assertEquals(2, MvpProgress.calculatePlayerLevel(15));
         assertEquals(3, MvpProgress.calculatePlayerLevel(23));
         assertEquals(4, MvpProgress.calculatePlayerLevel(35));
+    }
+
+    @Test
+    public void purchaseUpgradeSpendsHorseshoesAndIncreasesCategoryLevel() {
+        MvpProgress progress = MvpProgress.newGame();
+        progress.horseshoes = 25;
+
+        assertEquals(true, progress.purchaseUpgrade(0));
+        assertEquals(15, progress.horseshoes);
+        assertEquals(1, progress.upgradeLevels[0]);
+
+        assertEquals(true, progress.purchaseUpgrade(0));
+        assertEquals(5, progress.horseshoes);
+        assertEquals(2, progress.upgradeLevels[0]);
+
+        assertEquals(false, progress.purchaseUpgrade(0));
+        assertEquals(5, progress.horseshoes);
+        assertEquals(2, progress.upgradeLevels[0]);
     }
 }

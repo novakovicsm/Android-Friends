@@ -6,6 +6,7 @@ public final class MvpProgress {
     public int playerLevel;
     public int petXp;
     public int petLevel;
+    public int[] upgradeLevels;
     public String selectedHorse;
     public String selectedRiderName;
     public String selectedPet;
@@ -22,6 +23,7 @@ public final class MvpProgress {
         progress.playerLevel = 1;
         progress.petXp = 0;
         progress.petLevel = 1;
+        progress.upgradeLevels = new int[MvpGameConfig.UPGRADE_CATEGORIES.length];
         progress.selectedHorse = MvpGameConfig.HORSES[0].name;
         progress.selectedRiderName = MvpGameConfig.RIDER_NAMES[0];
         progress.selectedPet = "Kutya";
@@ -57,5 +59,39 @@ public final class MvpProgress {
             return 1;
         }
         return Math.min(level, MvpGameConfig.MAX_PET_LEVEL);
+    }
+
+    public boolean purchaseUpgrade(int categoryIndex) {
+        if (categoryIndex < 0 || categoryIndex >= MvpGameConfig.UPGRADE_CATEGORIES.length) {
+            throw new IllegalArgumentException("Upgrade category index is out of range.");
+        }
+        ensureUpgradeLevels();
+        int currentLevel = upgradeLevels[categoryIndex];
+        int maxLevel = MvpGameConfig.UPGRADE_CATEGORIES[categoryIndex].upgradeCount;
+        if (currentLevel >= maxLevel) {
+            return false;
+        }
+        int upgradeNumber = nextUpgradeNumber(categoryIndex, currentLevel);
+        int cost = MvpGameConfig.upgradeCost(upgradeNumber);
+        if (horseshoes < cost) {
+            return false;
+        }
+        horseshoes -= cost;
+        upgradeLevels[categoryIndex] = currentLevel + 1;
+        return true;
+    }
+
+    private void ensureUpgradeLevels() {
+        if (upgradeLevels == null || upgradeLevels.length != MvpGameConfig.UPGRADE_CATEGORIES.length) {
+            upgradeLevels = new int[MvpGameConfig.UPGRADE_CATEGORIES.length];
+        }
+    }
+
+    private int nextUpgradeNumber(int categoryIndex, int currentLevel) {
+        int upgradeNumber = currentLevel + 1;
+        for (int i = 0; i < categoryIndex; i++) {
+            upgradeNumber += MvpGameConfig.UPGRADE_CATEGORIES[i].upgradeCount;
+        }
+        return upgradeNumber;
     }
 }
