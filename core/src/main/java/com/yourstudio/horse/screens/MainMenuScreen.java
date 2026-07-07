@@ -137,9 +137,12 @@ public class MainMenuScreen extends ScreenAdapter {
         if (progress == null) {
             return "Aranypatk\u00F3: 0 | Szint: 1 | Kutya: 1";
         }
+        String petName = progress.selectedPet != null && progress.selectedPet.length() > 0
+            ? progress.selectedPet
+            : "Kutya";
         return "Aranypatk\u00F3: " + progress.horseshoes
             + " | Szint: " + progress.playerLevel
-            + " | Kutya: " + progress.petLevel;
+            + " | " + petName + ": " + progress.petLevel;
     }
 
     private void applyMenuMusicState() {
