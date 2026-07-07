@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.yourstudio.horse.HorseGame;
+import com.yourstudio.horse.model.MvpGameConfig;
 import com.yourstudio.horse.model.MvpProgress;
 import com.yourstudio.horse.model.MvpProgressStore;
 import com.yourstudio.horse.ui.ScreenNavigator;
@@ -142,7 +143,15 @@ public class MainMenuScreen extends ScreenAdapter {
             : "Kutya";
         return "Aranypatk\u00F3: " + progress.horseshoes
             + " | Szint: " + progress.playerLevel
-            + " | " + petName + ": " + progress.petLevel;
+            + " | " + petName + ": " + progress.petLevel
+            + " | Skin: " + selectedSkinName();
+    }
+
+    private String selectedSkinName() {
+        if (progress.selectedSkinIndex < 0 || progress.selectedSkinIndex >= MvpGameConfig.SKIN_LABELS.length) {
+            return MvpGameConfig.SKIN_LABELS[0];
+        }
+        return MvpGameConfig.SKIN_LABELS[progress.selectedSkinIndex];
     }
 
     private void applyMenuMusicState() {
