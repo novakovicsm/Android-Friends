@@ -2,6 +2,7 @@ package com.yourstudio.horse.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -25,6 +26,7 @@ public class ShopScreen extends ScreenAdapter {
     private Stage stage;
     private MvpProgressStore progressStore;
     private MvpProgress progress;
+    private Sound purchaseSound;
     private Label horseshoeLabel;
     private final Label[] skinLabels = new Label[MvpGameConfig.SKIN_LABELS.length];
     private final Label[] petLabels = new Label[MvpGameConfig.PET_LABELS.length];
@@ -40,6 +42,7 @@ public class ShopScreen extends ScreenAdapter {
         Skin skin = game.getSkin();
         progressStore = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME));
         progress = progressStore.load();
+        purchaseSound = game.getAssets().get("sfx/powerup.wav", Sound.class);
 
         Label.LabelStyle titleStyle = skin.get("title", Label.LabelStyle.class);
         Label.LabelStyle labelStyle = skin.get("default", Label.LabelStyle.class);
@@ -72,6 +75,7 @@ public class ShopScreen extends ScreenAdapter {
                 public void clicked(InputEvent event, float x, float y) {
                     if (progress.purchaseSkin(skinIndex)) {
                         progressStore.save(progress);
+                        playPurchaseSound();
                         refreshLabels();
                     }
                 }
@@ -93,6 +97,7 @@ public class ShopScreen extends ScreenAdapter {
                 public void clicked(InputEvent event, float x, float y) {
                     if (progress.purchasePet(petIndex)) {
                         progressStore.save(progress);
+                        playPurchaseSound();
                         refreshLabels();
                     }
                 }
@@ -114,6 +119,7 @@ public class ShopScreen extends ScreenAdapter {
                 public void clicked(InputEvent event, float x, float y) {
                     if (progress.purchaseUpgrade(categoryIndex)) {
                         progressStore.save(progress);
+                        playPurchaseSound();
                         refreshLabels();
                     }
                 }
@@ -163,6 +169,12 @@ public class ShopScreen extends ScreenAdapter {
                 ? "max"
                 : MvpGameConfig.upgradeCost(nextUpgradeNumber(i, level)) + " patk\u00F3";
             upgradeLabels[i].setText(category.label + ": " + level + "/" + category.upgradeCount + " - " + costText);
+        }
+    }
+
+    private void playPurchaseSound() {
+        if (!progress.muted && purchaseSound != null) {
+            purchaseSound.play(0.7f);
         }
     }
 
