@@ -94,6 +94,7 @@ public class RaceScreen extends ScreenAdapter {
     private Label jumpLabel;
     private Label npcLabel;
     private Label difficultyLabel;
+    private Label resultLabel;
     private Image horsePreviewImage;
     private Image riderPreviewImage;
     private Image petPreviewImage;
@@ -350,6 +351,7 @@ public class RaceScreen extends ScreenAdapter {
         jumpLabel = new Label("Ugr\u00E1s: k\u00E9sz", labelStyle);
         npcLabel = new Label(npcLabelText(), labelStyle);
         difficultyLabel = new Label("Neh\u00E9zs\u00E9g: " + difficultyLabelText(), labelStyle);
+        resultLabel = new Label("Eredm\u00E9ny: --", labelStyle);
         coinLabel = new Label("\u00C9rm\u00E9k: 0", labelStyle);
         // directionLabel = new Label("Ir\u00E1ny:", labelStyle);
             // Joystick control only, remove left/right buttons from UI
@@ -397,6 +399,8 @@ public class RaceScreen extends ScreenAdapter {
         hudContent.add(jumpLabel).left().padTop(6f);
         hudContent.row();
         hudContent.add(npcLabel).left().padTop(6f);
+        hudContent.row();
+        hudContent.add(resultLabel).left().padTop(6f);
         hudContent.row();
         hudContent.add(coinLabel).left().padTop(6f);
         hudContent.row();
@@ -565,6 +569,8 @@ public class RaceScreen extends ScreenAdapter {
         MvpProgressStore progressStore = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME));
         MvpProgress progress = progressStore.load();
         boolean recordBroken = isRecordBroken(progress.recordTime, elapsedTime);
+        int horseshoeReward = MvpGameConfig.horseshoeReward(1, difficulty);
+        int xpReward = MvpGameConfig.raceXp(1, difficulty, recordBroken);
         progress.applyRaceResult(1, difficulty, recordBroken);
         if (recordBroken) {
             progress.recordTime = formatRaceTime(elapsedTime);
@@ -572,6 +578,9 @@ public class RaceScreen extends ScreenAdapter {
         progressStore.save(progress);
         playerCoins = progress.horseshoes;
         updateCoinLabel();
+        if (resultLabel != null) {
+            resultLabel.setText("Eredm\u00E9ny: 1. hely, +" + horseshoeReward + " patk\u00F3, +" + xpReward + " XP");
+        }
         if (!muted && winSound != null) {
             winSound.play(0.7f);
         }
