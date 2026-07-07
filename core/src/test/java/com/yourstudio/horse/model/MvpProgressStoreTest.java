@@ -89,6 +89,18 @@ public class MvpProgressStoreTest {
         assertEquals(0, loaded.selectedSkinIndex);
     }
 
+    @Test
+    public void loadFallsBackWhenSelectedPetIsLocked() {
+        FakePreferences preferences = new FakePreferences();
+        preferences.putString("selectedPet", "Cica");
+        preferences.putString("unlockedPets", "1,0,0,0");
+        MvpProgressStore store = new MvpProgressStore(preferences);
+
+        MvpProgress loaded = store.load();
+
+        assertEquals("Kutya", loaded.selectedPet);
+    }
+
     private static final class FakePreferences implements Preferences {
         private final Map<String, Object> values = new HashMap<>();
         private boolean flushed;

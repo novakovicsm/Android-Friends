@@ -46,7 +46,7 @@ public final class MvpProgressStore {
         progress.unlockedPets = parseUnlockedPets(preferences.getString(KEY_UNLOCKED_PETS, ""));
         progress.selectedHorse = preferences.getString(KEY_SELECTED_HORSE, defaults.selectedHorse);
         progress.selectedRiderName = preferences.getString(KEY_SELECTED_RIDER_NAME, defaults.selectedRiderName);
-        progress.selectedPet = preferences.getString(KEY_SELECTED_PET, defaults.selectedPet);
+        progress.selectedPet = safeSelectedPet(preferences.getString(KEY_SELECTED_PET, defaults.selectedPet), progress.unlockedPets);
         progress.selectedRiderColor = preferences.getString(KEY_SELECTED_RIDER_COLOR, defaults.selectedRiderColor);
         progress.selectedDifficulty = difficultyFromName(
             preferences.getString(KEY_SELECTED_DIFFICULTY, defaults.selectedDifficulty.name()),
@@ -70,7 +70,7 @@ public final class MvpProgressStore {
         preferences.putString(KEY_UNLOCKED_PETS, formatUnlockedPets(progress.unlockedPets));
         preferences.putString(KEY_SELECTED_HORSE, progress.selectedHorse);
         preferences.putString(KEY_SELECTED_RIDER_NAME, progress.selectedRiderName);
-        preferences.putString(KEY_SELECTED_PET, progress.selectedPet);
+        preferences.putString(KEY_SELECTED_PET, safeSelectedPet(progress.selectedPet, progress.unlockedPets));
         preferences.putString(KEY_SELECTED_RIDER_COLOR, progress.selectedRiderColor);
         MvpGameConfig.Difficulty difficulty = progress.selectedDifficulty != null
             ? progress.selectedDifficulty
@@ -184,5 +184,17 @@ public final class MvpProgressStore {
             builder.append(unlocked ? '1' : '0');
         }
         return builder.toString();
+    }
+
+    private String safeSelectedPet(String petName, boolean[] unlockedPets) {
+        for (int i = 0; i < MvpGameConfig.PET_LABELS.length; i++) {
+            if (MvpGameConfig.PET_LABELS[i].equals(petName)
+                && unlockedPets != null
+                && i < unlockedPets.length
+                && unlockedPets[i]) {
+                return petName;
+            }
+        }
+        return MvpGameConfig.PET_LABELS[0];
     }
 }
