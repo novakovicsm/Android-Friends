@@ -5,6 +5,8 @@ import org.junit.Test;
 
 import java.lang.reflect.Method;
 
+import com.yourstudio.horse.model.MvpProgress;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -81,11 +83,39 @@ public class RaceScreenTest {
         assertTrue(getFloatField(raceScreen, "riderBoostChargeBonus") > 0f);
     }
 
+    @Test
+    public void selectedSkinProvidesFallbackHorseColor() {
+        MvpProgress progress = MvpProgress.newGame();
+        progress.selectedSkinIndex = 1;
+
+        Object resolved = invokePrivate(raceScreen, "resolveHorseColor",
+            new Class<?>[] {String.class, MvpProgress.class},
+            new Object[] {null, progress});
+
+        assertEquals("Arany", resolved);
+    }
+
+    @Test
+    public void explicitHorseColorOverridesSelectedSkin() {
+        MvpProgress progress = MvpProgress.newGame();
+        progress.selectedSkinIndex = 1;
+
+        Object resolved = invokePrivate(raceScreen, "resolveHorseColor",
+            new Class<?>[] {String.class, MvpProgress.class},
+            new Object[] {"Hamvas", progress});
+
+        assertEquals("Hamvas", resolved);
+    }
+
     private void invokePrivate(Object target, String methodName) {
+        invokePrivate(target, methodName, new Class<?>[0], new Object[0]);
+    }
+
+    private Object invokePrivate(Object target, String methodName, Class<?>[] parameterTypes, Object[] args) {
         try {
-            Method method = target.getClass().getDeclaredMethod(methodName);
+            Method method = target.getClass().getDeclaredMethod(methodName, parameterTypes);
             method.setAccessible(true);
-            method.invoke(target);
+            return method.invoke(target, args);
         } catch (Exception exception) {
             throw new RuntimeException(exception);
         }

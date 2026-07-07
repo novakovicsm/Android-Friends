@@ -76,6 +76,13 @@ public final class MvpGameConfig {
 
     public static final int[] SKIN_PRICES = {5, 10, 15, 20};
 
+    public static final String[] SKIN_HORSE_COLORS = {
+        "Meleg barna",
+        "Arany",
+        "Hamvas",
+        "S\u00F6t\u00E9t"
+    };
+
     public static final String[] PET_LABELS = {
         "Kutya",
         "Cica",
@@ -171,6 +178,13 @@ public final class MvpGameConfig {
             throw new IllegalArgumentException("Skin index is out of range.");
         }
         return SKIN_PRICES[skinIndex];
+    }
+
+    public static String skinHorseColor(int skinIndex) {
+        if (skinIndex < 0 || skinIndex >= SKIN_HORSE_COLORS.length) {
+            throw new IllegalArgumentException("Skin index is out of range.");
+        }
+        return SKIN_HORSE_COLORS[skinIndex];
     }
 
     public static RiderBonus riderBonusForIndex(int riderIndex) {

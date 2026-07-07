@@ -303,7 +303,7 @@ public class RaceScreen extends ScreenAdapter {
         petIndex = findIndex(pets, petName);
         npcNames = MvpGameConfig.npcNamesForSeed(trackName != null ? trackName.hashCode() : 0L);
         applyRiderBonus();
-        horseTintColor = colorForHorseColor(horseColor);
+        horseTintColor = colorForHorseColor(resolveHorseColor(horseColor, savedProgress));
         riderOutfitColor = colorForOutfitColor(outfitColor);
         riderHairColor = colorForRiderHair(riderName);
         // Load pixel art assets for previews
@@ -1309,6 +1309,16 @@ public class RaceScreen extends ScreenAdapter {
             return new Color(0.25f, 0.2f, 0.15f, 1f);
         }
         return null;
+    }
+
+    private String resolveHorseColor(String explicitHorseColor, MvpProgress progress) {
+        if (explicitHorseColor != null) {
+            return explicitHorseColor;
+        }
+        if (progress == null) {
+            return null;
+        }
+        return MvpGameConfig.skinHorseColor(progress.selectedSkinIndex);
     }
 
     private Color colorForOutfitColor(String value) {

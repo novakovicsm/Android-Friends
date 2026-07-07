@@ -112,10 +112,13 @@ public class MvpGameConfigTest {
     @Test
     public void skinPricesMatchMvpSpec() {
         assertEquals(4, MvpGameConfig.SKIN_LABELS.length);
+        assertEquals(4, MvpGameConfig.SKIN_HORSE_COLORS.length);
         assertEquals(5, MvpGameConfig.skinPrice(0));
         assertEquals(10, MvpGameConfig.skinPrice(1));
         assertEquals(15, MvpGameConfig.skinPrice(2));
         assertEquals(20, MvpGameConfig.skinPrice(3));
+        assertEquals("Meleg barna", MvpGameConfig.skinHorseColor(0));
+        assertEquals("Arany", MvpGameConfig.skinHorseColor(1));
     }
 
     @Test
