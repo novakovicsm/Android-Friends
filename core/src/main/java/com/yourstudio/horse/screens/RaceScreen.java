@@ -137,6 +137,7 @@ public class RaceScreen extends ScreenAdapter {
     private Array<ObstacleSpawn> obstacleSpawns = new Array<>();
     private Texture powerupMarker;
     private Texture[] obstacleMarkers;
+    private Texture npcMarker;
     private Texture treeMarker;
     private Texture shadowMarker;
     private float spawnTimer;
@@ -302,6 +303,7 @@ public class RaceScreen extends ScreenAdapter {
         runAnimation.setPlayMode(Animation.PlayMode.LOOP);
         powerupMarker = createPowerupMarker();
         obstacleMarkers = createObstacleMarkers();
+        npcMarker = createNpcMarker();
         treeMarker = createTreeMarker();
         shadowMarker = createShadowMarker();
         loadPowerupDefs();
@@ -597,6 +599,7 @@ public class RaceScreen extends ScreenAdapter {
             drawForestDecorations(mapRenderer.getBatch(), true, false);
             drawPowerups(mapRenderer.getBatch());
             drawObstacles(mapRenderer.getBatch());
+            drawNpcRacers(mapRenderer.getBatch(), true);
             drawHorseAnimation(mapRenderer.getBatch(), true);
             drawForestDecorations(mapRenderer.getBatch(), true, true);
             mapRenderer.getBatch().end();
@@ -606,6 +609,7 @@ public class RaceScreen extends ScreenAdapter {
             drawForestDecorations(stage.getBatch(), false, false);
             drawPowerups(stage.getBatch());
             drawObstacles(stage.getBatch());
+            drawNpcRacers(stage.getBatch(), false);
             drawHorseAnimation(stage.getBatch(), false);
             drawForestDecorations(stage.getBatch(), false, true);
             stage.getBatch().end();
@@ -790,6 +794,10 @@ public class RaceScreen extends ScreenAdapter {
         }
     }
 
+    private float npcRaceProgress(int npcIndex) {
+        return MathUtils.clamp(elapsedTime / npcFinishTimeSeconds(npcIndex), 0f, 1f);
+    }
+
     @Override
     public void resize(int width, int height) {
         if (stage != null) {
@@ -824,6 +832,9 @@ public class RaceScreen extends ScreenAdapter {
             powerupMarker.dispose();
         }
         disposeTextureArray(obstacleMarkers);
+        if (npcMarker != null) {
+            npcMarker.dispose();
+        }
         if (treeMarker != null) {
             treeMarker.dispose();
         }
@@ -1295,6 +1306,30 @@ public class RaceScreen extends ScreenAdapter {
         }
     }
 
+    private void drawNpcRacers(com.badlogic.gdx.graphics.g2d.Batch batch, boolean mapSpace) {
+        if (npcMarker == null || npcNames == null) {
+            return;
+        }
+        float scale = mapSpace ? mapScale : 1f;
+        float[] laneOffsets = {-58f, -26f, 28f, 62f};
+        for (int i = 0; i < MvpGameConfig.NPC_COUNT; i++) {
+            float progress = npcRaceProgress(i);
+            float npcDistance = lapDistance * 3f * progress;
+            float relativeDistance = npcDistance - distance;
+            float x;
+            float y;
+            if (mapSpace) {
+                x = (horseX + relativeDistance * 0.28f) * scale;
+                y = (horseY + laneOffsets[i % laneOffsets.length]) * scale;
+            } else {
+                x = stage.getViewport().getWorldWidth() * 0.5f + relativeDistance * 0.28f;
+                y = stage.getViewport().getWorldHeight() * 0.25f + laneOffsets[i % laneOffsets.length];
+            }
+            drawEntityShadow(batch, x, y - 14f * scale, 34f * scale, 8f * scale, 0.18f);
+            batch.draw(npcMarker, x - 20f * scale, y - 18f * scale, 40f * scale, 36f * scale);
+        }
+    }
+
     private void drawForestDecorations(com.badlogic.gdx.graphics.g2d.Batch batch, boolean mapSpace, boolean foreground) {
         if (treeMarker == null) {
             return;
@@ -1331,6 +1366,29 @@ public class RaceScreen extends ScreenAdapter {
         pixmap.setColor(0.35f, 0.25f, 0.05f, 1f);
         pixmap.drawCircle(12, 12, 10);
         Texture texture = new Texture(pixmap);
+        pixmap.dispose();
+        return texture;
+    }
+
+    private Texture createNpcMarker() {
+        Pixmap pixmap = new Pixmap(40, 36, Pixmap.Format.RGBA8888);
+        pixmap.setColor(0f, 0f, 0f, 0f);
+        pixmap.fill();
+        pixmap.setColor(0.38f, 0.28f, 0.18f, 1f);
+        pixmap.fillRectangle(8, 16, 22, 10);
+        pixmap.fillRectangle(25, 21, 8, 7);
+        pixmap.setColor(0.18f, 0.12f, 0.08f, 1f);
+        pixmap.fillRectangle(6, 22, 5, 8);
+        pixmap.fillRectangle(12, 8, 4, 10);
+        pixmap.fillRectangle(24, 8, 4, 10);
+        pixmap.setColor(0.75f, 0.32f, 0.25f, 1f);
+        pixmap.fillRectangle(15, 26, 10, 5);
+        pixmap.setColor(0.9f, 0.75f, 0.6f, 1f);
+        pixmap.fillRectangle(17, 31, 6, 4);
+        pixmap.setColor(0.08f, 0.08f, 0.08f, 1f);
+        pixmap.drawRectangle(8, 16, 22, 10);
+        Texture texture = new Texture(pixmap);
+        texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
         pixmap.dispose();
         return texture;
     }

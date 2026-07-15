@@ -165,6 +165,18 @@ public class RaceScreenTest {
         assertTrue(text.toString().startsWith("Dobog\u00F3: 1. Te"));
     }
 
+    @Test
+    public void npcRaceProgressCapsAtFinish() {
+        RaceScreen screen = new RaceScreen(null, "Villam", "Lili", "Kutya", "forest.tmx",
+            null, null, null, null, MvpGameConfig.Difficulty.EASY);
+        setFloatField(screen, "elapsedTime", 999f);
+
+        float progress = invokePrivateFloat(screen, "npcRaceProgress",
+            new Class<?>[] {int.class}, new Object[] {0});
+
+        assertEquals(1f, progress, 0.01f);
+    }
+
     private void invokePrivate(Object target, String methodName) {
         invokePrivate(target, methodName, new Class<?>[0], new Object[0]);
     }
@@ -181,6 +193,10 @@ public class RaceScreenTest {
 
     private int invokePrivateInt(Object target, String methodName, Class<?>[] parameterTypes, Object[] args) {
         return (Integer) invokePrivate(target, methodName, parameterTypes, args);
+    }
+
+    private float invokePrivateFloat(Object target, String methodName, Class<?>[] parameterTypes, Object[] args) {
+        return (Float) invokePrivate(target, methodName, parameterTypes, args);
     }
 
     private Object getObjectField(Object target, String fieldName) {
