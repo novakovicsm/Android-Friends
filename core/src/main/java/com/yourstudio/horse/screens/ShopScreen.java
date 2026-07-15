@@ -22,6 +22,7 @@ import com.yourstudio.horse.model.MvpProgressStore;
 import com.yourstudio.horse.ui.ScreenNavigator;
 
 public class ShopScreen extends ScreenAdapter {
+    private static final float ITEM_LABEL_WIDTH = 390f;
     private final HorseGame game;
     private Stage stage;
     private MvpProgressStore progressStore;
@@ -62,10 +63,11 @@ public class ShopScreen extends ScreenAdapter {
         horseshoeLabel.setAlignment(Align.center);
         statusLabel = new Label("", labelStyle);
         statusLabel.setAlignment(Align.center);
+        statusLabel.setWrap(true);
 
         layout.add(title).colspan(2).padBottom(18f).row();
         layout.add(horseshoeLabel).colspan(2).padBottom(8f).row();
-        layout.add(statusLabel).colspan(2).padBottom(20f).row();
+        layout.add(statusLabel).width(ITEM_LABEL_WIDTH + 240f).colspan(2).padBottom(20f).row();
 
         Label skinTitle = new Label("Skinek", labelStyle);
         layout.add(skinTitle).colspan(2).left().padBottom(12f).row();
@@ -73,6 +75,7 @@ public class ShopScreen extends ScreenAdapter {
         for (int i = 0; i < MvpGameConfig.SKIN_LABELS.length; i++) {
             final int skinIndex = i;
             skinLabels[i] = new Label("", labelStyle);
+            skinLabels[i].setWrap(true);
             TextButton buyButton = new TextButton("V\u00E1s\u00E1rl\u00E1s", buttonStyle);
             buyButton.addListener(new ClickListener() {
                 @Override
@@ -81,7 +84,7 @@ public class ShopScreen extends ScreenAdapter {
                 }
             });
 
-            layout.add(skinLabels[i]).width(360f).left();
+            layout.add(skinLabels[i]).width(ITEM_LABEL_WIDTH).left();
             layout.add(buyButton).width(220f).height(52f).row();
         }
 
@@ -91,6 +94,7 @@ public class ShopScreen extends ScreenAdapter {
         for (int i = 0; i < MvpGameConfig.PET_LABELS.length; i++) {
             final int petIndex = i;
             petLabels[i] = new Label("", labelStyle);
+            petLabels[i].setWrap(true);
             TextButton buyButton = new TextButton("V\u00E1s\u00E1rl\u00E1s", buttonStyle);
             buyButton.addListener(new ClickListener() {
                 @Override
@@ -99,7 +103,7 @@ public class ShopScreen extends ScreenAdapter {
                 }
             });
 
-            layout.add(petLabels[i]).width(360f).left();
+            layout.add(petLabels[i]).width(ITEM_LABEL_WIDTH).left();
             layout.add(buyButton).width(220f).height(52f).row();
         }
 
@@ -109,6 +113,7 @@ public class ShopScreen extends ScreenAdapter {
         for (int i = 0; i < MvpGameConfig.UPGRADE_CATEGORIES.length; i++) {
             final int categoryIndex = i;
             upgradeLabels[i] = new Label("", labelStyle);
+            upgradeLabels[i].setWrap(true);
             TextButton buyButton = new TextButton("V\u00E1s\u00E1rl\u00E1s", buttonStyle);
             buyButton.addListener(new ClickListener() {
                 @Override
@@ -117,7 +122,7 @@ public class ShopScreen extends ScreenAdapter {
                 }
             });
 
-            layout.add(upgradeLabels[i]).width(360f).left();
+            layout.add(upgradeLabels[i]).width(ITEM_LABEL_WIDTH).left();
             layout.add(buyButton).width(220f).height(52f).row();
         }
 
