@@ -113,6 +113,7 @@ public class RaceScreen extends ScreenAdapter {
     private int riderIndex;
     private int petIndex;
     private String[] npcNames;
+    private int finalPlacement;
     private final String[] horses = horseNamesFromConfig();
     private final String[] riders = MvpGameConfig.RIDER_NAMES;
     private final String[] pets = MvpGameConfig.PET_LABELS;
@@ -612,9 +613,10 @@ public class RaceScreen extends ScreenAdapter {
         MvpProgressStore progressStore = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME));
         MvpProgress progress = progressStore.load();
         boolean recordBroken = isRecordBroken(progress.recordTime, elapsedTime);
-        int horseshoeReward = MvpGameConfig.horseshoeReward(1, difficulty);
-        int xpReward = MvpGameConfig.raceXp(1, difficulty, recordBroken);
-        progress.applyRaceResult(1, difficulty, recordBroken);
+        finalPlacement = calculatePlacement(elapsedTime);
+        int horseshoeReward = MvpGameConfig.horseshoeReward(finalPlacement, difficulty);
+        int xpReward = MvpGameConfig.raceXp(finalPlacement, difficulty, recordBroken);
+        progress.applyRaceResult(finalPlacement, difficulty, recordBroken);
         if (recordBroken) {
             progress.recordTime = formatRaceTime(elapsedTime);
         }
@@ -622,8 +624,11 @@ public class RaceScreen extends ScreenAdapter {
         playerCoins = progress.horseshoes;
         updateCoinLabel();
         if (resultLabel != null) {
-            resultLabel.setText("Eredm\u00E9ny: 1. hely, +" + horseshoeReward + " patk\u00F3, +" + xpReward + " XP"
+            resultLabel.setText("Eredm\u00E9ny: " + finalPlacement + ". hely, +" + horseshoeReward + " patk\u00F3, +" + xpReward + " XP"
                 + (recordBroken ? ", \u00FAj rekord!" : ""));
+        }
+        if (npcLabel != null) {
+            npcLabel.setText(finishOrderText(elapsedTime));
         }
         if (restartButton != null) {
             restartButton.setVisible(true);
@@ -720,6 +725,59 @@ public class RaceScreen extends ScreenAdapter {
         int minutes = totalSeconds / 60;
         int remainder = totalSeconds % 60;
         return String.format("%02d:%02d", minutes, remainder);
+    }
+
+    private int calculatePlacement(float playerTimeSeconds) {
+        int placement = 1;
+        for (int i = 0; i < MvpGameConfig.NPC_COUNT; i++) {
+            if (npcFinishTimeSeconds(i) < playerTimeSeconds) {
+                placement++;
+            }
+        }
+        return MathUtils.clamp(placement, 1, MvpGameConfig.TOTAL_RACERS);
+    }
+
+    private float npcFinishTimeSeconds(int npcIndex) {
+        int trackSeed = trackName != null ? trackName.hashCode() : 0;
+        int mixedSeed = Math.abs(trackSeed + npcIndex * 97 + difficulty.ordinal() * 193);
+        float variance = (mixedSeed % 700) / 100f;
+        float baseTime;
+        if (difficulty == MvpGameConfig.Difficulty.HARD) {
+            baseTime = 29f;
+        } else if (difficulty == MvpGameConfig.Difficulty.MEDIUM) {
+            baseTime = 37f;
+        } else {
+            baseTime = 45f;
+        }
+        return baseTime + variance + npcIndex * 0.8f;
+    }
+
+    private String finishOrderText(float playerTimeSeconds) {
+        String[] names = new String[MvpGameConfig.TOTAL_RACERS];
+        float[] times = new float[MvpGameConfig.TOTAL_RACERS];
+        names[0] = "Te";
+        times[0] = playerTimeSeconds;
+        for (int i = 0; i < MvpGameConfig.NPC_COUNT; i++) {
+            names[i + 1] = npcNames != null && i < npcNames.length ? npcNames[i] : "NPC " + (i + 1);
+            times[i + 1] = npcFinishTimeSeconds(i);
+        }
+        sortFinishers(names, times);
+        return "Dobog\u00F3: 1. " + names[0] + ", 2. " + names[1] + ", 3. " + names[2];
+    }
+
+    private void sortFinishers(String[] names, float[] times) {
+        for (int i = 0; i < times.length - 1; i++) {
+            for (int j = i + 1; j < times.length; j++) {
+                if (times[j] < times[i]) {
+                    float time = times[i];
+                    times[i] = times[j];
+                    times[j] = time;
+                    String name = names[i];
+                    names[i] = names[j];
+                    names[j] = name;
+                }
+            }
+        }
     }
 
     @Override

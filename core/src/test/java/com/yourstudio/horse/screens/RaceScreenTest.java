@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import java.lang.reflect.Method;
 
+import com.yourstudio.horse.model.MvpGameConfig;
 import com.yourstudio.horse.model.MvpProgress;
 
 import static org.junit.Assert.assertEquals;
@@ -132,6 +133,38 @@ public class RaceScreenTest {
             new Class<?>[] {String.class}, new Object[] {"ismeretlen"}));
     }
 
+    @Test
+    public void placementUsesNpcFinishTimes() {
+        RaceScreen screen = new RaceScreen(null, "Villam", "Lili", "Kutya", "forest.tmx",
+            null, null, null, null, MvpGameConfig.Difficulty.HARD);
+
+        int placement = invokePrivateInt(screen, "calculatePlacement",
+            new Class<?>[] {float.class}, new Object[] {60f});
+
+        assertEquals(5, placement);
+    }
+
+    @Test
+    public void fastPlayerCanStillWinPlacement() {
+        RaceScreen screen = new RaceScreen(null, "Villam", "Lili", "Kutya", "forest.tmx",
+            null, null, null, null, MvpGameConfig.Difficulty.HARD);
+
+        int placement = invokePrivateInt(screen, "calculatePlacement",
+            new Class<?>[] {float.class}, new Object[] {10f});
+
+        assertEquals(1, placement);
+    }
+
+    @Test
+    public void finishOrderMentionsPodium() {
+        setObjectField(raceScreen, "npcNames", new String[] {"Anna", "Bence", "Dorka", "Misi"});
+
+        Object text = invokePrivate(raceScreen, "finishOrderText",
+            new Class<?>[] {float.class}, new Object[] {10f});
+
+        assertTrue(text.toString().startsWith("Dobog\u00F3: 1. Te"));
+    }
+
     private void invokePrivate(Object target, String methodName) {
         invokePrivate(target, methodName, new Class<?>[0], new Object[0]);
     }
@@ -195,6 +228,16 @@ public class RaceScreenTest {
             java.lang.reflect.Field field = target.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
             field.setInt(target, value);
+        } catch (Exception exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
+    private void setObjectField(Object target, String fieldName, Object value) {
+        try {
+            java.lang.reflect.Field field = target.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(target, value);
         } catch (Exception exception) {
             throw new RuntimeException(exception);
         }
