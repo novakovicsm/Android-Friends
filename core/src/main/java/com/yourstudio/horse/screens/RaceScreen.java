@@ -44,6 +44,7 @@ import com.yourstudio.horse.model.MvpProgressStore;
 import com.yourstudio.horse.ui.ScreenNavigator;
 
 public class RaceScreen extends ScreenAdapter {
+    private static final float HUD_TEXT_WIDTH = 360f;
         // Updates the coin label with the current coin count
         private void updateCoinLabel() {
             if (coinLabel != null) {
@@ -372,6 +373,15 @@ public class RaceScreen extends ScreenAdapter {
         difficultyLabel = new Label("Neh\u00E9zs\u00E9g: " + difficultyLabelText(), labelStyle);
         resultLabel = new Label("Eredm\u00E9ny: --", labelStyle);
         coinLabel = new Label("\u00C9rm\u00E9k: 0", labelStyle);
+        enableHudTextWrap(speedLabel);
+        enableHudTextWrap(lapLabel);
+        enableHudTextWrap(difficultyLabel);
+        enableHudTextWrap(powerupLabel);
+        enableHudTextWrap(petBonusLabel);
+        enableHudTextWrap(jumpLabel);
+        enableHudTextWrap(npcLabel);
+        enableHudTextWrap(resultLabel);
+        enableHudTextWrap(coinLabel);
         // directionLabel = new Label("Ir\u00E1ny:", labelStyle);
             // Joystick control only, remove left/right buttons from UI
             // directionLabel can remain for feedback if desired
@@ -420,20 +430,20 @@ public class RaceScreen extends ScreenAdapter {
         Table hudContent = new Table();
         hudContent.setBackground(toDrawable(hudPanel));
         hudContent.pad(12f);
-        hudContent.add(speedLabel).left().row();
-        hudContent.add(lapLabel).left().padTop(6f).row();
-        hudContent.add(difficultyLabel).left().padTop(6f).row();
-        hudContent.add(powerupLabel).left().padTop(6f);
+        hudContent.add(speedLabel).width(HUD_TEXT_WIDTH).left().row();
+        hudContent.add(lapLabel).width(HUD_TEXT_WIDTH).left().padTop(6f).row();
+        hudContent.add(difficultyLabel).width(HUD_TEXT_WIDTH).left().padTop(6f).row();
+        hudContent.add(powerupLabel).width(HUD_TEXT_WIDTH).left().padTop(6f);
         hudContent.row();
-        hudContent.add(petBonusLabel).left().padTop(6f);
+        hudContent.add(petBonusLabel).width(HUD_TEXT_WIDTH).left().padTop(6f);
         hudContent.row();
-        hudContent.add(jumpLabel).left().padTop(6f);
+        hudContent.add(jumpLabel).width(HUD_TEXT_WIDTH).left().padTop(6f);
         hudContent.row();
-        hudContent.add(npcLabel).left().padTop(6f);
+        hudContent.add(npcLabel).width(HUD_TEXT_WIDTH).left().padTop(6f);
         hudContent.row();
-        hudContent.add(resultLabel).left().padTop(6f);
+        hudContent.add(resultLabel).width(HUD_TEXT_WIDTH).left().padTop(6f);
         hudContent.row();
-        hudContent.add(coinLabel).left().padTop(6f);
+        hudContent.add(coinLabel).width(HUD_TEXT_WIDTH).left().padTop(6f);
         hudContent.row();
         Table previewRow = new Table();
         previewRow.add(horsePreviewImage).size(64f, 48f).padRight(6f);
@@ -1246,6 +1256,12 @@ public class RaceScreen extends ScreenAdapter {
     private void playSound(Sound sound, float volume) {
         if (!muted && sound != null) {
             sound.play(volume);
+        }
+    }
+
+    private void enableHudTextWrap(Label label) {
+        if (label != null) {
+            label.setWrap(true);
         }
     }
 
