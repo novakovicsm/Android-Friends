@@ -238,10 +238,6 @@ public class CharacterSelectScreen extends ScreenAdapter {
         layout.add(previewRow).colspan(5).padBottom(24f);
         layout.row();
 
-        addSelectorRow(layout, "L\u00F3", horseValue, buttonStyle, () -> updateHorse(-1), () -> updateHorse(1));
-        addSelectorRow(layout, "L\u00F3sz\u00EDn", horseColorValue, horseColorSwatchImage, buttonStyle, () -> updateHorseColor(-1), () -> updateHorseColor(1));
-        addSelectorRow(layout, "S\u00F6r\u00E9ny", maneColorValue, maneColorSwatchImage, buttonStyle, () -> updateManeColor(-1), () -> updateManeColor(1));
-        addSelectorRow(layout, "Nyereg", saddleColorValue, saddleColorSwatchImage, buttonStyle, () -> updateSaddleColor(-1), () -> updateSaddleColor(1));
         addSelectorRow(layout, "Lovas", riderValue, buttonStyle, () -> updateRider(-1), () -> updateRider(1));
         Label customNameLabel = new Label("Saj\u00E1t n\u00E9v", new Label.LabelStyle(bodyFont, Color.WHITE));
         layout.add(customNameLabel).left().padBottom(18f);
@@ -258,6 +254,10 @@ public class CharacterSelectScreen extends ScreenAdapter {
         layout.add(randomRiderButton).colspan(5).width(260f).height(60f).padBottom(18f);
         layout.row();
         addSelectorRow(layout, "Ruh\u00E1zat", outfitColorValue, outfitColorSwatchImage, buttonStyle, () -> updateOutfitColor(-1), () -> updateOutfitColor(1));
+        addSelectorRow(layout, "L\u00F3", horseValue, buttonStyle, () -> updateHorse(-1), () -> updateHorse(1));
+        addSelectorRow(layout, "L\u00F3sz\u00EDn", horseColorValue, horseColorSwatchImage, buttonStyle, () -> updateHorseColor(-1), () -> updateHorseColor(1));
+        addSelectorRow(layout, "S\u00F6r\u00E9ny", maneColorValue, maneColorSwatchImage, buttonStyle, () -> updateManeColor(-1), () -> updateManeColor(1));
+        addSelectorRow(layout, "Nyereg", saddleColorValue, saddleColorSwatchImage, buttonStyle, () -> updateSaddleColor(-1), () -> updateSaddleColor(1));
         addSelectorRow(layout, "Kis kedvenc", petValue, buttonStyle, () -> updatePet(-1), () -> updatePet(1));
         addSelectorRow(layout, "Neh\u00E9zs\u00E9g", difficultyValue, buttonStyle, () -> updateDifficulty(-1), () -> updateDifficulty(1));
 
