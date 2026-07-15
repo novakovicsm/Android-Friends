@@ -505,7 +505,9 @@ public class RaceScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0f, 0f, 0f, 1f);
-        elapsedTime += delta;
+        if (!raceFinished) {
+            elapsedTime += delta;
+        }
         if (Math.abs(joystickX) < 0.01f) {
             joystickX = 0f;
         }
