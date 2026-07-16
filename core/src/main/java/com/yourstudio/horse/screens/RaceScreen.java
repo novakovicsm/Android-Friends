@@ -99,6 +99,8 @@ public class RaceScreen extends ScreenAdapter {
     private Label difficultyLabel;
     private Label resultLabel;
     private TextButton restartButton;
+    private TextButton shopButton;
+    private TextButton menuButton;
     private Image horsePreviewImage;
     private Image riderPreviewImage;
     private Image petPreviewImage;
@@ -365,6 +367,10 @@ public class RaceScreen extends ScreenAdapter {
         TextButton jumpButton = new TextButton("Ugr\u00E1s", buttonStyle);
         restartButton = new TextButton("\u00DAj futam", buttonStyle);
         restartButton.setVisible(false);
+        shopButton = new TextButton("Ist\u00E1ll\u00F3", buttonStyle);
+        shopButton.setVisible(false);
+        menuButton = new TextButton("F\u0151men\u00FC", buttonStyle);
+        menuButton.setVisible(false);
 
         speedLabel = new Label("Sebess\u00E9g: 0 km/h", labelStyle);
         lapLabel = new Label("K\u00F6r: 1/3", labelStyle);
@@ -425,6 +431,24 @@ public class RaceScreen extends ScreenAdapter {
                 ScreenNavigator.toDefaultRace(game, selection);
             }
         });
+        shopButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (!muted && clickSound != null) {
+                    clickSound.play(0.6f);
+                }
+                ScreenNavigator.toShop(game);
+            }
+        });
+        menuButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (!muted && clickSound != null) {
+                    clickSound.play(0.6f);
+                }
+                ScreenNavigator.toMainMenu(game);
+            }
+        });
 
         Table hudTable = new Table();
         hudTable.setFillParent(true);
@@ -460,7 +484,9 @@ public class RaceScreen extends ScreenAdapter {
         backButtonTable.add(backButton).width(220f).height(80f).row();
         backButtonTable.add(boostButton).width(220f).height(80f).padTop(12f).row();
         backButtonTable.add(jumpButton).width(220f).height(80f).padTop(12f).row();
-        backButtonTable.add(restartButton).width(220f).height(80f).padTop(12f);
+        backButtonTable.add(restartButton).width(220f).height(80f).padTop(12f).row();
+        backButtonTable.add(shopButton).width(220f).height(80f).padTop(12f).row();
+        backButtonTable.add(menuButton).width(220f).height(80f).padTop(12f);
         stage.addActor(backButtonTable);
         stage.addActor(hudTable);
         InputMultiplexer multiplexer = new InputMultiplexer();
@@ -648,6 +674,12 @@ public class RaceScreen extends ScreenAdapter {
         }
         if (restartButton != null) {
             restartButton.setVisible(true);
+        }
+        if (shopButton != null) {
+            shopButton.setVisible(true);
+        }
+        if (menuButton != null) {
+            menuButton.setVisible(true);
         }
         if (!muted && winSound != null) {
             winSound.play(0.7f);
