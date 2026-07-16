@@ -83,6 +83,9 @@ Az eredmény a `core/build/docs/javadoc/`, `desktop/build/docs/javadoc/` stb. ma
 - Lásd a `docs/` mappát (design, asset workflow, todos).
 - Lásd ezt a README-t a build és használat részleteihez.
 - Headless Android UI smoke teszt: `./scripts/run_maestro.sh`.
+- Windows emulátor esetén: `scripts\\run_maestro_windows.cmd`.
+- A Maestro beállítása és a LibGDX canvas korlátozásai: `docs/ui-automation.md`.
+- Headless Android UI smoke teszt: `./scripts/run_maestro.sh`.
 - A Maestro beállítása és a LibGDX canvas korlátozásai: `docs/ui-automation.md`.
 
 ## License
