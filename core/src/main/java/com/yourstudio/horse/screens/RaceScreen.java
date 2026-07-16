@@ -93,6 +93,7 @@ public class RaceScreen extends ScreenAdapter {
     private Label speedLabel;
     private Label lapLabel;
     private Label powerupLabel;
+    private Label obstacleWarningLabel;
     private Label petBonusLabel;
     private Label jumpLabel;
     private Label npcLabel;
@@ -375,6 +376,7 @@ public class RaceScreen extends ScreenAdapter {
         speedLabel = new Label("Sebess\u00E9g: 0 km/h", labelStyle);
         lapLabel = new Label("K\u00F6r: 1/3", labelStyle);
         powerupLabel = new Label("B\u00F3nusz: --", labelStyle);
+        obstacleWarningLabel = new Label("Akadály: nincs a közelben", labelStyle);
         petBonusLabel = new Label("Kedvenc b\u00F3nusz: --", labelStyle);
         jumpLabel = new Label("Ugr\u00E1s: k\u00E9sz", labelStyle);
         npcLabel = new Label(npcLabelText(), labelStyle);
@@ -385,6 +387,7 @@ public class RaceScreen extends ScreenAdapter {
         enableHudTextWrap(lapLabel);
         enableHudTextWrap(difficultyLabel);
         enableHudTextWrap(powerupLabel);
+        enableHudTextWrap(obstacleWarningLabel);
         enableHudTextWrap(petBonusLabel);
         enableHudTextWrap(jumpLabel);
         enableHudTextWrap(npcLabel);
@@ -460,6 +463,8 @@ public class RaceScreen extends ScreenAdapter {
         hudContent.add(lapLabel).width(HUD_TEXT_WIDTH).left().padTop(6f).row();
         hudContent.add(difficultyLabel).width(HUD_TEXT_WIDTH).left().padTop(6f).row();
         hudContent.add(powerupLabel).width(HUD_TEXT_WIDTH).left().padTop(6f);
+        hudContent.row();
+        hudContent.add(obstacleWarningLabel).width(HUD_TEXT_WIDTH).left().padTop(6f);
         hudContent.row();
         hudContent.add(petBonusLabel).width(HUD_TEXT_WIDTH).left().padTop(6f);
         hudContent.row();
@@ -588,6 +593,9 @@ public class RaceScreen extends ScreenAdapter {
             powerupLabel.setText("Boost akt\u00EDv: " + (int) Math.ceil(boostActiveTimer) + "s");
         } else {
             powerupLabel.setText("Boost: " + Math.round(boostChargePercent) + "%");
+        }
+        if (obstacleWarningLabel != null) {
+            obstacleWarningLabel.setText(obstacleWarningText());
         }
         animationTime += delta;
         updateCoinLabel();
@@ -1296,6 +1304,33 @@ public class RaceScreen extends ScreenAdapter {
                 }
             }
         }
+    }
+
+    private String obstacleWarningText() {
+        if (raceFinished) {
+            return "Akadály: futam vége";
+        }
+        ObstacleSpawn nearest = null;
+        float nearestDistance = Float.MAX_VALUE;
+        for (ObstacleSpawn spawn : obstacleSpawns) {
+            float dx = spawn.x - horseX;
+            float dy = spawn.y - horseY;
+            if (dx <= 0f || Math.abs(dy) > 95f) {
+                continue;
+            }
+            float distance = (float) Math.sqrt(dx * dx + dy * dy);
+            if (distance < nearestDistance) {
+                nearest = spawn;
+                nearestDistance = distance;
+            }
+        }
+        if (nearest == null || nearestDistance > 165f) {
+            return "Akadály: nincs a közelben";
+        }
+        if (jumpTimer > 0f) {
+            return "Akadály: " + nearest.label + " — ugrás aktív";
+        }
+        return "Figyelem: " + nearest.label + " közeleg — készülj ugrani!";
     }
 
     private void playSound(Sound sound, float volume) {
