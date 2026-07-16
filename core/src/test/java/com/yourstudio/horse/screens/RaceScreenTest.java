@@ -166,6 +166,44 @@ public class RaceScreenTest {
     }
 
     @Test
+    public void obstacleWarningIsShownBeforeCollision() {
+        setObjectField(raceScreen, "obstacleSpawns", new com.badlogic.gdx.utils.Array<>());
+        com.badlogic.gdx.utils.Array obstacles =
+            (com.badlogic.gdx.utils.Array) getObjectField(raceScreen, "obstacleSpawns");
+        addObstacle(obstacles, "kidolt_fa", "Kidőlt fa", 180f, 64f);
+
+        Object warning = invokePrivate(raceScreen, "obstacleWarningText");
+
+        assertTrue(warning.toString().contains("Kidőlt fa"));
+        assertTrue(warning.toString().contains("készülj ugrani"));
+    }
+
+    @Test
+    public void obstacleWarningDisappearsWhenObstacleIsBehindPlayer() {
+        setObjectField(raceScreen, "obstacleSpawns", new com.badlogic.gdx.utils.Array<>());
+        com.badlogic.gdx.utils.Array obstacles =
+            (com.badlogic.gdx.utils.Array) getObjectField(raceScreen, "obstacleSpawns");
+        addObstacle(obstacles, "kidolt_fa", "Kidőlt fa", 20f, 64f);
+
+        Object warning = invokePrivate(raceScreen, "obstacleWarningText");
+
+        assertEquals("Akadály: nincs a közelben", warning);
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private void addObstacle(com.badlogic.gdx.utils.Array obstacles, String id, String label, float x, float y) {
+        try {
+            Class<?> type = Class.forName("com.yourstudio.horse.screens.RaceScreen$ObstacleSpawn");
+            java.lang.reflect.Constructor<?> constructor =
+                type.getDeclaredConstructor(String.class, String.class, float.class, float.class);
+            constructor.setAccessible(true);
+            obstacles.add(constructor.newInstance(id, label, x, y));
+        } catch (Exception exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
+    @Test
     public void npcRaceProgressCapsAtFinish() {
         RaceScreen screen = new RaceScreen(null, "Villam", "Lili", "Kutya", "forest.tmx",
             null, null, null, null, MvpGameConfig.Difficulty.EASY);
