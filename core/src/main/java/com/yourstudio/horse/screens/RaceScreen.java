@@ -93,6 +93,7 @@ public class RaceScreen extends ScreenAdapter {
     private Label speedLabel;
     private Label lapLabel;
     private Label raceTimeLabel;
+    private Label lapTimeLabel;
     private Label powerupLabel;
     private Label obstacleWarningLabel;
     private Label petBonusLabel;
@@ -123,6 +124,7 @@ public class RaceScreen extends ScreenAdapter {
     private final String[] riders = MvpGameConfig.RIDER_NAMES;
     private final String[] pets = MvpGameConfig.PET_LABELS;
     private float elapsedTime;
+    private float lapElapsedTime;
     private int currentLap = 1;
     private float speed;
     private float distance;
@@ -377,6 +379,7 @@ public class RaceScreen extends ScreenAdapter {
         speedLabel = new Label("Sebess\u00E9g: 0 km/h", labelStyle);
         lapLabel = new Label("K\u00F6r: 1/3", labelStyle);
         raceTimeLabel = new Label("Idő: 00:00", labelStyle);
+        lapTimeLabel = new Label("Köridő: 00:00", labelStyle);
         powerupLabel = new Label("B\u00F3nusz: --", labelStyle);
         obstacleWarningLabel = new Label("Akadály: nincs a közelben", labelStyle);
         petBonusLabel = new Label("Kedvenc b\u00F3nusz: --", labelStyle);
@@ -388,6 +391,7 @@ public class RaceScreen extends ScreenAdapter {
         enableHudTextWrap(speedLabel);
         enableHudTextWrap(lapLabel);
         enableHudTextWrap(raceTimeLabel);
+        enableHudTextWrap(lapTimeLabel);
         enableHudTextWrap(difficultyLabel);
         enableHudTextWrap(powerupLabel);
         enableHudTextWrap(obstacleWarningLabel);
@@ -465,6 +469,7 @@ public class RaceScreen extends ScreenAdapter {
         hudContent.add(speedLabel).width(HUD_TEXT_WIDTH).left().row();
         hudContent.add(lapLabel).width(HUD_TEXT_WIDTH).left().padTop(6f).row();
         hudContent.add(raceTimeLabel).width(HUD_TEXT_WIDTH).left().padTop(6f).row();
+        hudContent.add(lapTimeLabel).width(HUD_TEXT_WIDTH).left().padTop(6f).row();
         hudContent.add(difficultyLabel).width(HUD_TEXT_WIDTH).left().padTop(6f).row();
         hudContent.add(powerupLabel).width(HUD_TEXT_WIDTH).left().padTop(6f);
         hudContent.row();
@@ -543,6 +548,9 @@ public class RaceScreen extends ScreenAdapter {
         if (!raceFinished) {
             elapsedTime += delta;
         }
+        if (!raceFinished) {
+            lapElapsedTime += delta;
+        }
         if (Math.abs(joystickX) < 0.01f) {
             joystickX = 0f;
         }
@@ -579,6 +587,9 @@ public class RaceScreen extends ScreenAdapter {
         int lap = Math.min(3, 1 + (int) (distance / lapDistance));
         if (lap != currentLap) {
             currentLap = lap;
+        if (lap != currentLap) {
+            lapElapsedTime = 0f;
+            currentLap = lap;
             if (currentLap == 3 && !victoryPlayed) {
                 victoryPlayed = true;
                 if (!muted && winSound != null) {
@@ -589,6 +600,9 @@ public class RaceScreen extends ScreenAdapter {
         }
         speedLabel.setText("Sebess\u00E9g: " + (int) speed + " km/h");
         updateRaceTimeLabel();
+        if (lapTimeLabel != null) {
+            lapTimeLabel.setText("Köridő: " + formatRaceTime(lapElapsedTime));
+        }
         lapLabel.setText("K\u00F6r: " + currentLap + "/3");
         if (activeObstacleName != null) {
             powerupLabel.setText("Akad\u00E1ly: " + activeObstacleName + " (" + (int) Math.ceil(activeObstacleTimer) + "s)");
