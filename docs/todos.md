@@ -51,7 +51,7 @@ Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladat
 - [ ] A teljes játék 4 pályája még nincs megvalósítva; MVP-ben csak az erdei pálya aktív.
 - [x] Ló testreszabás még nem készült el (szín, sörény, nyereg).
 - [x] Kis kedvenc választás és alap MVP-bónuszok összekötése.
-- [ ] Tematikus power-upok és felvételük hiányzik a verseny során.
+- [x] Tematikus power-upok és felvételük: boost-töltet, Gyorsító és Pajzs.
 - [x] A karakterválasztó és a verseny HUD lovas/pet előnézetei generált pixel-art PNG-ket használnak; a procedurális rajzolás csak hiányzó asset fallback.
 
 ## Milestone 2 – Teendők
