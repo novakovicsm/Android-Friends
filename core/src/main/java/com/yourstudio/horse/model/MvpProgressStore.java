@@ -44,10 +44,19 @@ public final class MvpProgressStore {
             progress.unlockedSkins
         );
         progress.unlockedPets = parseUnlockedPets(preferences.getString(KEY_UNLOCKED_PETS, ""));
-        progress.selectedHorse = preferences.getString(KEY_SELECTED_HORSE, defaults.selectedHorse);
-        progress.selectedRiderName = preferences.getString(KEY_SELECTED_RIDER_NAME, defaults.selectedRiderName);
+        progress.selectedHorse = safeSelectedHorse(
+            preferences.getString(KEY_SELECTED_HORSE, defaults.selectedHorse),
+            defaults.selectedHorse
+        );
+        progress.selectedRiderName = safeRiderName(
+            preferences.getString(KEY_SELECTED_RIDER_NAME, defaults.selectedRiderName),
+            defaults.selectedRiderName
+        );
         progress.selectedPet = safeSelectedPet(preferences.getString(KEY_SELECTED_PET, defaults.selectedPet), progress.unlockedPets);
-        progress.selectedRiderColor = preferences.getString(KEY_SELECTED_RIDER_COLOR, defaults.selectedRiderColor);
+        progress.selectedRiderColor = safeRiderColor(
+            preferences.getString(KEY_SELECTED_RIDER_COLOR, defaults.selectedRiderColor),
+            defaults.selectedRiderColor
+        );
         progress.selectedDifficulty = difficultyFromName(
             preferences.getString(KEY_SELECTED_DIFFICULTY, defaults.selectedDifficulty.name()),
             defaults.selectedDifficulty
@@ -80,6 +89,37 @@ public final class MvpProgressStore {
         preferences.putBoolean(KEY_TUTORIAL_COMPLETE, progress.tutorialComplete);
         preferences.putBoolean(KEY_MUTED, progress.muted);
         preferences.flush();
+    }
+
+    private String safeSelectedHorse(String horseName, String fallback) {
+        if (horseName != null) {
+            for (MvpGameConfig.HorseProfile horse : MvpGameConfig.HORSES) {
+                if (horse.name.equals(horseName)) {
+                    return horseName;
+                }
+            }
+        }
+        return fallback;
+    }
+
+    private String safeRiderName(String riderName, String fallback) {
+        if (riderName == null) {
+            return fallback;
+        }
+        String trimmed = riderName.trim();
+        if (trimmed.length() == 0) {
+            return fallback;
+        }
+        return trimmed.length() > MvpGameConfig.MAX_CUSTOM_RIDER_NAME_LENGTH
+            ? trimmed.substring(0, MvpGameConfig.MAX_CUSTOM_RIDER_NAME_LENGTH)
+            : trimmed;
+    }
+
+    private String safeRiderColor(String color, String fallback) {
+        if (color == null || color.trim().length() == 0) {
+            return fallback;
+        }
+        return color.trim();
     }
 
     private MvpGameConfig.Difficulty difficultyFromName(String name, MvpGameConfig.Difficulty fallback) {
