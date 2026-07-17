@@ -61,8 +61,10 @@ Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladat
 
 ### Playable loop polish (race feel, input, HUD, rewards)
 - [x] Input finomhangolás: érzékenység, gyorsítás/lassítás görbék, irányváltás animáció
-- [ ] Versenyérzet: sebességvisszajelzés (kamera enyhe előre dőlés/rásegítés), por/sparkle effekt
-- [ ] HUD tisztítás: aktív power-up időzítő, köridő/legjobb idő, célvonal jelzés
+- [x] Versenyérzet: sebességvisszajelzés (sebességfüggő kamera zoom/dőlés)
+- [ ] Versenyérzet: por/sparkle effekt
+- [x] HUD: aktív power-up időzítő, futamidő és célvonal-jelzés
+- [ ] HUD: köridő/legjobb idő részletes összesítése
 - [ ] Célba érés flow: győzelmi panel, jutalom összegzés, újraindítás gomb
 - [ ] Jutalom rendszer: egyszerű valuta/pontok, beváltás preview
 - [ ] Akadályok a pályán: életerő, életek számának csökkenése, vagy lassítás
