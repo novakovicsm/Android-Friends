@@ -1987,11 +1987,15 @@ public class RaceScreen extends ScreenAdapter {
         if (horseTintColor != null) {
             batch.setColor(horseTintColor);
         }
-        float scale = mapSpace ? mapScale : 1f;
-        float size = 96f * scale;
+        float scale = mapSpace && isometricMode ? 1f : (mapSpace ? mapScale : 1f);
+        float size = mapSpace && isometricMode ? 112f : 96f * scale;
         float x;
         float y;
-        if (mapSpace) {
+        if (mapSpace && isometricMode) {
+            com.badlogic.gdx.math.Vector2 point = projectIso(horseX, horseY);
+            x = point.x - size * 0.5f;
+            y = point.y - size * 0.5f;
+        } else if (mapSpace) {
             x = horseX * scale - size * 0.5f;
             y = horseY * scale - size * 0.5f;
         } else {
