@@ -140,6 +140,9 @@ public class RaceScreen extends ScreenAdapter {
     private OrthogonalTiledMapRenderer mapRenderer;
     private OrthographicCamera camera;
     private boolean isometricMode = true;
+    private static final float ISO_PROJECTION_SCALE = 0.42f;
+    private static final float ISO_TRACK_HALF_WIDTH = 120f;
+    private static final float ISO_FENCE_OFFSET = 160f;
     private com.badlogic.gdx.graphics.glutils.ShapeRenderer isoTerrain;
     private Array<PowerupDef> powerupDefs = new Array<>();
     private Array<PowerupSpawn> powerupSpawns = new Array<>();
@@ -731,7 +734,7 @@ public class RaceScreen extends ScreenAdapter {
             horseDirection = joystickX >= 0f ? 1f : -1f;
         }
         float trackCenter = isoTrackCenterY(horseX);
-        float trackHalfWidth = 96f;
+        float trackHalfWidth = ISO_TRACK_HALF_WIDTH;
         boolean fenceHit = horseY < trackCenter - trackHalfWidth || horseY > trackCenter + trackHalfWidth;
         if (fenceHit) {
             horseY = MathUtils.clamp(horseY, trackCenter - trackHalfWidth, trackCenter + trackHalfWidth);
@@ -749,7 +752,7 @@ public class RaceScreen extends ScreenAdapter {
     }
 
     private float isoTrackCenterY(float worldX) {
-        return isoTrackBaseY + MathUtils.sin((worldX - horseX) * 0.012f) * 120f;
+        return isoTrackBaseY + MathUtils.sin((worldX - horseX) * 0.012f) * 150f;
     }
 
     private void renderIsometricScene() {
@@ -773,8 +776,8 @@ public class RaceScreen extends ScreenAdapter {
     }
 
     private com.badlogic.gdx.math.Vector2 projectIso(float worldX, float worldY) {
-        float dx = (worldX - horseX) * 0.55f;
-        float dy = (worldY - horseY) * 0.55f;
+        float dx = (worldX - horseX) * ISO_PROJECTION_SCALE;
+        float dy = (worldY - horseY) * ISO_PROJECTION_SCALE;
         float centerX = stage.getViewport().getWorldWidth() * 0.5f;
         float centerY = stage.getViewport().getWorldHeight() * 0.60f;
         return new com.badlogic.gdx.math.Vector2(centerX + dx - dy, centerY + (dx + dy) * 0.42f);
@@ -789,15 +792,15 @@ public class RaceScreen extends ScreenAdapter {
         float halfHeight = tile * 0.23f;
         isoTerrain.setProjectionMatrix(stage.getCamera().combined);
         isoTerrain.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled);
-        for (int ix = -12; ix <= 12; ix++) {
+        for (int ix = -16; ix <= 16; ix++) {
             float worldX = horseX + ix * tile;
             float trackCenter = isoTrackCenterY(worldX);
-            for (int iy = -9; iy <= 9; iy++) {
+            for (int iy = -12; iy <= 12; iy++) {
                 float worldY = horseY + iy * tile;
                 com.badlogic.gdx.math.Vector2 p = projectIso(worldX, worldY);
                 float lateralDistance = Math.abs(worldY - trackCenter);
-                boolean path = lateralDistance <= 96f;
-                boolean shoulder = lateralDistance <= 150f;
+                boolean path = lateralDistance <= ISO_TRACK_HALF_WIDTH;
+                boolean shoulder = lateralDistance <= ISO_FENCE_OFFSET + 24f;
                 float red = path ? 0.50f : (shoulder ? 0.28f : 0.12f);
                 float green = path ? 0.34f : (shoulder ? 0.46f : 0.30f);
                 float blue = path ? 0.18f : (shoulder ? 0.20f : 0.16f);
@@ -816,7 +819,7 @@ public class RaceScreen extends ScreenAdapter {
             return;
         }
         float tile = 64f;
-        float fenceOffset = 128f;
+        float fenceOffset = ISO_FENCE_OFFSET;
         int side = foreground ? 1 : -1;
         for (int ix = -12; ix <= 12; ix++) {
             float worldX = horseX + ix * tile;
