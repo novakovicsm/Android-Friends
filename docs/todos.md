@@ -47,6 +47,7 @@ Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladat
 - [x] APK build script + release pipeline
 
 ## Specifikációs eltérések / issue-k
+- [x] Izometrikus 2.5D pályarenderelés: gyémántcsempés talaj, mélységi sorrend és izometrikus objektumprojekció.
 - [x] Hiányzik a pályaválasztás a flow-ból (spec: lovas/ló/pálya választás).
 - [ ] A teljes játék 4 pályája még nincs megvalósítva; MVP-ben csak az erdei pálya aktív.
 - [x] Ló testreszabás még nem készült el (szín, sörény, nyereg).
