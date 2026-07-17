@@ -293,6 +293,18 @@ public class RaceScreenTest {
         assertEquals(1f, progress, 0.01f);
     }
 
+    @Test
+    public void thematicPowerupsAreLoaded() {
+        invokePrivate(raceScreen, "loadPowerupDefs");
+
+        com.badlogic.gdx.utils.Array<?> defs =
+            (com.badlogic.gdx.utils.Array<?>) getObjectField(raceScreen, "powerupDefs");
+
+        assertEquals(3, defs.size);
+        assertEquals("speed_burst", getStringField(defs.get(1), "id"));
+        assertEquals("shield", getStringField(defs.get(2), "id"));
+    }
+
     private void invokePrivate(Object target, String methodName) {
         invokePrivate(target, methodName, new Class<?>[0], new Object[0]);
     }
@@ -360,6 +372,16 @@ public class RaceScreenTest {
             java.lang.reflect.Field field = target.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
             field.setInt(target, value);
+        } catch (Exception exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
+    private String getStringField(Object target, String fieldName) {
+        try {
+            java.lang.reflect.Field field = target.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return (String) field.get(target);
         } catch (Exception exception) {
             throw new RuntimeException(exception);
         }
