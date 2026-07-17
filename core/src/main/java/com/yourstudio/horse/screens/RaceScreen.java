@@ -92,6 +92,7 @@ public class RaceScreen extends ScreenAdapter {
     private Texture hudPanel;
     private Label speedLabel;
     private Label lapLabel;
+    private Label raceTimeLabel;
     private Label powerupLabel;
     private Label obstacleWarningLabel;
     private Label petBonusLabel;
@@ -375,6 +376,7 @@ public class RaceScreen extends ScreenAdapter {
 
         speedLabel = new Label("Sebess\u00E9g: 0 km/h", labelStyle);
         lapLabel = new Label("K\u00F6r: 1/3", labelStyle);
+        raceTimeLabel = new Label("Idő: 00:00", labelStyle);
         powerupLabel = new Label("B\u00F3nusz: --", labelStyle);
         obstacleWarningLabel = new Label("Akadály: nincs a közelben", labelStyle);
         petBonusLabel = new Label("Kedvenc b\u00F3nusz: --", labelStyle);
@@ -385,6 +387,7 @@ public class RaceScreen extends ScreenAdapter {
         coinLabel = new Label("\u00C9rm\u00E9k: 0", labelStyle);
         enableHudTextWrap(speedLabel);
         enableHudTextWrap(lapLabel);
+        enableHudTextWrap(raceTimeLabel);
         enableHudTextWrap(difficultyLabel);
         enableHudTextWrap(powerupLabel);
         enableHudTextWrap(obstacleWarningLabel);
@@ -461,6 +464,7 @@ public class RaceScreen extends ScreenAdapter {
         hudContent.pad(12f);
         hudContent.add(speedLabel).width(HUD_TEXT_WIDTH).left().row();
         hudContent.add(lapLabel).width(HUD_TEXT_WIDTH).left().padTop(6f).row();
+        hudContent.add(raceTimeLabel).width(HUD_TEXT_WIDTH).left().padTop(6f).row();
         hudContent.add(difficultyLabel).width(HUD_TEXT_WIDTH).left().padTop(6f).row();
         hudContent.add(powerupLabel).width(HUD_TEXT_WIDTH).left().padTop(6f);
         hudContent.row();
@@ -584,6 +588,7 @@ public class RaceScreen extends ScreenAdapter {
             }
         }
         speedLabel.setText("Sebess\u00E9g: " + (int) speed + " km/h");
+        updateRaceTimeLabel();
         lapLabel.setText("K\u00F6r: " + currentLap + "/3");
         if (activeObstacleName != null) {
             powerupLabel.setText("Akad\u00E1ly: " + activeObstacleName + " (" + (int) Math.ceil(activeObstacleTimer) + "s)");
@@ -1303,6 +1308,23 @@ public class RaceScreen extends ScreenAdapter {
                     }
                 }
             }
+        }
+    }
+
+    private void updateRaceTimeLabel() {
+        if (raceTimeLabel == null) {
+            return;
+        }
+        String timeText = formatRaceTime(elapsedTime);
+        if (raceFinished) {
+            raceTimeLabel.setText("Idő: " + timeText);
+            return;
+        }
+        float finishDistance = lapDistance * 3f;
+        if (distance >= finishDistance - 90f) {
+            raceTimeLabel.setText("Idő: " + timeText + " — CÉL KÖZELEG!");
+        } else {
+            raceTimeLabel.setText("Idő: " + timeText);
         }
     }
 
