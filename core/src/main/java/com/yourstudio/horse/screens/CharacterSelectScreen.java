@@ -35,7 +35,7 @@ import com.yourstudio.horse.ui.PixelArtFactory;
 import com.yourstudio.horse.ui.ScreenNavigator;
 
 public class CharacterSelectScreen extends ScreenAdapter {
-    private static final boolean FORCE_PROCEDURAL_HORSE = true;
+    private static final boolean FORCE_PROCEDURAL_HORSE = false;
     private static final String PREFS_NAME = "versenylovak_prefs";
     private static final String PREF_HORSE = "horse";
     private static final String PREF_RIDER = "rider";
@@ -664,7 +664,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
         }
         for (int i = 0; i < variants.length; i++) {
             try {
-                Texture sheet = new Texture("sprites/horse_idle_" + variants[i] + ".png");
+                Texture sheet = new Texture("sprites/pixel_horse_" + variants[i] + ".png");
                 horseSheets[i] = sheet;
                 TextureRegion[][] split = TextureRegion.split(sheet, 128, 128);
                 horsePreviewRegions[i] = split[0][0];
@@ -677,21 +677,15 @@ public class CharacterSelectScreen extends ScreenAdapter {
     }
 
     private Texture[] createRiderPreviews() {
-        Color[] outfits = {
-            new Color(0.35f, 0.6f, 0.85f, 1f),
-            new Color(0.6f, 0.45f, 0.8f, 1f),
-            new Color(0.2f, 0.7f, 0.45f, 1f),
-            new Color(0.85f, 0.4f, 0.4f, 1f)
-        };
-        Color[] hair = {
-            new Color(0.2f, 0.15f, 0.1f, 1f),
-            new Color(0.4f, 0.25f, 0.1f, 1f),
-            new Color(0.1f, 0.08f, 0.05f, 1f),
-            new Color(0.7f, 0.55f, 0.3f, 1f)
-        };
+        String[] assets = {"girl", "boy"};
         Texture[] previews = new Texture[riders.length];
         for (int i = 0; i < riders.length; i++) {
-            previews[i] = createRiderPreview(outfits[i % outfits.length], hair[i % hair.length]);
+            try {
+                previews[i] = loadUiTexture("sprites/pixel_rider_" + assets[i % assets.length] + ".png");
+            } catch (RuntimeException exception) {
+                previews[i] = createRiderPreview(outfitColorValues[i % outfitColorValues.length],
+                    riderHairColors[i % riderHairColors.length]);
+            }
         }
         return previews;
     }
@@ -711,18 +705,22 @@ public class CharacterSelectScreen extends ScreenAdapter {
     }
 
     private Texture[] createPetPreviews() {
-        // Colors: Kutya, Cica, Nyuszi, Papagáj, Kapibara, Lajhár
+        String[] assets = {"dog", "cat", "rabbit", "parrot", "capybara", "sloth"};
         Color[] petColors = {
-            new Color(0.85f, 0.65f, 0.4f, 1f),   // Kutya
-            new Color(0.6f, 0.6f, 0.65f, 1f),    // Cica
-            new Color(0.95f, 0.9f, 0.75f, 1f),   // Nyuszi
-            new Color(0.2f, 0.75f, 0.45f, 1f),   // Papagáj
-            new Color(0.7f, 0.5f, 0.3f, 1f),     // Kapibara
-            new Color(0.6f, 0.7f, 0.5f, 1f)      // Lajhár
+            new Color(0.85f, 0.65f, 0.4f, 1f),
+            new Color(0.6f, 0.6f, 0.65f, 1f),
+            new Color(0.95f, 0.9f, 0.75f, 1f),
+            new Color(0.2f, 0.75f, 0.45f, 1f),
+            new Color(0.7f, 0.5f, 0.3f, 1f),
+            new Color(0.6f, 0.7f, 0.5f, 1f)
         };
         Texture[] previews = new Texture[petColors.length];
         for (int i = 0; i < petColors.length; i++) {
-            previews[i] = createPetPreview(petColors[i]);
+            try {
+                previews[i] = loadUiTexture("sprites/pixel_pet_" + assets[i] + ".png");
+            } catch (RuntimeException exception) {
+                previews[i] = createPetPreview(petColors[i]);
+            }
         }
         return previews;
     }
@@ -794,27 +792,14 @@ public class CharacterSelectScreen extends ScreenAdapter {
         if (horsePreviewImage == null) {
             return;
         }
-        if (horsePreviewCustom != null) {
-            horsePreviewCustom.dispose();
-        }
-        Color body = horseColorValues[horseColorIndex];
-        Color mane = maneColorValues[maneColorIndex];
-        Color saddle = saddleColorValues[saddleColorIndex];
-        horsePreviewCustom = createHorsePreview(body, mane, saddle);
-        horsePreviewImage.setDrawable(toDrawable(horsePreviewCustom));
+        horsePreviewImage.setDrawable(new TextureRegionDrawable(horsePreviewRegions[horseIndex]));
     }
 
     private void refreshRiderPreview() {
         if (riderPreviewImage == null) {
             return;
         }
-        if (riderPreviewCustom != null) {
-            riderPreviewCustom.dispose();
-        }
-        Color outfit = outfitColorValues[outfitColorIndex];
-        Color hair = riderHairColors[riderIndex % riderHairColors.length];
-        riderPreviewCustom = createRiderPreview(outfit, hair);
-        riderPreviewImage.setDrawable(toDrawable(riderPreviewCustom));
+        riderPreviewImage.setDrawable(toDrawable(riderPreviews[riderIndex]));
     }
 
     private Texture createRiderPreview(Color outfit, Color hair) {
