@@ -623,16 +623,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
     }
 
     private String petBonusText(String petName) {
-        if ("Cica".equals(petName)) {
-            return "Kicsit gyorsabban indul.";
-        }
-        if ("Nyuszi".equals(petName)) {
-            return "F\u00FCrg\u00E9bb rajtot seg\u00EDt.";
-        }
-        if ("Papag\u00E1j".equals(petName)) {
-            return "Vid\u00E1m t\u00E1rs, aki b\u00E1tor\u00EDt.";
-        }
-        return "Kedves t\u00E1rs a versenyen.";
+        return MvpGameConfig.petBonusDescription(petName);
     }
 
     private String statBar(int value) {
