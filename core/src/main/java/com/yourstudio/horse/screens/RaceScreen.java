@@ -710,7 +710,7 @@ public class RaceScreen extends ScreenAdapter {
             String bestTimeText = progress.recordTime != null && progress.recordTime.length() > 0
                 ? progress.recordTime
                 : formatRaceTime(elapsedTime);
-            resultLabel.setText("Eredm\u00E9ny: " + finalPlacement + ". hely, +" + horseshoeReward + " patk\u00F3, +" + xpReward + " XP"
+            resultLabel.setText(placementHeadline(finalPlacement) + " Eredm\\u00E9ny: " + finalPlacement + ". hely, +" + horseshoeReward + " patk\u00F3, +" + xpReward + " XP"
                 + ", id\u0151: " + formatRaceTime(elapsedTime)
                 + ", legjobb: " + bestTimeText
                 + (recordBroken ? ", \u00FAj rekord!" : ""));
@@ -1379,6 +1379,10 @@ public class RaceScreen extends ScreenAdapter {
     private float cameraRotationForSpeed(float currentSpeed) {
         float speedRatio = maxSpeed <= 0f ? 0f : MathUtils.clamp(currentSpeed / maxSpeed, 0f, 1f);
         return horseDirection * speedRatio * 1.5f;
+    }
+
+    private String placementHeadline(int placement) {
+        return placement >= 1 && placement <= 3 ? "Dobogó!" : "Futam vége!";
     }
 
     private void updateRaceTimeLabel() {
