@@ -6,6 +6,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -80,7 +81,7 @@ public class ShopScreen extends ScreenAdapter {
             buyButton.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    purchaseSkin(skinIndex);
+                    confirmPurchase("Skin", MvpGameConfig.SKIN_LABELS[skinIndex] + " - " + MvpGameConfig.skinPrice(skinIndex) + " patkó", () -> purchaseSkin(skinIndex));
                 }
             });
 
@@ -99,7 +100,7 @@ public class ShopScreen extends ScreenAdapter {
             buyButton.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    purchasePet(petIndex);
+                    confirmPurchase("Kedvenc", MvpGameConfig.PET_LABELS[petIndex] + " - " + MvpGameConfig.PET_UNLOCK_PRICE + " patkó", () -> purchasePet(petIndex));
                 }
             });
 
@@ -118,7 +119,7 @@ public class ShopScreen extends ScreenAdapter {
             buyButton.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    purchaseUpgrade(categoryIndex);
+                    confirmPurchase("Upgrade", MvpGameConfig.UPGRADE_CATEGORIES[categoryIndex].label + " - következő szint", () -> purchaseUpgrade(categoryIndex));
                 }
             });
 
@@ -176,6 +177,22 @@ public class ShopScreen extends ScreenAdapter {
         if (!progress.muted && purchaseSound != null) {
             purchaseSound.play(0.7f);
         }
+    }
+
+    private void confirmPurchase(String title, String description, final Runnable action) {
+        Dialog dialog = new Dialog(title, game.getSkin()) {
+            @Override
+            protected void result(Object object) {
+                if (Boolean.TRUE.equals(object)) {
+                    action.run();
+                }
+            }
+        };
+        dialog.text(description + "\nMegvásárolod?");
+        dialog.button("Mégse", false);
+        dialog.button("Vásárlás", true);
+        dialog.setModal(true);
+        dialog.show(stage);
     }
 
     private void purchaseSkin(int skinIndex) {
