@@ -63,8 +63,8 @@ Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladat
 - [x] Input finomhangolás: érzékenység, gyorsítás/lassítás görbék, irányváltás animáció
 - [x] Versenyérzet: sebességvisszajelzés (sebességfüggő kamera zoom/dőlés)
 - [ ] Versenyérzet: por/sparkle effekt
-- [x] HUD: aktív power-up időzítő, futamidő és célvonal-jelzés
-- [ ] HUD: köridő/legjobb idő részletes összesítése
+- [x] HUD: aktív power-up időzítő, futamidő, köridő és célvonal-jelzés
+- [ ] HUD: legjobb idő részletes eredmény-összesítése
 - [ ] Célba érés flow: győzelmi panel, jutalom összegzés, újraindítás gomb
 - [ ] Jutalom rendszer: egyszerű valuta/pontok, beváltás preview
 - [ ] Akadályok a pályán: életerő, életek számának csökkenése, vagy lassítás
