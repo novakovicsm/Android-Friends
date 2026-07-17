@@ -48,16 +48,16 @@ Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladat
 
 ## Specifikációs eltérések / issue-k
 - [x] Hiányzik a pályaválasztás a flow-ból (spec: lovas/ló/pálya választás).
-- [x] A specifikáció szerinti 4 pálya nincs megvalósítva (jelenleg 1 placeholder map).
+- [ ] A teljes játék 4 pályája még nincs megvalósítva; MVP-ben csak az erdei pálya aktív.
 - [x] Ló testreszabás még nem készült el (szín, sörény, nyereg).
-- [ ] Kis kedvenc választás nincs összekötve bónuszokkal.
+- [x] Kis kedvenc választás és alap MVP-bónuszok összekötése.
 - [ ] Tematikus power-upok és felvételük hiányzik a verseny során.
 - [ ] Pixel art UI/assetek helyett még csak programozott placeholder színek vannak.
 
 ## Milestone 2 – Teendők
 
 ### Bugfixes
-- [ ] Rider, pet, and color specification: fix selection and display bugs
+- [ ] Rider, pet, and color specification: végső kiválasztási és megjelenítési regressziótesztek.
 
 ### Playable loop polish (race feel, input, HUD, rewards)
 - [x] Input finomhangolás: érzékenység, gyorsítás/lassítás görbék, irányváltás animáció
@@ -68,7 +68,7 @@ Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladat
 - [x] HUD: legjobb idő részletes eredmény-összesítése
 - [x] Célba érés flow: győzelmi panel, jutalom összegzés, újraindítás gomb
 - [x] Jutalom rendszer: egyszerű valuta/pontok, beváltás preview
-- [ ] Akadályok a pályán: életerő, életek számának csökkenése, vagy lassítás
+- [x] Akadályok a pályán: MVP-ben egységes lassítás, pontlevonás nélkül.
 
 
 ### Content expansion (more tracks, power-ups, assets)
