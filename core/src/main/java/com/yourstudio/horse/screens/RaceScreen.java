@@ -146,6 +146,9 @@ public class RaceScreen extends ScreenAdapter {
     private Texture npcMarker;
     private Texture treeMarker;
     private Texture shadowMarker;
+    private Texture dustMarker;
+    private Array<DustParticle> dustParticles = new Array<>();
+    private float dustSpawnTimer;
     private float spawnTimer;
     private float obstacleSpawnTimer;
     private float nextSpawnDelay = 3.5f;
@@ -312,6 +315,7 @@ public class RaceScreen extends ScreenAdapter {
         npcMarker = createNpcMarker();
         treeMarker = createTreeMarker();
         shadowMarker = createShadowMarker();
+        dustMarker = createDustMarker();
         loadPowerupDefs();
         horseIndex = findIndex(horses, horseName);
         riderIndex = findIndex(riders, riderName);
@@ -578,6 +582,7 @@ public class RaceScreen extends ScreenAdapter {
         updateJump(delta);
         updateBoost(delta);
         updateObstacleSlowdown(delta);
+        updateDustParticles(delta);
         if (!raceFinished) {
             updatePowerupSpawns(delta);
             updatePowerupPickup(delta);
@@ -655,6 +660,7 @@ public class RaceScreen extends ScreenAdapter {
             drawPowerups(mapRenderer.getBatch());
             drawObstacles(mapRenderer.getBatch());
             drawNpcRacers(mapRenderer.getBatch(), true);
+            drawDustParticles(mapRenderer.getBatch(), true);
             drawHorseAnimation(mapRenderer.getBatch(), true);
             drawForestDecorations(mapRenderer.getBatch(), true, true);
             mapRenderer.getBatch().end();
@@ -665,6 +671,7 @@ public class RaceScreen extends ScreenAdapter {
             drawPowerups(stage.getBatch());
             drawObstacles(stage.getBatch());
             drawNpcRacers(stage.getBatch(), false);
+            drawDustParticles(stage.getBatch(), false);
             drawHorseAnimation(stage.getBatch(), false);
             drawForestDecorations(stage.getBatch(), false, true);
             stage.getBatch().end();
@@ -901,6 +908,9 @@ public class RaceScreen extends ScreenAdapter {
         }
         if (shadowMarker != null) {
             shadowMarker.dispose();
+        }
+        if (dustMarker != null) {
+            dustMarker.dispose();
         }
         if (hudPanel != null) {
             hudPanel.dispose();
@@ -1619,6 +1629,77 @@ public class RaceScreen extends ScreenAdapter {
         texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
         pixmap.dispose();
         return texture;
+    }
+
+    private Texture createDustMarker() {
+        Pixmap pixmap = new Pixmap(8, 8, Pixmap.Format.RGBA8888);
+        pixmap.setColor(0f, 0f, 0f, 0f);
+        pixmap.fill();
+        pixmap.setColor(0.88f, 0.74f, 0.50f, 0.8f);
+        pixmap.fillCircle(4, 4, 3);
+        Texture texture = new Texture(pixmap);
+        texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+        pixmap.dispose();
+        return texture;
+    }
+
+    private void updateDustParticles(float delta) {
+        for (int i = dustParticles.size - 1; i >= 0; i--) {
+            DustParticle particle = dustParticles.get(i);
+            particle.life -= delta;
+            particle.x += particle.velocityX * delta;
+            particle.y += particle.velocityY * delta;
+            if (particle.life <= 0f) {
+                dustParticles.removeIndex(i);
+            }
+        }
+        if (raceFinished || speed < 26f) {
+            dustSpawnTimer = 0f;
+            return;
+        }
+        dustSpawnTimer += delta;
+        if (dustSpawnTimer < 0.08f || dustParticles.size >= 18) {
+            return;
+        }
+        dustSpawnTimer = 0f;
+        dustParticles.add(new DustParticle(
+            horseX - horseDirection * 34f + MathUtils.random(-5f, 5f),
+            horseY + MathUtils.random(-8f, 8f),
+            MathUtils.random(-8f, 8f),
+            MathUtils.random(-4f, 4f)
+        ));
+    }
+
+    private void drawDustParticles(com.badlogic.gdx.graphics.g2d.Batch batch, boolean mapSpace) {
+        if (dustMarker == null || dustParticles.size == 0) {
+            return;
+        }
+        float scale = mapSpace ? mapScale : 1f;
+        Color previous = new Color(batch.getColor());
+        for (DustParticle particle : dustParticles) {
+            float alpha = MathUtils.clamp(particle.life / 0.55f, 0f, 1f) * 0.65f;
+            batch.setColor(1f, 1f, 1f, alpha);
+            float x = particle.x * scale;
+            float y = particle.y * scale;
+            float size = (5f + (1f - alpha) * 5f) * scale;
+            batch.draw(dustMarker, x - size * 0.5f, y - size * 0.5f, size, size);
+        }
+        batch.setColor(previous);
+    }
+
+    private static class DustParticle {
+        float x;
+        float y;
+        final float velocityX;
+        final float velocityY;
+        float life = 0.55f;
+
+        DustParticle(float x, float y, float velocityX, float velocityY) {
+            this.x = x;
+            this.y = y;
+            this.velocityX = velocityX;
+            this.velocityY = velocityY;
+        }
     }
 
     private Texture createShadowMarker() {
