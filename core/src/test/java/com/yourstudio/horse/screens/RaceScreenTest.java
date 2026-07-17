@@ -172,7 +172,7 @@ public class RaceScreenTest {
             (com.badlogic.gdx.utils.Array) getObjectField(raceScreen, "obstacleSpawns");
         addObstacle(obstacles, "kidolt_fa", "Kidőlt fa", 180f, 64f);
 
-        Object warning = invokePrivate(raceScreen, "obstacleWarningText");
+        Object warning = invokePrivate(raceScreen, "obstacleWarningText", new Class<?>[0], new Object[0]);
 
         assertTrue(warning.toString().contains("Kidőlt fa"));
         assertTrue(warning.toString().contains("készülj ugrani"));
@@ -185,7 +185,7 @@ public class RaceScreenTest {
             (com.badlogic.gdx.utils.Array) getObjectField(raceScreen, "obstacleSpawns");
         addObstacle(obstacles, "kidolt_fa", "Kidőlt fa", 20f, 64f);
 
-        Object warning = invokePrivate(raceScreen, "obstacleWarningText");
+        Object warning = invokePrivate(raceScreen, "obstacleWarningText", new Class<?>[0], new Object[0]);
 
         assertEquals("Akadály: nincs a közelben", warning);
     }
