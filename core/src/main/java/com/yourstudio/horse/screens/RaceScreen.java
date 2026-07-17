@@ -772,9 +772,9 @@ public class RaceScreen extends ScreenAdapter {
                 boolean path = Math.abs(iy) <= 1;
                 isoTerrain.setColor(path ? 0.43f : 0.20f, path ? 0.30f : 0.48f, path ? 0.18f : 0.22f, 1f);
                 isoTerrain.triangle(p.x, p.y - halfHeight, p.x + halfWidth, p.y,
-                    p.x, p.y + halfHeight, p.x, p.y + halfHeight);
-                isoTerrain.triangle(p.x, p.y - halfHeight, p.x + halfWidth, p.y,
-                    p.x, p.y + halfHeight, p.x - halfWidth, p.y);
+                    p.x, p.y + halfHeight);
+                isoTerrain.triangle(p.x, p.y - halfHeight, p.x, p.y + halfHeight,
+                    p.x - halfWidth, p.y);
             }
         }
         isoTerrain.end();
