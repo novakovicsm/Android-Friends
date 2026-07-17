@@ -88,7 +88,7 @@ public class MvpProgressStoreTest {
         MvpProgress loaded = store.load();
 
         assertEquals("Villám", loaded.selectedHorse);
-        assertEquals("Túl hosszú lovas", loaded.selectedRiderName);
+        assertEquals("Túl hosszú lova", loaded.selectedRiderName);
         assertEquals("Kék", loaded.selectedRiderColor);
     }
 
