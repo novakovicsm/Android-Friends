@@ -758,6 +758,7 @@ public class RaceScreen extends ScreenAdapter {
 
         drawIsometricTerrain();
         stage.getBatch().begin();
+        drawIsometricFences(stage.getBatch(), false);
         drawForestDecorations(stage.getBatch(), true, false);
         drawPowerups(stage.getBatch());
         drawObstacles(stage.getBatch());
@@ -766,6 +767,7 @@ public class RaceScreen extends ScreenAdapter {
         drawSparkles(stage.getBatch(), true);
         drawHorseAnimation(stage.getBatch(), true);
         drawForestDecorations(stage.getBatch(), true, true);
+        drawIsometricFences(stage.getBatch(), true);
         stage.getBatch().end();
     }
 
@@ -806,6 +808,25 @@ public class RaceScreen extends ScreenAdapter {
             }
         }
         isoTerrain.end();
+    }
+
+    private void drawIsometricFences(com.badlogic.gdx.graphics.g2d.Batch batch, boolean foreground) {
+        if (isoFenceMarker == null) {
+            return;
+        }
+        float tile = 64f;
+        float fenceOffset = 128f;
+        int side = foreground ? 1 : -1;
+        for (int ix = -12; ix <= 12; ix++) {
+            float worldX = horseX + ix * tile;
+            float trackCenter = isoTrackCenterY(worldX);
+            float worldY = trackCenter + side * fenceOffset;
+            com.badlogic.gdx.math.Vector2 point = projectIso(worldX, worldY);
+            float depth = 0.82f + MathUtils.clamp((point.y / stage.getViewport().getWorldHeight()) * 0.22f, 0f, 0.22f);
+            float width = 24f * depth;
+            float height = 58f * depth;
+            batch.draw(isoFenceMarker, point.x - width * 0.5f, point.y - height + 8f, width, height);
+        }
     }
 
     private void updateRaceCompletion() {
@@ -1809,6 +1830,25 @@ public class RaceScreen extends ScreenAdapter {
             }
         }
         return textures;
+    }
+
+    private Texture createIsoFenceMarker() {
+        Pixmap pixmap = new Pixmap(24, 64, Pixmap.Format.RGBA8888);
+        pixmap.setColor(0f, 0f, 0f, 0f);
+        pixmap.fill();
+        pixmap.setColor(0.32f, 0.18f, 0.08f, 1f);
+        pixmap.fillRectangle(8, 6, 8, 56);
+        pixmap.setColor(0.52f, 0.32f, 0.14f, 1f);
+        pixmap.fillRectangle(2, 20, 20, 6);
+        pixmap.fillRectangle(2, 38, 20, 6);
+        pixmap.setColor(0.18f, 0.10f, 0.05f, 1f);
+        pixmap.drawRectangle(8, 6, 8, 56);
+        pixmap.drawRectangle(2, 20, 20, 6);
+        pixmap.drawRectangle(2, 38, 20, 6);
+        Texture texture = new Texture(pixmap);
+        texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+        pixmap.dispose();
+        return texture;
     }
 
     private Texture createTreeMarker() {
