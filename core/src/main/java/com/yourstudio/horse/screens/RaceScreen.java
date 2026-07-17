@@ -139,6 +139,8 @@ public class RaceScreen extends ScreenAdapter {
     private TiledMap map;
     private OrthogonalTiledMapRenderer mapRenderer;
     private OrthographicCamera camera;
+    private boolean isometricMode = true;
+    private com.badlogic.gdx.graphics.glutils.ShapeRenderer isoTerrain;
     private Array<PowerupDef> powerupDefs = new Array<>();
     private Array<PowerupSpawn> powerupSpawns = new Array<>();
     private Array<ObstacleSpawn> obstacleSpawns = new Array<>();
@@ -283,6 +285,7 @@ public class RaceScreen extends ScreenAdapter {
                     petPowerupDurationMultiplier = 1.5f;
                 }
         stage = new Stage(new ScreenViewport());
+        isoTerrain = new com.badlogic.gdx.graphics.glutils.ShapeRenderer();
         // Floating joystick visuals (with safe fallback if assets are missing).
         joystickBaseTexture = createJoystickTexture(128, 0.25f);
         joystickKnobTexture = loadUiTextureOrFallback("ui/joystick_knob.png", 64);
@@ -646,7 +649,10 @@ public class RaceScreen extends ScreenAdapter {
         }
         animationTime += delta;
         updateCoinLabel();
-        if (mapLoaded && mapRenderer != null && camera != null) {
+        if (isometricMode) {
+            updateIsometricMovement(delta);
+            renderIsometricScene();
+        } else if (mapLoaded && mapRenderer != null && camera != null) {
             // Draw a full-screen background so any unused map area isn't black.
             stage.getBatch().begin();
             drawBackgroundFit(stage.getBatch());
@@ -705,6 +711,73 @@ public class RaceScreen extends ScreenAdapter {
         }
         stage.act(delta);
         stage.draw();
+    }
+
+    private void updateIsometricMovement(float delta) {
+        horseX += speed * delta * joystickX * upgradeTurnMultiplier;
+        horseY += speed * delta * joystickY * upgradeTurnMultiplier;
+        if (Math.abs(joystickX) > 0.01f || Math.abs(joystickY) > 0.01f) {
+            horseDirection = joystickX >= 0f ? 1f : -1f;
+        }
+        if (mapHasBounds) {
+            float minX = mapBoundsMinX + horseBoundsPadding;
+            float maxX = mapBoundsMaxX - horseBoundsPadding;
+            horseX = MathUtils.clamp(horseX, minX, maxX);
+            horseY = MathUtils.clamp(horseY, mapBoundsMinY + horseBoundsPadding, mapBoundsMaxY - horseBoundsPadding);
+        }
+    }
+
+    private void renderIsometricScene() {
+        stage.getBatch().begin();
+        drawBackgroundFit(stage.getBatch());
+        stage.getBatch().end();
+
+        drawIsometricTerrain();
+        stage.getBatch().begin();
+        drawForestDecorations(stage.getBatch(), true, false);
+        drawPowerups(stage.getBatch());
+        drawObstacles(stage.getBatch());
+        drawNpcRacers(stage.getBatch(), true);
+        drawDustParticles(stage.getBatch(), true);
+        drawSparkles(stage.getBatch(), true);
+        drawHorseAnimation(stage.getBatch(), true);
+        drawForestDecorations(stage.getBatch(), true, true);
+        stage.getBatch().end();
+    }
+
+    private com.badlogic.gdx.math.Vector2 projectIso(float worldX, float worldY) {
+        float dx = (worldX - horseX) * 0.55f;
+        float dy = (worldY - horseY) * 0.55f;
+        float centerX = stage.getViewport().getWorldWidth() * 0.5f;
+        float centerY = stage.getViewport().getWorldHeight() * 0.60f;
+        return new com.badlogic.gdx.math.Vector2(centerX + dx - dy, centerY + (dx + dy) * 0.42f);
+    }
+
+    private void drawIsometricTerrain() {
+        if (isoTerrain == null || stage == null) {
+            return;
+        }
+        float tile = 64f;
+        float halfWidth = tile * 0.55f;
+        float halfHeight = tile * 0.23f;
+        float centerX = stage.getViewport().getWorldWidth() * 0.5f;
+        float centerY = stage.getViewport().getWorldHeight() * 0.60f;
+        isoTerrain.setProjectionMatrix(stage.getCamera().combined);
+        isoTerrain.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled);
+        for (int ix = -8; ix <= 8; ix++) {
+            for (int iy = -6; iy <= 6; iy++) {
+                float worldX = horseX + ix * tile;
+                float worldY = horseY + iy * tile;
+                com.badlogic.gdx.math.Vector2 p = projectIso(worldX, worldY);
+                boolean path = Math.abs(iy) <= 1;
+                isoTerrain.setColor(path ? 0.43f : 0.20f, path ? 0.30f : 0.48f, path ? 0.18f : 0.22f, 1f);
+                isoTerrain.triangle(p.x, p.y - halfHeight, p.x + halfWidth, p.y,
+                    p.x, p.y + halfHeight, p.x, p.y + halfHeight);
+                isoTerrain.triangle(p.x, p.y - halfHeight, p.x + halfWidth, p.y,
+                    p.x, p.y + halfHeight, p.x - halfWidth, p.y);
+            }
+        }
+        isoTerrain.end();
     }
 
     private void updateRaceCompletion() {
@@ -934,6 +1007,9 @@ public class RaceScreen extends ScreenAdapter {
 
     @Override
     public void dispose() {
+        if (isoTerrain != null) {
+            isoTerrain.dispose();
+        }
         if (stage != null) {
             stage.dispose();
         }
