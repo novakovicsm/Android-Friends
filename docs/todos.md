@@ -67,7 +67,7 @@ Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladat
 - [x] HUD: aktív power-up időzítő, futamidő, köridő és célvonal-jelzés
 - [x] HUD: legjobb idő részletes eredmény-összesítése
 - [x] Célba érés flow: győzelmi panel, jutalom összegzés, újraindítás gomb
-- [ ] Jutalom rendszer: egyszerű valuta/pontok, beváltás preview
+- [x] Jutalom rendszer: egyszerű valuta/pontok, beváltás preview
 - [ ] Akadályok a pályán: életerő, életek számának csökkenése, vagy lassítás
 
 
