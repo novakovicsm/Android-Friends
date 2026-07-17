@@ -167,6 +167,7 @@ public class RaceScreen extends ScreenAdapter {
     private float activeObstacleTimer;
     private float obstacleSlowTimer;
     private float boundarySlowTimer;
+    private float isoTrackBaseY = 64f;
     private Texture isoFenceMarker;
     private float boostChargePercent;
     private float petSpeedBonus;
@@ -748,7 +749,7 @@ public class RaceScreen extends ScreenAdapter {
     }
 
     private float isoTrackCenterY(float worldX) {
-        return horseY + MathUtils.sin((worldX - horseX) * 0.012f) * 120f;
+        return isoTrackBaseY + MathUtils.sin((worldX - horseX) * 0.012f) * 120f;
     }
 
     private void renderIsometricScene() {
