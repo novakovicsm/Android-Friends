@@ -633,6 +633,8 @@ public class RaceScreen extends ScreenAdapter {
             float renderHorseX = horseX * mapScale;
             float renderHorseY = horseY * mapScale;
             camera.position.set(clampCameraX(renderHorseX), clampCameraY(renderHorseY), 0f);
+            camera.zoom = cameraZoomForSpeed(speed);
+            camera.rotation = horseDirection * cameraRotationForSpeed(speed);
             camera.update();
             mapRenderer.setView(camera);
             mapRenderer.render();
@@ -1309,6 +1311,16 @@ public class RaceScreen extends ScreenAdapter {
                 }
             }
         }
+    }
+
+    private float cameraZoomForSpeed(float currentSpeed) {
+        float speedRatio = maxSpeed <= 0f ? 0f : MathUtils.clamp(currentSpeed / maxSpeed, 0f, 1f);
+        return 1.05f - speedRatio * 0.12f;
+    }
+
+    private float cameraRotationForSpeed(float currentSpeed) {
+        float speedRatio = maxSpeed <= 0f ? 0f : MathUtils.clamp(currentSpeed / maxSpeed, 0f, 1f);
+        return horseDirection * speedRatio * 1.5f;
     }
 
     private void updateRaceTimeLabel() {
