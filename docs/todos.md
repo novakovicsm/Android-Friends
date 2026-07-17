@@ -52,7 +52,7 @@ Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladat
 - [x] Ló testreszabás még nem készült el (szín, sörény, nyereg).
 - [x] Kis kedvenc választás és alap MVP-bónuszok összekötése.
 - [ ] Tematikus power-upok és felvételük hiányzik a verseny során.
-- [ ] Pixel art UI/assetek helyett még csak programozott placeholder színek vannak.
+- [x] A karakterválasztó lovas/lovas/pet előnézetei generált pixel-art PNG-ket használnak; a procedurális rajzolás csak hiányzó asset fallback..
 
 ## Milestone 2 – Teendők
 
