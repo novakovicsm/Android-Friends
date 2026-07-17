@@ -20,6 +20,11 @@ public class RaceScreenTest {
     }
 
     @Test
+    public void isometricRenderModeIsEnabledByDefault() {
+        assertTrue((Boolean) getField(raceScreen, "isometricMode"));
+    }
+
+    @Test
     public void constructorStoresSelectionNames() {
         RaceScreen screen = new RaceScreen(null, "Pihe", "Peti", "Cica");
 
@@ -338,6 +343,16 @@ public class RaceScreenTest {
 
     private float invokePrivateFloat(Object target, String methodName, Class<?>[] parameterTypes, Object[] args) {
         return (Float) invokePrivate(target, methodName, parameterTypes, args);
+    }
+
+    private Object getField(Object target, String fieldName) {
+        try {
+            java.lang.reflect.Field field = target.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field.get(target);
+        } catch (Exception exception) {
+            throw new RuntimeException(exception);
+        }
     }
 
     private Object getObjectField(Object target, String fieldName) {
