@@ -57,7 +57,7 @@ Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladat
 ## Milestone 2 – Teendők
 
 ### Bugfixes
-- [ ] Rider, pet, and color specification: végső kiválasztási és megjelenítési regressziótesztek.
+- [x] Rider, pet, and color specification: végső kiválasztási és megjelenítési regressziótesztek.
 
 ### Playable loop polish (race feel, input, HUD, rewards)
 - [x] Input finomhangolás: érzékenység, gyorsítás/lassítás görbék, irányváltás animáció
@@ -76,7 +76,7 @@ Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladat
 - [ ] Pálya-specifikus díszletek/tileset elemek
 - [ ] Tematikus power-upok pályánként + ikonok (legalább 2-2)
 - [ ] Új SFX: boost, pickup variánsok, célba érés
-- [ ] Pixel art race háttér és pálya dekorációk frissítése
+- [x] Pixel-art erdei pályadekorációk frissítése (tölgy, fenyő, bokor, irányjelző, kő)
 
 ### Customization depth (horse/rider/pet cosmetics + bonuses)
 - [ ] Ló testreszabás bővítése: minták / foltok / lábvédők
