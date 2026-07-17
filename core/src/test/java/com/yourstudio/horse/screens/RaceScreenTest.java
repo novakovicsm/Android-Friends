@@ -254,6 +254,18 @@ public class RaceScreenTest {
     }
 
     @Test
+    public void boostSpawnsSparklesWhileActive() {
+        setFloatField(raceScreen, "boostActiveTimer", 1f);
+
+        invokePrivate(raceScreen, "updateBoost",
+            new Class<?>[] {float.class}, new Object[] {0.1f});
+
+        com.badlogic.gdx.utils.Array<?> particles =
+            (com.badlogic.gdx.utils.Array<?>) getObjectField(raceScreen, "sparkleParticles");
+        assertEquals(1, particles.size);
+    }
+
+    @Test
     public void npcRaceProgressCapsAtFinish() {
         RaceScreen screen = new RaceScreen(null, "Villam", "Lili", "Kutya", "forest.tmx",
             null, null, null, null, MvpGameConfig.Difficulty.EASY);
