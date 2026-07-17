@@ -147,6 +147,9 @@ public class RaceScreen extends ScreenAdapter {
     private Texture treeMarker;
     private Texture shadowMarker;
     private Texture dustMarker;
+    private Texture sparkleMarker;
+    private Array<SparkleParticle> sparkleParticles = new Array<>();
+    private float sparkleSpawnTimer;
     private Array<DustParticle> dustParticles = new Array<>();
     private float dustSpawnTimer;
     private float spawnTimer;
@@ -316,6 +319,7 @@ public class RaceScreen extends ScreenAdapter {
         treeMarker = createTreeMarker();
         shadowMarker = createShadowMarker();
         dustMarker = createDustMarker();
+        sparkleMarker = createSparkleMarker();
         loadPowerupDefs();
         horseIndex = findIndex(horses, horseName);
         riderIndex = findIndex(riders, riderName);
@@ -661,6 +665,7 @@ public class RaceScreen extends ScreenAdapter {
             drawObstacles(mapRenderer.getBatch());
             drawNpcRacers(mapRenderer.getBatch(), true);
             drawDustParticles(mapRenderer.getBatch(), true);
+            drawSparkles(mapRenderer.getBatch(), true);
             drawHorseAnimation(mapRenderer.getBatch(), true);
             drawForestDecorations(mapRenderer.getBatch(), true, true);
             mapRenderer.getBatch().end();
@@ -672,6 +677,7 @@ public class RaceScreen extends ScreenAdapter {
             drawObstacles(stage.getBatch());
             drawNpcRacers(stage.getBatch(), false);
             drawDustParticles(stage.getBatch(), false);
+            drawSparkles(stage.getBatch(), false);
             drawHorseAnimation(stage.getBatch(), false);
             drawForestDecorations(stage.getBatch(), false, true);
             stage.getBatch().end();
@@ -778,8 +784,29 @@ public class RaceScreen extends ScreenAdapter {
     }
 
     private void updateBoost(float delta) {
+        for (int i = sparkleParticles.size - 1; i >= 0; i--) {
+            SparkleParticle particle = sparkleParticles.get(i);
+            particle.life -= delta;
+            particle.x += particle.velocityX * delta;
+            particle.y += particle.velocityY * delta;
+            if (particle.life <= 0f) {
+                sparkleParticles.removeIndex(i);
+            }
+        }
         if (boostActiveTimer > 0f) {
             boostActiveTimer = Math.max(0f, boostActiveTimer - delta);
+            sparkleSpawnTimer += delta;
+            if (sparkleSpawnTimer >= 0.06f && sparkleParticles.size < 24) {
+                sparkleSpawnTimer = 0f;
+                sparkleParticles.add(new SparkleParticle(
+                    horseX - horseDirection * 20f + MathUtils.random(-10f, 10f),
+                    horseY + MathUtils.random(-12f, 12f),
+                    MathUtils.random(-10f, 10f),
+                    MathUtils.random(8f, 18f)
+                ));
+            }
+        } else {
+            sparkleSpawnTimer = 0f;
         }
     }
 
@@ -911,6 +938,9 @@ public class RaceScreen extends ScreenAdapter {
         }
         if (dustMarker != null) {
             dustMarker.dispose();
+        }
+        if (sparkleMarker != null) {
+            sparkleMarker.dispose();
         }
         if (hudPanel != null) {
             hudPanel.dispose();
@@ -1629,6 +1659,51 @@ public class RaceScreen extends ScreenAdapter {
         texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
         pixmap.dispose();
         return texture;
+    }
+
+    private Texture createSparkleMarker() {
+        Pixmap pixmap = new Pixmap(8, 8, Pixmap.Format.RGBA8888);
+        pixmap.setColor(0f, 0f, 0f, 0f);
+        pixmap.fill();
+        pixmap.setColor(1f, 0.94f, 0.42f, 1f);
+        pixmap.fillRectangle(3, 0, 2, 8);
+        pixmap.fillRectangle(0, 3, 8, 2);
+        Texture texture = new Texture(pixmap);
+        texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+        pixmap.dispose();
+        return texture;
+    }
+
+    private void drawSparkles(com.badlogic.gdx.graphics.g2d.Batch batch, boolean mapSpace) {
+        if (sparkleMarker == null || sparkleParticles.size == 0) {
+            return;
+        }
+        float scale = mapSpace ? mapScale : 1f;
+        Color previous = new Color(batch.getColor());
+        for (SparkleParticle particle : sparkleParticles) {
+            float alpha = MathUtils.clamp(particle.life / 0.35f, 0f, 1f);
+            batch.setColor(1f, 0.94f, 0.42f, alpha);
+            float x = particle.x * scale;
+            float y = particle.y * scale;
+            float size = (4f + (1f - alpha) * 5f) * scale;
+            batch.draw(sparkleMarker, x - size * 0.5f, y - size * 0.5f, size, size);
+        }
+        batch.setColor(previous);
+    }
+
+    private static class SparkleParticle {
+        float x;
+        float y;
+        final float velocityX;
+        final float velocityY;
+        float life = 0.35f;
+
+        SparkleParticle(float x, float y, float velocityX, float velocityY) {
+            this.x = x;
+            this.y = y;
+            this.velocityX = velocityX;
+            this.velocityY = velocityY;
+        }
     }
 
     private Texture createDustMarker() {
