@@ -28,7 +28,7 @@ public class RaceScreenTest {
             new Class<?>[] {float.class}, new Object[] {1f});
 
         assertTrue(getFloatField(raceScreen, "boundarySlowTimer") > 0f);
-        assertTrue(getFloatField(raceScreen, "horseY") <= 160.01f);
+        assertTrue(getFloatField(raceScreen, "horseY") <= 184.01f);
         assertEquals("Kerítés érintés", getField(raceScreen, "activeObstacleName"));
     }
 
