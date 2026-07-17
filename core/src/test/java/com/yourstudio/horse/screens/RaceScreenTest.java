@@ -242,6 +242,18 @@ public class RaceScreenTest {
     }
 
     @Test
+    public void dustParticlesSpawnOnlyWhenHorseIsRunning() {
+        setFloatField(raceScreen, "speed", 30f);
+
+        invokePrivate(raceScreen, "updateDustParticles",
+            new Class<?>[] {float.class}, new Object[] {0.1f});
+
+        com.badlogic.gdx.utils.Array<?> particles =
+            (com.badlogic.gdx.utils.Array<?>) getObjectField(raceScreen, "dustParticles");
+        assertEquals(1, particles.size);
+    }
+
+    @Test
     public void npcRaceProgressCapsAtFinish() {
         RaceScreen screen = new RaceScreen(null, "Villam", "Lili", "Kutya", "forest.tmx",
             null, null, null, null, MvpGameConfig.Difficulty.EASY);
