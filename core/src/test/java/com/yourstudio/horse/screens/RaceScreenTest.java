@@ -220,6 +220,23 @@ public class RaceScreenTest {
     }
 
     @Test
+    public void cameraZoomPullsBackAtTopSpeed() {
+        Object zoom = invokePrivate(raceScreen, "cameraZoomForSpeed",
+            new Class<?>[] {float.class}, new Object[] {48f});
+
+        assertEquals(0.93f, (Float) zoom, 0.01f);
+    }
+
+    @Test
+    public void cameraRotationFollowsHorseDirection() {
+        setFloatField(raceScreen, "horseDirection", -1f);
+        Object rotation = invokePrivate(raceScreen, "cameraRotationForSpeed",
+            new Class<?>[] {float.class}, new Object[] {48f});
+
+        assertEquals(-1.5f, (Float) rotation, 0.01f);
+    }
+
+    @Test
     public void npcRaceProgressCapsAtFinish() {
         RaceScreen screen = new RaceScreen(null, "Villam", "Lili", "Kutya", "forest.tmx",
             null, null, null, null, MvpGameConfig.Difficulty.EASY);
