@@ -266,6 +266,22 @@ public class RaceScreenTest {
     }
 
     @Test
+    public void topThreeUsePodiumHeadline() {
+        Object headline = invokePrivate(raceScreen, "placementHeadline",
+            new Class<?>[] {int.class}, new Object[] {3});
+
+        assertEquals("Dobogó!", headline);
+    }
+
+    @Test
+    public void LowerPlacementsUseFinishHeadline() {
+        Object headline = invokePrivate(raceScreen, "placementHeadline",
+            new Class<?>[] {int.class}, new Object[] {4});
+
+        assertEquals("Futam vége!", headline);
+    }
+
+    @Test
     public void npcRaceProgressCapsAtFinish() {
         RaceScreen screen = new RaceScreen(null, "Villam", "Lili", "Kutya", "forest.tmx",
             null, null, null, null, MvpGameConfig.Difficulty.EASY);
