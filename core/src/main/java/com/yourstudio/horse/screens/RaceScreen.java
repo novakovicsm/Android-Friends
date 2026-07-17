@@ -586,8 +586,6 @@ public class RaceScreen extends ScreenAdapter {
         }
         int lap = Math.min(3, 1 + (int) (distance / lapDistance));
         if (lap != currentLap) {
-            currentLap = lap;
-        if (lap != currentLap) {
             lapElapsedTime = 0f;
             currentLap = lap;
             if (currentLap == 3 && !victoryPlayed) {
