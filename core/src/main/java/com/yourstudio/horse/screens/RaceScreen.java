@@ -707,7 +707,12 @@ public class RaceScreen extends ScreenAdapter {
         playerCoins = progress.horseshoes;
         updateCoinLabel();
         if (resultLabel != null) {
+            String bestTimeText = progress.recordTime != null && progress.recordTime.length() > 0
+                ? progress.recordTime
+                : formatRaceTime(elapsedTime);
             resultLabel.setText("Eredm\u00E9ny: " + finalPlacement + ". hely, +" + horseshoeReward + " patk\u00F3, +" + xpReward + " XP"
+                + ", id\u0151: " + formatRaceTime(elapsedTime)
+                + ", legjobb: " + bestTimeText
                 + (recordBroken ? ", \u00FAj rekord!" : ""));
         }
         if (npcLabel != null) {
