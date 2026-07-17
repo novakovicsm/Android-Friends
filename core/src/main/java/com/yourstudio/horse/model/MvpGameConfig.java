@@ -187,6 +187,19 @@ public final class MvpGameConfig {
         return SKIN_HORSE_COLORS[skinIndex];
     }
 
+    public static String petBonusDescription(String petName) {
+        if ("Cica".equals(petName)) {
+            return "+5 gyorsulás";
+        }
+        if ("Nyuszi".equals(petName)) {
+            return "+3 gyorsulás, +3 km/h";
+        }
+        if ("Papagáj".equals(petName)) {
+            return "+1 pajzs";
+        }
+        return "csak társ";
+    }
+
     public static RiderBonus riderBonusForIndex(int riderIndex) {
         if (riderIndex < 0) {
             throw new IllegalArgumentException("Rider index must be zero or greater.");
