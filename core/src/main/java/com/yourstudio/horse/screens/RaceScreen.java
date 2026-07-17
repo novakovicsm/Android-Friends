@@ -145,7 +145,7 @@ public class RaceScreen extends ScreenAdapter {
     private Texture powerupMarker;
     private Texture[] obstacleMarkers;
     private Texture npcMarker;
-    private Texture treeMarker;
+    private Texture[] forestDecorMarkers;
     private Texture shadowMarker;
     private Texture dustMarker;
     private Texture sparkleMarker;
@@ -318,7 +318,7 @@ public class RaceScreen extends ScreenAdapter {
         powerupMarker = createPowerupMarker();
         obstacleMarkers = createObstacleMarkers();
         npcMarker = createNpcMarker();
-        treeMarker = createTreeMarker();
+        forestDecorMarkers = loadForestDecorMarkers();
         shadowMarker = createShadowMarker();
         dustMarker = createDustMarker();
         sparkleMarker = createSparkleMarker();
@@ -956,9 +956,7 @@ public class RaceScreen extends ScreenAdapter {
         if (npcMarker != null) {
             npcMarker.dispose();
         }
-        if (treeMarker != null) {
-            treeMarker.dispose();
-        }
+        disposeTextureArray(forestDecorMarkers);
         if (shadowMarker != null) {
             shadowMarker.dispose();
         }
@@ -1520,7 +1518,7 @@ public class RaceScreen extends ScreenAdapter {
     }
 
     private void drawForestDecorations(com.badlogic.gdx.graphics.g2d.Batch batch, boolean mapSpace, boolean foreground) {
-        if (treeMarker == null) {
+        if (forestDecorMarkers == null || forestDecorMarkers.length == 0) {
             return;
         }
         float scale = mapSpace ? mapScale : 1f;
@@ -1544,7 +1542,8 @@ public class RaceScreen extends ScreenAdapter {
             float width = 48f * depthScale;
             float height = 64f * depthScale;
             drawEntityShadow(batch, x, worldY - 3f * scale, width * 0.70f, 9f * depthScale, 0.18f);
-            batch.draw(treeMarker, x - width * 0.5f, worldY - 10f * depthScale, width, height);
+            Texture marker = forestDecorMarkers[i % forestDecorMarkers.length];
+            batch.draw(marker, x - width * 0.5f, worldY - 10f * depthScale, width, height);
         }
     }
 
@@ -1672,6 +1671,19 @@ public class RaceScreen extends ScreenAdapter {
         pixmap.fillRectangle(11, 13, 8, 2);
         pixmap.setColor(0.08f, 0.20f, 0.32f, 1f);
         pixmap.drawRectangle(7, 9, 18, 8);
+    }
+
+    private Texture[] loadForestDecorMarkers() {
+        String[] assets = {"oak", "pine", "bush", "sign", "rock"};
+        Texture[] textures = new Texture[assets.length];
+        for (int i = 0; i < assets.length; i++) {
+            try {
+                textures[i] = loadUiTexture("sprites/pixel_decor_" + assets[i] + ".png");
+            } catch (RuntimeException exception) {
+                textures[i] = createTreeMarker();
+            }
+        }
+        return textures;
     }
 
     private Texture createTreeMarker() {
