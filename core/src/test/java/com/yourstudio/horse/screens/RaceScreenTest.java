@@ -21,7 +21,7 @@ public class RaceScreenTest {
 
     @Test
     public void fenceContactClampsHorseAndStartsSlowdown() {
-        setFloatField(raceScreen, "speed", 100f);
+        setFloatField(raceScreen, "speed", 300f);
         setFloatField(raceScreen, "joystickY", 1f);
 
         invokePrivate(raceScreen, "updateIsometricMovement",
