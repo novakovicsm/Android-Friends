@@ -122,6 +122,14 @@ public class MvpGameConfigTest {
     }
 
     @Test
+    public void petBonusDescriptionsMatchMvpSelection() {
+        assertEquals("csak társ", MvpGameConfig.petBonusDescription("Kutya"));
+        assertEquals("+5 gyorsulás", MvpGameConfig.petBonusDescription("Cica"));
+        assertEquals("+3 gyorsulás, +3 km/h", MvpGameConfig.petBonusDescription("Nyuszi"));
+        assertEquals("+1 pajzs", MvpGameConfig.petBonusDescription("Papagáj"));
+    }
+
+    @Test
     public void petAndPowerupValuesMatchMvpSpec() {
         assertEquals(10, MvpGameConfig.MAX_PET_LEVEL);
         assertEquals(100, MvpGameConfig.PET_XP_PER_LEVEL);
