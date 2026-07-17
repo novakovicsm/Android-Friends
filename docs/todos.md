@@ -66,7 +66,7 @@ Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladat
 - [x] Versenyeffekt: sparkle/boost vizuális effekt
 - [x] HUD: aktív power-up időzítő, futamidő, köridő és célvonal-jelzés
 - [x] HUD: legjobb idő részletes eredmény-összesítése
-- [ ] Célba érés flow: győzelmi panel, jutalom összegzés, újraindítás gomb
+- [x] Célba érés flow: győzelmi panel, jutalom összegzés, újraindítás gomb
 - [ ] Jutalom rendszer: egyszerű valuta/pontok, beváltás preview
 - [ ] Akadályok a pályán: életerő, életek számának csökkenése, vagy lassítás
 
