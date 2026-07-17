@@ -159,6 +159,7 @@ public class RaceScreen extends ScreenAdapter {
     private float nextObstacleSpawnDelay = 2.5f;
     private String activePowerupName;
     private float activePowerupTimer;
+    private boolean powerupShieldActive;
     private float boostActiveTimer;
     private String activeObstacleName;
     private float activeObstacleTimer;
@@ -1292,6 +1293,7 @@ public class RaceScreen extends ScreenAdapter {
             activePowerupTimer = Math.max(0f, activePowerupTimer - delta);
             if (activePowerupTimer == 0f) {
                 activePowerupName = null;
+                powerupShieldActive = false;
             }
         }
         for (int i = powerupSpawns.size - 1; i >= 0; i--) {
@@ -1300,12 +1302,22 @@ public class RaceScreen extends ScreenAdapter {
             float dy = spawn.y - horseY;
             if (dx * dx + dy * dy <= 24f * 24f) {
                 powerupSpawns.removeIndex(i);
-                boostChargePercent = Math.min(
-                    100f,
-                    boostChargePercent + MvpGameConfig.BOOST_POWERUP_CHARGE_PERCENT * (1f + riderBoostChargeBonus)
-                );
-                activePowerupName = "+" + MvpGameConfig.BOOST_POWERUP_CHARGE_PERCENT + "% boost";
-                activePowerupTimer = 1.5f;
+                if ("speed_burst".equals(spawn.id)) {
+                    boostActiveTimer = Math.max(boostActiveTimer, 3f);
+                    activePowerupName = "Gyorsító";
+                    activePowerupTimer = 3f;
+                } else if ("shield".equals(spawn.id)) {
+                    powerupShieldActive = true;
+                    activePowerupName = "Pajzs";
+                    activePowerupTimer = 5f;
+                } else {
+                    boostChargePercent = Math.min(
+                        100f,
+                        boostChargePercent + MvpGameConfig.BOOST_POWERUP_CHARGE_PERCENT * (1f + riderBoostChargeBonus)
+                    );
+                    activePowerupName = "+" + MvpGameConfig.BOOST_POWERUP_CHARGE_PERCENT + "% boost";
+                    activePowerupTimer = 1.5f;
+                }
                 if (!muted && powerupSound != null) {
                     powerupSound.play(0.7f);
                 }
@@ -1358,6 +1370,12 @@ public class RaceScreen extends ScreenAdapter {
             float dy = spawn.y - horseY;
             if (dx * dx + dy * dy <= 28f * 28f) {
                 obstacleSpawns.removeIndex(i);
+                if (powerupShieldActive) {
+                    powerupShieldActive = false;
+                    activePowerupName = "Pajzs védett";
+                    activePowerupTimer = 1.2f;
+                    continue;
+                }
                 if (jumpTimer > 0f) {
                     activeObstacleName = spawn.label + " \u00E1tugorva";
                     activeObstacleTimer = 0.8f;
@@ -1810,6 +1828,8 @@ public class RaceScreen extends ScreenAdapter {
     private void loadPowerupDefs() {
         powerupDefs.clear();
         powerupDefs.add(new PowerupDef("boost_charge", "Boost t\u00f6ltet"));
+        powerupDefs.add(new PowerupDef("speed_burst", "Gyorsító"));
+        powerupDefs.add(new PowerupDef("shield", "Pajzs"));
     }
 
     private static class PowerupDef {
