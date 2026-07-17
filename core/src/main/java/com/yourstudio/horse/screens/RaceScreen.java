@@ -1171,29 +1171,16 @@ public class RaceScreen extends ScreenAdapter {
         petSpeedBonus = 0f;
         petAccelBonus = 0f;
         petShieldBonus = 0f;
-        String bonusText = "csak t\u00e1rs";
-        if ("Kutya_DISABLED".equals(petName)) {
-            petSpeedBonus = 6f;
-            bonusText = "+6 km/h végsebesség";
-        } else if ("Cica".equals(petName)) {
+        if ("Cica".equals(petName)) {
             petAccelBonus = 5f;
-            bonusText = "+5 gyorsulás";
         } else if ("Nyuszi".equals(petName)) {
             petAccelBonus = 3f;
             petSpeedBonus = 3f;
-            bonusText = "+3 gyorsulás, +3 km/h";
         } else if ("Papagáj".equals(petName)) {
             petShieldBonus = 1f;
-            bonusText = "+1 pajzs";
-        } else if ("Kapibara".equals(petName)) {
-            // Coin multiplier bonus (handled in coin collection logic)
-            bonusText = "Érme szorzó: x2";
-        } else if ("Lajhár".equals(petName)) {
-            // Power-up duration increase (handled in power-up logic)
-            bonusText = "Power-up idő: x1.5";
         }
         if (petBonusLabel != null) {
-            petBonusLabel.setText("Kedvenc bónusz: " + bonusText);
+            petBonusLabel.setText("Kedvenc bónusz: " + MvpGameConfig.petBonusDescription(petName));
         }
     }
 
