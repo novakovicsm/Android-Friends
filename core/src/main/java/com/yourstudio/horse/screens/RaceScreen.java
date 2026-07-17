@@ -1543,10 +1543,11 @@ public class RaceScreen extends ScreenAdapter {
         if (powerupMarker == null) {
             return;
         }
-        float scale = mapLoaded ? mapScale : 1f;
+        float scale = isometricMode ? 1f : (mapLoaded ? mapScale : 1f);
         for (PowerupSpawn spawn : powerupSpawns) {
-            float x = spawn.x * scale;
-            float y = spawn.y * scale;
+            com.badlogic.gdx.math.Vector2 point = isometricMode ? projectIso(spawn.x, spawn.y) : null;
+            float x = isometricMode ? point.x : spawn.x * scale;
+            float y = isometricMode ? point.y : spawn.y * scale;
             drawEntityShadow(batch, x, y - 7f * scale, 14f * scale, 5f * scale, 0.18f);
             batch.draw(powerupMarker, x - 10f * scale, y - 10f * scale, 20f * scale, 20f * scale);
         }
@@ -1556,14 +1557,15 @@ public class RaceScreen extends ScreenAdapter {
         if (obstacleMarkers == null) {
             return;
         }
-        float scale = mapLoaded ? mapScale : 1f;
+        float scale = isometricMode ? 1f : (mapLoaded ? mapScale : 1f);
         for (ObstacleSpawn spawn : obstacleSpawns) {
             Texture marker = obstacleMarkerFor(spawn.id);
             if (marker == null) {
                 continue;
             }
-            float x = spawn.x * scale;
-            float y = spawn.y * scale;
+            com.badlogic.gdx.math.Vector2 point = isometricMode ? projectIso(spawn.x, spawn.y) : null;
+            float x = isometricMode ? point.x : spawn.x * scale;
+            float y = isometricMode ? point.y : spawn.y * scale;
             drawEntityShadow(batch, x, y - 10f * scale, 28f * scale, 8f * scale, 0.22f);
             batch.draw(marker, x - 16f * scale, y - 12f * scale, 32f * scale, 24f * scale);
         }
@@ -1581,7 +1583,14 @@ public class RaceScreen extends ScreenAdapter {
             float relativeDistance = npcDistance - distance;
             float x;
             float y;
-            if (mapSpace) {
+            if (mapSpace && isometricMode) {
+                com.badlogic.gdx.math.Vector2 point = projectIso(
+                    horseX + relativeDistance * 0.28f,
+                    horseY + laneOffsets[i % laneOffsets.length]);
+                x = point.x;
+                y = point.y;
+                scale = 1f;
+            } else if (mapSpace) {
                 x = (horseX + relativeDistance * 0.28f) * scale;
                 y = (horseY + laneOffsets[i % laneOffsets.length]) * scale;
             } else {
@@ -1612,9 +1621,18 @@ public class RaceScreen extends ScreenAdapter {
             if (isForeground != foreground) {
                 continue;
             }
-            float x = baseX + decorations[i][0] * scale;
-            float worldY = baseY + y * scale;
+            float x;
+            float worldY;
             float depthScale = decorations[i][2] * scale;
+            if (mapSpace && isometricMode) {
+                com.badlogic.gdx.math.Vector2 point = projectIso(baseX + decorations[i][0], baseY + y);
+                x = point.x;
+                worldY = point.y;
+                depthScale = decorations[i][2];
+            } else {
+                x = baseX + decorations[i][0] * scale;
+                worldY = baseY + y * scale;
+            }
             float width = 48f * depthScale;
             float height = 64f * depthScale;
             drawEntityShadow(batch, x, worldY - 3f * scale, width * 0.70f, 9f * depthScale, 0.18f);
@@ -1805,8 +1823,9 @@ public class RaceScreen extends ScreenAdapter {
         for (SparkleParticle particle : sparkleParticles) {
             float alpha = MathUtils.clamp(particle.life / 0.35f, 0f, 1f);
             batch.setColor(1f, 0.94f, 0.42f, alpha);
-            float x = particle.x * scale;
-            float y = particle.y * scale;
+            com.badlogic.gdx.math.Vector2 point = isometricMode ? projectIso(particle.x, particle.y) : null;
+            float x = isometricMode ? point.x : particle.x * scale;
+            float y = isometricMode ? point.y : particle.y * scale;
             float size = (4f + (1f - alpha) * 5f) * scale;
             batch.draw(sparkleMarker, x - size * 0.5f, y - size * 0.5f, size, size);
         }
@@ -1876,8 +1895,9 @@ public class RaceScreen extends ScreenAdapter {
         for (DustParticle particle : dustParticles) {
             float alpha = MathUtils.clamp(particle.life / 0.55f, 0f, 1f) * 0.65f;
             batch.setColor(1f, 1f, 1f, alpha);
-            float x = particle.x * scale;
-            float y = particle.y * scale;
+            com.badlogic.gdx.math.Vector2 point = isometricMode ? projectIso(particle.x, particle.y) : null;
+            float x = isometricMode ? point.x : particle.x * scale;
+            float y = isometricMode ? point.y : particle.y * scale;
             float size = (5f + (1f - alpha) * 5f) * scale;
             batch.draw(dustMarker, x - size * 0.5f, y - size * 0.5f, size, size);
         }
