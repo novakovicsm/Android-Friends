@@ -667,7 +667,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
                 Texture sheet = new Texture("sprites/pixel_horse_" + variants[i] + ".png");
                 horseSheets[i] = sheet;
                 TextureRegion[][] split = TextureRegion.split(sheet, 128, 128);
-                horsePreviewRegions[i] = split[0][0];
+                horsePreviewRegions[i] = new TextureRegion(sheet);
             } catch (RuntimeException exception) {
                 Texture fallback = createHorsePreview(new Color(0.65f, 0.44f, 0.3f, 1f), new Color(0.25f, 0.16f, 0.1f, 1f), new Color(0.35f, 0.2f, 0.1f, 1f));
                 horseSheets[i] = fallback;
