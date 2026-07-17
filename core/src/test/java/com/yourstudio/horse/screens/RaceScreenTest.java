@@ -20,6 +20,19 @@ public class RaceScreenTest {
     }
 
     @Test
+    public void fenceContactClampsHorseAndStartsSlowdown() {
+        setFloatField(raceScreen, "speed", 100f);
+        setFloatField(raceScreen, "joystickY", 1f);
+
+        invokePrivate(raceScreen, "updateIsometricMovement",
+            new Class<?>[] {float.class}, new Object[] {1f});
+
+        assertTrue(getFloatField(raceScreen, "boundarySlowTimer") > 0f);
+        assertTrue(getFloatField(raceScreen, "horseY") <= 160.01f);
+        assertEquals("Kerítés érintés", getField(raceScreen, "activeObstacleName"));
+    }
+
+    @Test
     public void isometricRenderModeIsEnabledByDefault() {
         assertTrue((Boolean) getField(raceScreen, "isometricMode"));
     }
