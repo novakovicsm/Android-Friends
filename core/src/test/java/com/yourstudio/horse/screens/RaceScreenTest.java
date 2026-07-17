@@ -294,6 +294,19 @@ public class RaceScreenTest {
     }
 
     @Test
+    public void generatedHudPreviewAssetsFollowSelection() {
+        assertEquals("sprites/pixel_rider_girl.png",
+            invokePrivate(raceScreen, "getRiderPreviewAsset",
+                new Class<?>[] {String.class}, new Object[] {"Szandi"}));
+        assertEquals("sprites/pixel_rider_boy.png",
+            invokePrivate(raceScreen, "getRiderPreviewAsset",
+                new Class<?>[] {String.class}, new Object[] {"Peti"}));
+        assertEquals("sprites/pixel_pet_rabbit.png",
+            invokePrivate(raceScreen, "getPetPreviewAsset",
+                new Class<?>[] {String.class}, new Object[] {"Nyuszi"}));
+    }
+
+    @Test
     public void thematicPowerupsAreLoaded() {
         invokePrivate(raceScreen, "loadPowerupDefs");
 
