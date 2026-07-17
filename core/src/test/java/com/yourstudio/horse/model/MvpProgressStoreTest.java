@@ -78,6 +78,21 @@ public class MvpProgressStoreTest {
     }
 
     @Test
+    public void loadSanitizesInvalidCharacterSelections() {
+        FakePreferences preferences = new FakePreferences();
+        preferences.putString("selectedHorse", "ismeretlen");
+        preferences.putString("selectedRiderName", "  Túl hosszú lovasnév  ");
+        preferences.putString("selectedRiderColor", "  Kék  ");
+        MvpProgressStore store = new MvpProgressStore(preferences);
+
+        MvpProgress loaded = store.load();
+
+        assertEquals("Villám", loaded.selectedHorse);
+        assertEquals("Túl hosszú lovas", loaded.selectedRiderName);
+        assertEquals("Kék", loaded.selectedRiderColor);
+    }
+
+    @Test
     public void loadFallsBackWhenSelectedSkinIsLocked() {
         FakePreferences preferences = new FakePreferences();
         preferences.putInteger("selectedSkinIndex", 2);
