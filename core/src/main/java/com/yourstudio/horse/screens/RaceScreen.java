@@ -166,6 +166,8 @@ public class RaceScreen extends ScreenAdapter {
     private String activeObstacleName;
     private float activeObstacleTimer;
     private float obstacleSlowTimer;
+    private float boundarySlowTimer;
+    private Texture isoFenceMarker;
     private float boostChargePercent;
     private float petSpeedBonus;
     private float petAccelBonus;
@@ -322,6 +324,7 @@ public class RaceScreen extends ScreenAdapter {
         obstacleMarkers = createObstacleMarkers();
         npcMarker = createNpcMarker();
         forestDecorMarkers = loadForestDecorMarkers();
+        isoFenceMarker = createIsoFenceMarker();
         shadowMarker = createShadowMarker();
         dustMarker = createDustMarker();
         sparkleMarker = createSparkleMarker();
@@ -590,7 +593,7 @@ public class RaceScreen extends ScreenAdapter {
             joystickY = 0f;
         }
         boolean accelerating = joystickPointer != -1 && !raceFinished;
-        float slowMultiplier = obstacleSlowTimer > 0f ? upgradeObstacleSlowMultiplier : 1f;
+        float slowMultiplier = (obstacleSlowTimer > 0f || boundarySlowTimer > 0f) ? upgradeObstacleSlowMultiplier : 1f;
         float boostMultiplier = boostActiveTimer > 0f
             ? MvpGameConfig.BOOST_SPEED_MULTIPLIER + upgradeBoostMultiplierBonus
             : 1f;
@@ -610,6 +613,7 @@ public class RaceScreen extends ScreenAdapter {
         updateJump(delta);
         updateBoost(delta);
         updateObstacleSlowdown(delta);
+        updateBoundarySlowdown(delta);
         updateDustParticles(delta);
         if (!raceFinished) {
             updatePowerupSpawns(delta);
@@ -711,6 +715,12 @@ public class RaceScreen extends ScreenAdapter {
         }
         stage.act(delta);
         stage.draw();
+    }
+
+    private void updateBoundarySlowdown(float delta) {
+        if (boundarySlowTimer > 0f) {
+            boundarySlowTimer = Math.max(0f, boundarySlowTimer - delta);
+        }
     }
 
     private void updateIsometricMovement(float delta) {
@@ -1033,6 +1043,9 @@ public class RaceScreen extends ScreenAdapter {
             npcMarker.dispose();
         }
         disposeTextureArray(forestDecorMarkers);
+        if (isoFenceMarker != null) {
+            isoFenceMarker.dispose();
+        }
         if (shadowMarker != null) {
             shadowMarker.dispose();
         }
