@@ -21,6 +21,7 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -655,7 +656,7 @@ public class RaceScreen extends ScreenAdapter {
             float renderHorseY = horseY * mapScale;
             camera.position.set(clampCameraX(renderHorseX), clampCameraY(renderHorseY), 0f);
             camera.zoom = cameraZoomForSpeed(speed);
-            camera.rotation = horseDirection * cameraRotationForSpeed(speed);
+            camera.up.set(0f, 1f, 0f).rotate(Vector3.Z, cameraRotationForSpeed(speed));
             camera.update();
             mapRenderer.setView(camera);
             mapRenderer.render();
