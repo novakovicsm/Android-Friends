@@ -204,6 +204,22 @@ public class RaceScreenTest {
     }
 
     @Test
+    public void raceTimeFormatsMinutesAndSeconds() {
+        Object formatted = invokePrivate(raceScreen, "formatRaceTime",
+            new Class<?>[] {float.class}, new Object[] {65.4f});
+
+        assertEquals("01:05", formatted);
+    }
+
+    @Test
+    public void invalidRaceTimeIsClampedToZero() {
+        Object formatted = invokePrivate(raceScreen, "formatRaceTime",
+            new Class<?>[] {float.class}, new Object[] {-2f});
+
+        assertEquals("00:00", formatted);
+    }
+
+    @Test
     public void npcRaceProgressCapsAtFinish() {
         RaceScreen screen = new RaceScreen(null, "Villam", "Lili", "Kutya", "forest.tmx",
             null, null, null, null, MvpGameConfig.Difficulty.EASY);
