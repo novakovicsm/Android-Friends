@@ -237,6 +237,11 @@ public class RaceScreenTest {
     }
 
     @Test
+    public void lapElapsedTimeStartsAtZeroForNewRace() {
+        assertEquals(0f, getFloatField(raceScreen, "lapElapsedTime"), 0.01f);
+    }
+
+    @Test
     public void npcRaceProgressCapsAtFinish() {
         RaceScreen screen = new RaceScreen(null, "Villam", "Lili", "Kutya", "forest.tmx",
             null, null, null, null, MvpGameConfig.Difficulty.EASY);
