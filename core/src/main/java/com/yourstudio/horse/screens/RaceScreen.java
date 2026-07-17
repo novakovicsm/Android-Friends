@@ -543,13 +543,32 @@ public class RaceScreen extends ScreenAdapter {
     }
 
     private String getRiderPreviewAsset(String riderName) {
-        // Placeholder: always return a default image, update as needed
-        return "ui/panel_logo.png";
+        if (riderName != null) {
+            switch (riderName) {
+                case "Szandi":
+                case "Bogi":
+                case "Lili":
+                case "Panni":
+                case "Zsófi":
+                    return "sprites/pixel_rider_girl.png";
+                default:
+                    break;
+            }
+        }
+        return "sprites/pixel_rider_boy.png";
     }
 
     private String getPetPreviewAsset(String petName) {
-        // Placeholder: always return a default image, update as needed
-        return "ui/panel_menu.png";
+        if ("Cica".equals(petName)) {
+            return "sprites/pixel_pet_cat.png";
+        }
+        if ("Nyuszi".equals(petName)) {
+            return "sprites/pixel_pet_rabbit.png";
+        }
+        if ("Papagáj".equals(petName)) {
+            return "sprites/pixel_pet_parrot.png";
+        }
+        return "sprites/pixel_pet_dog.png";
     }
     @Override
     public void render(float delta) {
