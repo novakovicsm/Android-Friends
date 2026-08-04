@@ -70,16 +70,20 @@ public class RaceScreenTest {
     }
 
     @Test
-    public void zoomIsClampedToPlayableRange() {
+    public void automaticZoomFollowsSpeedWithoutUiControls() {
         setFloatField(raceScreen, "isoZoom", 1f);
+        setFloatField(raceScreen, "speed", 0f);
+        invokePrivate(raceScreen, "updateAutomaticIsoZoom",
+            new Class<?>[] {float.class}, new Object[] {1f});
+        float closeZoom = getFloatField(raceScreen, "isoZoom");
 
-        invokePrivate(raceScreen, "adjustIsoZoom",
-            new Class<?>[] {float.class}, new Object[] {10f});
-        assertEquals(1.45f, getFloatField(raceScreen, "isoZoom"), 0.001f);
+        setFloatField(raceScreen, "speed", 48f);
+        invokePrivate(raceScreen, "updateAutomaticIsoZoom",
+            new Class<?>[] {float.class}, new Object[] {1f});
+        float fastZoom = getFloatField(raceScreen, "isoZoom");
 
-        invokePrivate(raceScreen, "adjustIsoZoom",
-            new Class<?>[] {float.class}, new Object[] {-10f});
-        assertEquals(0.78f, getFloatField(raceScreen, "isoZoom"), 0.001f);
+        assertTrue(closeZoom > fastZoom);
+        assertTrue(fastZoom >= 0.78f && fastZoom <= 1.45f);
     }
 
     @Test
