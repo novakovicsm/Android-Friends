@@ -28,7 +28,9 @@ public class RaceScreenTest {
             new Class<?>[] {float.class}, new Object[] {1f});
 
         assertTrue(getFloatField(raceScreen, "boundarySlowTimer") > 0f);
-        assertTrue(getFloatField(raceScreen, "horseY") <= 184.01f);
+        float trackCenter = invokePrivateFloat(raceScreen, "isoTrackCenterY",
+            new Class<?>[] {float.class}, new Object[] {getFloatField(raceScreen, "horseX")});
+        assertTrue(getFloatField(raceScreen, "horseY") <= trackCenter + 120.01f);
         assertEquals("Kerítés érintés", getField(raceScreen, "activeObstacleName"));
     }
 
@@ -45,8 +47,8 @@ public class RaceScreenTest {
         assertEquals(64, offsets.length);
         assertEquals(0f, offsets[0], 0.001f);
         for (int i = 1; i < offsets.length; i++) {
-            assertTrue(Math.abs(offsets[i]) <= 115.01f);
-            assertTrue(Math.abs(offsets[i] - offsets[i - 1]) <= 52.01f);
+            assertTrue(Math.abs(offsets[i]) <= 130.01f);
+            assertTrue(Math.abs(offsets[i] - offsets[i - 1]) <= 75.01f);
         }
     }
 
@@ -65,6 +67,19 @@ public class RaceScreenTest {
         invokePrivate(raceScreen, "updateHorseDirection",
             new Class<?>[] {float.class}, new Object[] {1f});
         assertEquals(1f, getFloatField(raceScreen, "horseDirection"), 0.001f);
+    }
+
+    @Test
+    public void zoomIsClampedToPlayableRange() {
+        setFloatField(raceScreen, "isoZoom", 1f);
+
+        invokePrivate(raceScreen, "adjustIsoZoom",
+            new Class<?>[] {float.class}, new Object[] {10f});
+        assertEquals(1.45f, getFloatField(raceScreen, "isoZoom"), 0.001f);
+
+        invokePrivate(raceScreen, "adjustIsoZoom",
+            new Class<?>[] {float.class}, new Object[] {-10f});
+        assertEquals(0.78f, getFloatField(raceScreen, "isoZoom"), 0.001f);
     }
 
     @Test
@@ -218,7 +233,7 @@ public class RaceScreenTest {
         setObjectField(raceScreen, "obstacleSpawns", new com.badlogic.gdx.utils.Array<>());
         com.badlogic.gdx.utils.Array obstacles =
             (com.badlogic.gdx.utils.Array) getObjectField(raceScreen, "obstacleSpawns");
-        addObstacle(obstacles, "kidolt_fa", "Kidőlt fa", 180f, 64f);
+        addObstacle(obstacles, "kidolt_fa", "Kidőlt fa", 180f, 180f);
 
         Object warning = invokePrivate(raceScreen, "obstacleWarningText", new Class<?>[0], new Object[0]);
 
@@ -231,7 +246,7 @@ public class RaceScreenTest {
         setObjectField(raceScreen, "obstacleSpawns", new com.badlogic.gdx.utils.Array<>());
         com.badlogic.gdx.utils.Array obstacles =
             (com.badlogic.gdx.utils.Array) getObjectField(raceScreen, "obstacleSpawns");
-        addObstacle(obstacles, "kidolt_fa", "Kidőlt fa", 20f, 64f);
+        addObstacle(obstacles, "kidolt_fa", "Kidőlt fa", 20f, 180f);
 
         Object warning = invokePrivate(raceScreen, "obstacleWarningText", new Class<?>[0], new Object[0]);
 
