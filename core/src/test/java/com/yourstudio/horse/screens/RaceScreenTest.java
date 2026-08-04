@@ -38,6 +38,36 @@ public class RaceScreenTest {
     }
 
     @Test
+    public void generatedTrackIsBoundedAndContinuous() {
+        invokePrivate(raceScreen, "initializeIsoTrack");
+        float[] offsets = (float[]) getObjectField(raceScreen, "isoTrackOffsets");
+
+        assertEquals(64, offsets.length);
+        assertEquals(0f, offsets[0], 0.001f);
+        for (int i = 1; i < offsets.length; i++) {
+            assertTrue(Math.abs(offsets[i]) <= 115.01f);
+            assertTrue(Math.abs(offsets[i] - offsets[i - 1]) <= 52.01f);
+        }
+    }
+
+    @Test
+    public void horseDirectionMirrorsOnlyOnHorizontalInput() {
+        setFloatField(raceScreen, "horseDirection", 1f);
+
+        invokePrivate(raceScreen, "updateHorseDirection",
+            new Class<?>[] {float.class}, new Object[] {-1f});
+        assertEquals(-1f, getFloatField(raceScreen, "horseDirection"), 0.001f);
+
+        invokePrivate(raceScreen, "updateHorseDirection",
+            new Class<?>[] {float.class}, new Object[] {0f});
+        assertEquals(-1f, getFloatField(raceScreen, "horseDirection"), 0.001f);
+
+        invokePrivate(raceScreen, "updateHorseDirection",
+            new Class<?>[] {float.class}, new Object[] {1f});
+        assertEquals(1f, getFloatField(raceScreen, "horseDirection"), 0.001f);
+    }
+
+    @Test
     public void constructorStoresSelectionNames() {
         RaceScreen screen = new RaceScreen(null, "Pihe", "Peti", "Cica");
 
