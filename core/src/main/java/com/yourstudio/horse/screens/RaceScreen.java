@@ -55,7 +55,6 @@ public class RaceScreen extends ScreenAdapter {
     // Coin count for player
     private int playerCoins = 0;
     private Label coinLabel;
-    private Label zoomLabel;
     // Call this method wherever coins are collected in the game logic
     public void collectCoin(int baseAmount) {
         int amount = Math.round(baseAmount * petCoinMultiplier);
@@ -399,8 +398,7 @@ public class RaceScreen extends ScreenAdapter {
         TextButton backButton = new TextButton("Vissza", buttonStyle);
         TextButton boostButton = new TextButton("Boost", buttonStyle);
         TextButton jumpButton = new TextButton("Ugr\u00E1s", buttonStyle);
-        TextButton zoomOutButton = new TextButton("Zoom -", buttonStyle);
-        TextButton zoomInButton = new TextButton("Zoom +", buttonStyle);
+
         restartButton = new TextButton("\u00DAj futam", buttonStyle);
         restartButton.setVisible(false);
         shopButton = new TextButton("Ist\u00E1ll\u00F3", buttonStyle);
@@ -420,7 +418,6 @@ public class RaceScreen extends ScreenAdapter {
         difficultyLabel = new Label("Neh\u00E9zs\u00E9g: " + difficultyLabelText(), labelStyle);
         resultLabel = new Label("Eredm\u00E9ny: --", labelStyle);
         coinLabel = new Label("\u00C9rm\u00E9k: 0", labelStyle);
-        zoomLabel = new Label("Zoom: 100%", labelStyle);
         enableHudTextWrap(speedLabel);
         enableHudTextWrap(lapLabel);
         enableHudTextWrap(raceTimeLabel);
@@ -433,7 +430,6 @@ public class RaceScreen extends ScreenAdapter {
         enableHudTextWrap(npcLabel);
         enableHudTextWrap(resultLabel);
         enableHudTextWrap(coinLabel);
-        enableHudTextWrap(zoomLabel);
         // directionLabel = new Label("Ir\u00E1ny:", labelStyle);
             // Joystick control only, remove left/right buttons from UI
             // directionLabel can remain for feedback if desired
@@ -455,18 +451,6 @@ public class RaceScreen extends ScreenAdapter {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 triggerJump();
-            }
-        });
-        zoomOutButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                adjustIsoZoom(-0.1f);
-            }
-        });
-        zoomInButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                adjustIsoZoom(0.1f);
             }
         });
         boostButton.addListener(new ClickListener() {
@@ -531,8 +515,7 @@ public class RaceScreen extends ScreenAdapter {
         hudContent.row();
         hudContent.add(coinLabel).width(HUD_TEXT_WIDTH).left().padTop(6f);
         hudContent.row();
-        hudContent.add(zoomLabel).width(HUD_TEXT_WIDTH).left().padTop(6f);
-        hudContent.row();
+
         Table previewRow = new Table();
         previewRow.add(horsePreviewImage).size(64f, 48f).padRight(6f);
         previewRow.add(riderPreviewImage).size(64f, 48f).padRight(6f);
@@ -546,8 +529,6 @@ public class RaceScreen extends ScreenAdapter {
         backButtonTable.add(backButton).width(220f).height(80f).row();
         backButtonTable.add(boostButton).width(220f).height(80f).padTop(12f).row();
         backButtonTable.add(jumpButton).width(220f).height(80f).padTop(12f).row();
-        backButtonTable.add(zoomOutButton).width(105f).height(70f).padTop(12f).left();
-        backButtonTable.add(zoomInButton).width(105f).height(70f).padTop(12f).right().row();
         backButtonTable.add(restartButton).width(220f).height(80f).padTop(12f).row();
         backButtonTable.add(shopButton).width(220f).height(80f).padTop(12f).row();
         backButtonTable.add(menuButton).width(220f).height(80f).padTop(12f);
@@ -689,6 +670,7 @@ public class RaceScreen extends ScreenAdapter {
         updateCoinLabel();
         if (isometricMode) {
             updateIsometricMovement(delta);
+            updateAutomaticIsoZoom(delta);
             renderIsometricScene();
         } else if (mapLoaded && mapRenderer != null && camera != null) {
             // Draw a full-screen background so any unused map area isn't black.
@@ -901,11 +883,11 @@ public class RaceScreen extends ScreenAdapter {
         }
     }
 
-    private void adjustIsoZoom(float delta) {
-        isoZoom = MathUtils.clamp(isoZoom + delta, ISO_ZOOM_MIN, ISO_ZOOM_MAX);
-        if (zoomLabel != null) {
-            zoomLabel.setText("Zoom: " + Math.round(isoZoom * 100f) + "%");
-        }
+    private void updateAutomaticIsoZoom(float delta) {
+        float speedRatio = maxSpeed <= 0f ? 0f : MathUtils.clamp(speed / maxSpeed, 0f, 1f);
+        float targetZoom = MathUtils.lerp(1.18f, 0.92f, speedRatio);
+        isoZoom = MathUtils.lerp(isoZoom, targetZoom, MathUtils.clamp(delta * 5f, 0f, 1f));
+        isoZoom = MathUtils.clamp(isoZoom, ISO_ZOOM_MIN, ISO_ZOOM_MAX);
     }
 
     private void drawIsometricGates() {
