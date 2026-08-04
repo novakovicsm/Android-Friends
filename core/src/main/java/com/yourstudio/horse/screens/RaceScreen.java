@@ -171,6 +171,11 @@ public class RaceScreen extends ScreenAdapter {
     private float obstacleSlowTimer;
     private float boundarySlowTimer;
     private float isoTrackBaseY = 64f;
+    private static final float ISO_TRACK_SEGMENT_LENGTH = 256f;
+    private static final float ISO_TRACK_MAX_OFFSET = 115f;
+    private static final float ISO_TRACK_MAX_STEP = 52f;
+    private final float[] isoTrackOffsets = new float[64];
+    private float isoTrackOriginX = 0f;
     private Texture isoFenceMarker;
     private float boostChargePercent;
     private float petSpeedBonus;
@@ -291,6 +296,7 @@ public class RaceScreen extends ScreenAdapter {
                     petPowerupDurationMultiplier = 1.5f;
                 }
         stage = new Stage(new ScreenViewport());
+        initializeIsoTrack();
         isoTerrain = new com.badlogic.gdx.graphics.glutils.ShapeRenderer();
         // Floating joystick visuals (with safe fallback if assets are missing).
         joystickBaseTexture = createJoystickTexture(128, 0.25f);
@@ -670,7 +676,7 @@ public class RaceScreen extends ScreenAdapter {
             horseX += speed * delta * joystickX * upgradeTurnMultiplier;
             horseY += speed * delta * joystickY * upgradeTurnMultiplier;
             if (Math.abs(joystickX) > 0.01f || Math.abs(joystickY) > 0.01f) {
-                horseDirection = joystickX >= 0f ? 1f : -1f;
+                updateHorseDirection(joystickX);
             }
             if (mapHasBounds) {
                 float minX = mapBoundsMinX + horseBoundsPadding;
@@ -727,6 +733,12 @@ public class RaceScreen extends ScreenAdapter {
         }
     }
 
+    private void updateHorseDirection(float horizontalInput) {
+        if (Math.abs(horizontalInput) > 0.01f) {
+            horseDirection = horizontalInput > 0f ? 1f : -1f;
+        }
+    }
+
     private void updateIsometricMovement(float delta) {
         horseX += speed * delta * joystickX * upgradeTurnMultiplier;
         horseY += speed * delta * joystickY * upgradeTurnMultiplier;
@@ -751,8 +763,30 @@ public class RaceScreen extends ScreenAdapter {
         }
     }
 
+    private void initializeIsoTrack() {
+        // Generate a new world-space centerline for every RaceScreen instance.
+        // Bounded steps plus interpolation keep the route smooth and rideable.
+        isoTrackOriginX = 0f;
+        isoTrackOffsets[0] = 0f;
+        for (int i = 1; i < isoTrackOffsets.length; i++) {
+            float previous = isoTrackOffsets[i - 1];
+            float next = previous + MathUtils.random(-ISO_TRACK_MAX_STEP, ISO_TRACK_MAX_STEP);
+            isoTrackOffsets[i] = MathUtils.clamp(next, -ISO_TRACK_MAX_OFFSET, ISO_TRACK_MAX_OFFSET);
+        }
+    }
+
     private float isoTrackCenterY(float worldX) {
-        return isoTrackBaseY + MathUtils.sin((worldX - horseX) * 0.012f) * 150f;
+        float segmentPosition = (worldX - isoTrackOriginX) / ISO_TRACK_SEGMENT_LENGTH;
+        if (segmentPosition <= 0f) {
+            return isoTrackBaseY + isoTrackOffsets[0];
+        }
+        int left = MathUtils.floor(segmentPosition);
+        if (left >= isoTrackOffsets.length - 1) {
+            return isoTrackBaseY + isoTrackOffsets[isoTrackOffsets.length - 1];
+        }
+        float fraction = segmentPosition - left;
+        float offset = MathUtils.lerp(isoTrackOffsets[left], isoTrackOffsets[left + 1], fraction);
+        return isoTrackBaseY + offset;
     }
 
     private void renderIsometricScene() {
@@ -2088,6 +2122,8 @@ public class RaceScreen extends ScreenAdapter {
         float shadowAlpha = 0.28f - Math.min(0.14f, jump * 0.0035f);
         drawEntityShadow(batch, x + size * 0.5f, y + size * 0.18f, size * 0.58f, size * 0.10f, shadowAlpha);
         y += jump;
+        // The procedural frame contains both horse and rider, so mirroring the
+        // complete draw rect turns both characters together.
         if (horseDirection >= 0f) {
             batch.draw(frame, x, y, size, size);
         } else {
