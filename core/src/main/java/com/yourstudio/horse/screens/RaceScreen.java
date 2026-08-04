@@ -55,6 +55,7 @@ public class RaceScreen extends ScreenAdapter {
     // Coin count for player
     private int playerCoins = 0;
     private Label coinLabel;
+    private Label zoomLabel;
     // Call this method wherever coins are collected in the game logic
     public void collectCoin(int baseAmount) {
         int amount = Math.round(baseAmount * petCoinMultiplier);
@@ -134,7 +135,7 @@ public class RaceScreen extends ScreenAdapter {
     private final float deceleration = 18f;
     private final float lapDistance = 300f;
     private float horseX = 64f;
-    private float horseY = 64f;
+    private float horseY = 180f;
     private float horseDirection = 1f;
     private TiledMap map;
     private OrthogonalTiledMapRenderer mapRenderer;
@@ -170,10 +171,13 @@ public class RaceScreen extends ScreenAdapter {
     private float activeObstacleTimer;
     private float obstacleSlowTimer;
     private float boundarySlowTimer;
-    private float isoTrackBaseY = 64f;
-    private static final float ISO_TRACK_SEGMENT_LENGTH = 256f;
-    private static final float ISO_TRACK_MAX_OFFSET = 115f;
-    private static final float ISO_TRACK_MAX_STEP = 52f;
+    private float isoTrackBaseY = 180f;
+    private static final float ISO_TRACK_SEGMENT_LENGTH = 144f;
+    private static final float ISO_TRACK_MAX_OFFSET = 130f;
+    private static final float ISO_TRACK_MAX_STEP = 75f;
+    private static final float ISO_ZOOM_MIN = 0.78f;
+    private static final float ISO_ZOOM_MAX = 1.45f;
+    private float isoZoom = 1f;
     private final float[] isoTrackOffsets = new float[64];
     private float isoTrackOriginX = 0f;
     private Texture isoFenceMarker;
@@ -395,6 +399,8 @@ public class RaceScreen extends ScreenAdapter {
         TextButton backButton = new TextButton("Vissza", buttonStyle);
         TextButton boostButton = new TextButton("Boost", buttonStyle);
         TextButton jumpButton = new TextButton("Ugr\u00E1s", buttonStyle);
+        TextButton zoomOutButton = new TextButton("Zoom -", buttonStyle);
+        TextButton zoomInButton = new TextButton("Zoom +", buttonStyle);
         restartButton = new TextButton("\u00DAj futam", buttonStyle);
         restartButton.setVisible(false);
         shopButton = new TextButton("Ist\u00E1ll\u00F3", buttonStyle);
@@ -414,6 +420,7 @@ public class RaceScreen extends ScreenAdapter {
         difficultyLabel = new Label("Neh\u00E9zs\u00E9g: " + difficultyLabelText(), labelStyle);
         resultLabel = new Label("Eredm\u00E9ny: --", labelStyle);
         coinLabel = new Label("\u00C9rm\u00E9k: 0", labelStyle);
+        zoomLabel = new Label("Zoom: 100%", labelStyle);
         enableHudTextWrap(speedLabel);
         enableHudTextWrap(lapLabel);
         enableHudTextWrap(raceTimeLabel);
@@ -426,6 +433,7 @@ public class RaceScreen extends ScreenAdapter {
         enableHudTextWrap(npcLabel);
         enableHudTextWrap(resultLabel);
         enableHudTextWrap(coinLabel);
+        enableHudTextWrap(zoomLabel);
         // directionLabel = new Label("Ir\u00E1ny:", labelStyle);
             // Joystick control only, remove left/right buttons from UI
             // directionLabel can remain for feedback if desired
@@ -447,6 +455,18 @@ public class RaceScreen extends ScreenAdapter {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 triggerJump();
+            }
+        });
+        zoomOutButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                adjustIsoZoom(-0.1f);
+            }
+        });
+        zoomInButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                adjustIsoZoom(0.1f);
             }
         });
         boostButton.addListener(new ClickListener() {
@@ -511,6 +531,8 @@ public class RaceScreen extends ScreenAdapter {
         hudContent.row();
         hudContent.add(coinLabel).width(HUD_TEXT_WIDTH).left().padTop(6f);
         hudContent.row();
+        hudContent.add(zoomLabel).width(HUD_TEXT_WIDTH).left().padTop(6f);
+        hudContent.row();
         Table previewRow = new Table();
         previewRow.add(horsePreviewImage).size(64f, 48f).padRight(6f);
         previewRow.add(riderPreviewImage).size(64f, 48f).padRight(6f);
@@ -524,6 +546,8 @@ public class RaceScreen extends ScreenAdapter {
         backButtonTable.add(backButton).width(220f).height(80f).row();
         backButtonTable.add(boostButton).width(220f).height(80f).padTop(12f).row();
         backButtonTable.add(jumpButton).width(220f).height(80f).padTop(12f).row();
+        backButtonTable.add(zoomOutButton).width(105f).height(70f).padTop(12f).left();
+        backButtonTable.add(zoomInButton).width(105f).height(70f).padTop(12f).right().row();
         backButtonTable.add(restartButton).width(220f).height(80f).padTop(12f).row();
         backButtonTable.add(shopButton).width(220f).height(80f).padTop(12f).row();
         backButtonTable.add(menuButton).width(220f).height(80f).padTop(12f);
@@ -795,6 +819,7 @@ public class RaceScreen extends ScreenAdapter {
         stage.getBatch().end();
 
         drawIsometricTerrain();
+        drawIsometricGates();
         stage.getBatch().begin();
         drawIsometricFences(stage.getBatch(), false);
         drawForestDecorations(stage.getBatch(), true, false);
@@ -810,10 +835,11 @@ public class RaceScreen extends ScreenAdapter {
     }
 
     private com.badlogic.gdx.math.Vector2 projectIso(float worldX, float worldY) {
-        float dx = (worldX - horseX) * ISO_PROJECTION_SCALE;
-        float dy = (worldY - horseY) * ISO_PROJECTION_SCALE;
+        float projectionScale = ISO_PROJECTION_SCALE * isoZoom;
+        float dx = (worldX - horseX) * projectionScale;
+        float dy = (worldY - horseY) * projectionScale;
         float centerX = stage.getViewport().getWorldWidth() * 0.5f;
-        float centerY = stage.getViewport().getWorldHeight() * 0.60f;
+        float centerY = stage.getViewport().getWorldHeight() * 0.50f;
         return new com.badlogic.gdx.math.Vector2(centerX + dx - dy, centerY + (dx + dy) * 0.42f);
     }
 
@@ -828,8 +854,9 @@ public class RaceScreen extends ScreenAdapter {
         // empty bands on wide phones and tablets after isometric projection.
         float viewportWidth = stage.getViewport().getWorldWidth();
         float viewportHeight = stage.getViewport().getWorldHeight();
-        int tilesX = Math.max(32, MathUtils.ceil(viewportWidth / (tile * ISO_PROJECTION_SCALE)) + 8);
-        int tilesY = Math.max(24, MathUtils.ceil(viewportHeight / (tile * ISO_PROJECTION_SCALE)) + 8);
+        float projectionScale = ISO_PROJECTION_SCALE * isoZoom;
+        int tilesX = Math.max(32, MathUtils.ceil(viewportWidth / (tile * projectionScale)) + 8);
+        int tilesY = Math.max(24, MathUtils.ceil(viewportHeight / (tile * projectionScale)) + 8);
         isoTerrain.setProjectionMatrix(stage.getCamera().combined);
         isoTerrain.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled);
         for (int ix = -tilesX; ix <= tilesX; ix++) {
@@ -861,7 +888,7 @@ public class RaceScreen extends ScreenAdapter {
         float tile = 64f;
         float fenceOffset = ISO_FENCE_OFFSET;
         int side = foreground ? 1 : -1;
-        int fenceTiles = Math.max(24, MathUtils.ceil(stage.getViewport().getWorldWidth() / (tile * ISO_PROJECTION_SCALE)) + 8);
+        int fenceTiles = Math.max(24, MathUtils.ceil(stage.getViewport().getWorldWidth() / (tile * ISO_PROJECTION_SCALE * isoZoom)) + 8);
         for (int ix = -fenceTiles; ix <= fenceTiles; ix++) {
             float worldX = horseX + ix * tile;
             float trackCenter = isoTrackCenterY(worldX);
@@ -872,6 +899,47 @@ public class RaceScreen extends ScreenAdapter {
             float height = 58f * depth;
             batch.draw(isoFenceMarker, point.x - width * 0.5f, point.y - height + 8f, width, height);
         }
+    }
+
+    private void adjustIsoZoom(float delta) {
+        isoZoom = MathUtils.clamp(isoZoom + delta, ISO_ZOOM_MIN, ISO_ZOOM_MAX);
+        if (zoomLabel != null) {
+            zoomLabel.setText("Zoom: " + Math.round(isoZoom * 100f) + "%");
+        }
+    }
+
+    private void drawIsometricGates() {
+        if (isoTerrain == null || stage == null) {
+            return;
+        }
+        drawIsometricGate(64f, false);
+        drawIsometricGate(64f + lapDistance * 3f, true);
+    }
+
+    private void drawIsometricGate(float worldX, boolean finish) {
+        com.badlogic.gdx.math.Vector2 gateCenter = projectIso(worldX, isoTrackCenterY(worldX));
+        float viewportWidth = stage.getViewport().getWorldWidth();
+        float viewportHeight = stage.getViewport().getWorldHeight();
+        if (gateCenter.x < -180f || gateCenter.x > viewportWidth + 180f
+            || gateCenter.y < -180f || gateCenter.y > viewportHeight + 180f) {
+            return;
+        }
+        float tile = 28f;
+        float halfWidth = ISO_TRACK_HALF_WIDTH * isoZoom;
+        isoTerrain.setProjectionMatrix(stage.getCamera().combined);
+        isoTerrain.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled);
+        for (int i = -4; i <= 4; i++) {
+            float lateral = i * tile / Math.max(isoZoom, 0.01f);
+            com.badlogic.gdx.math.Vector2 point = projectIso(worldX, isoTrackCenterY(worldX) + lateral);
+            boolean dark = (i & 1) == 0;
+            isoTerrain.setColor(dark ? 0.08f : 0.96f, dark ? 0.08f : 0.96f, dark ? 0.10f : 0.82f, 1f);
+            float size = 14f * isoZoom;
+            isoTerrain.triangle(point.x, point.y - size, point.x + size, point.y, point.x, point.y + size);
+            isoTerrain.triangle(point.x, point.y - size, point.x, point.y + size, point.x - size, point.y);
+        }
+        isoTerrain.setColor(finish ? 0.95f : 0.95f, finish ? 0.22f : 0.82f, 0.12f, 1f);
+        isoTerrain.rect(gateCenter.x - halfWidth, gateCenter.y + 26f * isoZoom, halfWidth * 2f, 7f * isoZoom);
+        isoTerrain.end();
     }
 
     private void updateRaceCompletion() {
