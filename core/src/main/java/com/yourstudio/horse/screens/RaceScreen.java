@@ -790,12 +790,18 @@ public class RaceScreen extends ScreenAdapter {
         float tile = 64f;
         float halfWidth = tile * 0.55f;
         float halfHeight = tile * 0.23f;
+        // Derive the world coverage from the viewport. Fixed ranges leave
+        // empty bands on wide phones and tablets after isometric projection.
+        float viewportWidth = stage.getViewport().getWorldWidth();
+        float viewportHeight = stage.getViewport().getWorldHeight();
+        int tilesX = Math.max(32, MathUtils.ceil(viewportWidth / (tile * ISO_PROJECTION_SCALE)) + 8);
+        int tilesY = Math.max(24, MathUtils.ceil(viewportHeight / (tile * ISO_PROJECTION_SCALE)) + 8);
         isoTerrain.setProjectionMatrix(stage.getCamera().combined);
         isoTerrain.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled);
-        for (int ix = -16; ix <= 16; ix++) {
+        for (int ix = -tilesX; ix <= tilesX; ix++) {
             float worldX = horseX + ix * tile;
             float trackCenter = isoTrackCenterY(worldX);
-            for (int iy = -12; iy <= 12; iy++) {
+            for (int iy = -tilesY; iy <= tilesY; iy++) {
                 float worldY = horseY + iy * tile;
                 com.badlogic.gdx.math.Vector2 p = projectIso(worldX, worldY);
                 float lateralDistance = Math.abs(worldY - trackCenter);
@@ -821,7 +827,8 @@ public class RaceScreen extends ScreenAdapter {
         float tile = 64f;
         float fenceOffset = ISO_FENCE_OFFSET;
         int side = foreground ? 1 : -1;
-        for (int ix = -12; ix <= 12; ix++) {
+        int fenceTiles = Math.max(24, MathUtils.ceil(stage.getViewport().getWorldWidth() / (tile * ISO_PROJECTION_SCALE)) + 8);
+        for (int ix = -fenceTiles; ix <= fenceTiles; ix++) {
             float worldX = horseX + ix * tile;
             float trackCenter = isoTrackCenterY(worldX);
             float worldY = trackCenter + side * fenceOffset;
