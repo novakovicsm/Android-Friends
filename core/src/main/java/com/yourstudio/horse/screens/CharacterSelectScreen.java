@@ -45,6 +45,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private static final String PREF_SADDLE_COLOR = "saddleColor";
     private static final String PREF_OUTFIT_COLOR = "outfitColor";
     private final HorseGame game;
+    private final CharacterSelectionFlow selectionFlow = new CharacterSelectionFlow();
     private Stage stage;
     private Texture background;
     private BitmapFont titleFont;
@@ -289,6 +290,13 @@ public class CharacterSelectScreen extends ScreenAdapter {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 playClick();
+                if (selectionFlow.isRiderStep()) {
+                    saveSelectionPrefs();
+                    selectionFlow.next();
+                    title.setText("Lo es futam valasztas");
+                    startButton.setText("Verseny inditasa");
+                    return;
+                }
                 saveSelectionPrefs();
                 ScreenNavigator.Selection selection = new ScreenNavigator.Selection(
                     horses[horseIndex],
