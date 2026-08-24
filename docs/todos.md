@@ -47,25 +47,30 @@ Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladat
 - [x] APK build script + release pipeline
 
 ## Specifikációs eltérések / issue-k
+- [x] Izometrikus 2.5D pályarenderelés: gyémántcsempés talaj, mélységi sorrend és izometrikus objektumprojekció.
+- [x] Nagyobb, kanyargó 2.5D pálya: képernyőt kitöltő táj, kétoldali kerítés, külső táj és kerítésérintési lassítás.
 - [x] Hiányzik a pályaválasztás a flow-ból (spec: lovas/ló/pálya választás).
-- [x] A specifikáció szerinti 4 pálya nincs megvalósítva (jelenleg 1 placeholder map).
+- [ ] A teljes játék 4 pályája még nincs megvalósítva; MVP-ben csak az erdei pálya aktív.
 - [x] Ló testreszabás még nem készült el (szín, sörény, nyereg).
-- [ ] Kis kedvenc választás nincs összekötve bónuszokkal.
-- [ ] Tematikus power-upok és felvételük hiányzik a verseny során.
-- [ ] Pixel art UI/assetek helyett még csak programozott placeholder színek vannak.
+- [x] Kis kedvenc választás és alap MVP-bónuszok összekötése.
+- [x] Tematikus power-upok és felvételük: boost-töltet, Gyorsító és Pajzs.
+- [x] A karakterválasztó és a verseny HUD lovas/pet előnézetei generált pixel-art PNG-ket használnak; a procedurális rajzolás csak hiányzó asset fallback.
 
 ## Milestone 2 – Teendők
 
 ### Bugfixes
-- [ ] Rider, pet, and color specification: fix selection and display bugs
+- [x] Rider, pet, and color specification: végső kiválasztási és megjelenítési regressziótesztek.
 
 ### Playable loop polish (race feel, input, HUD, rewards)
 - [x] Input finomhangolás: érzékenység, gyorsítás/lassítás görbék, irányváltás animáció
-- [ ] Versenyérzet: sebességvisszajelzés (kamera enyhe előre dőlés/rásegítés), por/sparkle effekt
-- [ ] HUD tisztítás: aktív power-up időzítő, köridő/legjobb idő, célvonal jelzés
-- [ ] Célba érés flow: győzelmi panel, jutalom összegzés, újraindítás gomb
-- [ ] Jutalom rendszer: egyszerű valuta/pontok, beváltás preview
-- [ ] Akadályok a pályán: életerő, életek számának csökkenése, vagy lassítás
+- [x] Versenyérzet: sebességvisszajelzés (sebességfüggő kamera zoom/dőlés)
+- [x] Versenyérzet: sebességfüggő por effekt
+- [x] Versenyeffekt: sparkle/boost vizuális effekt
+- [x] HUD: aktív power-up időzítő, futamidő, köridő és célvonal-jelzés
+- [x] HUD: legjobb idő részletes eredmény-összesítése
+- [x] Célba érés flow: győzelmi panel, jutalom összegzés, újraindítás gomb
+- [x] Jutalom rendszer: egyszerű valuta/pontok, beváltás preview
+- [x] Akadályok a pályán: MVP-ben egységes lassítás, pontlevonás nélkül.
 
 
 ### Content expansion (more tracks, power-ups, assets)
@@ -73,7 +78,7 @@ Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladat
 - [ ] Pálya-specifikus díszletek/tileset elemek
 - [ ] Tematikus power-upok pályánként + ikonok (legalább 2-2)
 - [ ] Új SFX: boost, pickup variánsok, célba érés
-- [ ] Pixel art race háttér és pálya dekorációk frissítése
+- [x] Pixel-art erdei pályadekorációk frissítése (tölgy, fenyő, bokor, irányjelző, kő)
 
 ### Customization depth (horse/rider/pet cosmetics + bonuses)
 - [ ] Ló testreszabás bővítése: minták / foltok / lábvédők

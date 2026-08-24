@@ -1,0 +1,23 @@
+appId: com.yourstudio.horse
+
+onFlowStart:
+  - clearState
+
+---
+
+- launchApp
+- waitForAnimationToEnd
+- takeScreenshot: 01-main-menu
+
+# LibGDX currently renders the game UI on a canvas without native accessibility nodes.
+- tapOn:
+    point: "50%,50%"
+    retryTapIfNoChange: true
+- waitForAnimationToEnd
+- takeScreenshot: 02-after-start-tap
+
+- pressKey: Home
+- launchApp:
+    stopApp: false
+- waitForAnimationToEnd
+- takeScreenshot: 03-resumed

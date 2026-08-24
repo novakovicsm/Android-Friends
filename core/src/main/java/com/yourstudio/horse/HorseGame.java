@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.yourstudio.horse.screens.MainMenuScreen;
 
 public class HorseGame extends Game {
@@ -105,6 +106,14 @@ public class HorseGame extends Game {
         secondaryButton.fontColor = Color.WHITE;
         secondaryButton.downFontColor = Color.LIGHT_GRAY;
         skin.add("secondary", secondaryButton);
+
+        TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle(
+            uiFont,
+            Color.BLACK,
+            null,
+            null,
+            skin.getDrawable("panel"));
+        skin.add("default", textFieldStyle);
 
         CheckBox.CheckBoxStyle checkboxStyle = new CheckBox.CheckBoxStyle(
             skin.getDrawable("checkbox-off"),

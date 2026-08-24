@@ -24,6 +24,8 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.yourstudio.horse.HorseGame;
+import com.yourstudio.horse.model.MvpProgress;
+import com.yourstudio.horse.model.MvpProgressStore;
 import com.yourstudio.horse.ui.ScreenNavigator;
 import com.yourstudio.horse.ui.UiFactory;
 
@@ -196,7 +198,8 @@ public class TrackSelectScreen extends ScreenAdapter {
     }
 
     private void playClick() {
-        if (clickSound != null) {
+        MvpProgress progress = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME)).load();
+        if (!progress.muted && clickSound != null) {
             clickSound.play(0.6f);
         }
     }

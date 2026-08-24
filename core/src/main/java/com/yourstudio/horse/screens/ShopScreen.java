@@ -1,0 +1,292 @@
+package com.yourstudio.horse.screens;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.yourstudio.horse.HorseGame;
+import com.yourstudio.horse.model.MvpGameConfig;
+import com.yourstudio.horse.model.MvpProgress;
+import com.yourstudio.horse.model.MvpProgressStore;
+import com.yourstudio.horse.ui.ScreenNavigator;
+
+public class ShopScreen extends ScreenAdapter {
+    private static final float ITEM_LABEL_WIDTH = 390f;
+    private final HorseGame game;
+    private Stage stage;
+    private MvpProgressStore progressStore;
+    private MvpProgress progress;
+    private Sound purchaseSound;
+    private Label horseshoeLabel;
+    private Label statusLabel;
+    private final Label[] skinLabels = new Label[MvpGameConfig.SKIN_LABELS.length];
+    private final Label[] petLabels = new Label[MvpGameConfig.PET_LABELS.length];
+    private final Label[] upgradeLabels = new Label[MvpGameConfig.UPGRADE_CATEGORIES.length];
+
+    public ShopScreen(HorseGame game) {
+        this.game = game;
+    }
+
+    @Override
+    public void show() {
+        stage = new Stage(new ScreenViewport());
+        Skin skin = game.getSkin();
+        progressStore = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME));
+        progress = progressStore.load();
+        purchaseSound = game.getAssets().get("sfx/powerup.wav", Sound.class);
+
+        Label.LabelStyle titleStyle = skin.get("title", Label.LabelStyle.class);
+        Label.LabelStyle labelStyle = skin.get("default", Label.LabelStyle.class);
+        TextButton.TextButtonStyle buttonStyle = skin.get("primary", TextButton.TextButtonStyle.class);
+
+        Table root = new Table();
+        root.setFillParent(true);
+        root.pad(28f);
+
+        Table layout = new Table();
+        layout.defaults().padBottom(10f);
+
+        Label title = new Label("Ist\u00E1ll\u00F3 fejleszt\u00E9sek", titleStyle);
+        title.setAlignment(Align.center);
+        horseshoeLabel = new Label("", labelStyle);
+        horseshoeLabel.setAlignment(Align.center);
+        statusLabel = new Label("", labelStyle);
+        statusLabel.setAlignment(Align.center);
+        statusLabel.setWrap(true);
+
+        layout.add(title).colspan(2).padBottom(18f).row();
+        layout.add(horseshoeLabel).colspan(2).padBottom(8f).row();
+        layout.add(statusLabel).width(ITEM_LABEL_WIDTH + 240f).colspan(2).padBottom(20f).row();
+
+        Label skinTitle = new Label("Skinek", labelStyle);
+        layout.add(skinTitle).colspan(2).left().padBottom(12f).row();
+
+        for (int i = 0; i < MvpGameConfig.SKIN_LABELS.length; i++) {
+            final int skinIndex = i;
+            skinLabels[i] = new Label("", labelStyle);
+            skinLabels[i].setWrap(true);
+            TextButton buyButton = new TextButton("V\u00E1s\u00E1rl\u00E1s", buttonStyle);
+            buyButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    confirmPurchase("Skin", MvpGameConfig.SKIN_LABELS[skinIndex] + " - " + MvpGameConfig.skinPrice(skinIndex) + " patkó", () -> purchaseSkin(skinIndex));
+                }
+            });
+
+            layout.add(skinLabels[i]).width(ITEM_LABEL_WIDTH).left();
+            layout.add(buyButton).width(220f).height(52f).row();
+        }
+
+        Label petTitle = new Label("Kedvencek", labelStyle);
+        layout.add(petTitle).colspan(2).left().padTop(8f).padBottom(12f).row();
+
+        for (int i = 0; i < MvpGameConfig.PET_LABELS.length; i++) {
+            final int petIndex = i;
+            petLabels[i] = new Label("", labelStyle);
+            petLabels[i].setWrap(true);
+            TextButton buyButton = new TextButton("V\u00E1s\u00E1rl\u00E1s", buttonStyle);
+            buyButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    confirmPurchase("Kedvenc", MvpGameConfig.PET_LABELS[petIndex] + " - " + MvpGameConfig.PET_UNLOCK_PRICE + " patkó", () -> purchasePet(petIndex));
+                }
+            });
+
+            layout.add(petLabels[i]).width(ITEM_LABEL_WIDTH).left();
+            layout.add(buyButton).width(220f).height(52f).row();
+        }
+
+        Label upgradeTitle = new Label("Upgrade-ek", labelStyle);
+        layout.add(upgradeTitle).colspan(2).left().padTop(8f).padBottom(12f).row();
+
+        for (int i = 0; i < MvpGameConfig.UPGRADE_CATEGORIES.length; i++) {
+            final int categoryIndex = i;
+            upgradeLabels[i] = new Label("", labelStyle);
+            upgradeLabels[i].setWrap(true);
+            TextButton buyButton = new TextButton("V\u00E1s\u00E1rl\u00E1s", buttonStyle);
+            buyButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    confirmPurchase("Upgrade", MvpGameConfig.UPGRADE_CATEGORIES[categoryIndex].label + " - következő szint", () -> purchaseUpgrade(categoryIndex));
+                }
+            });
+
+            layout.add(upgradeLabels[i]).width(ITEM_LABEL_WIDTH).left();
+            layout.add(buyButton).width(220f).height(52f).row();
+        }
+
+        TextButton backButton = new TextButton("Vissza", buttonStyle);
+        backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                ScreenNavigator.toMainMenu(game);
+            }
+        });
+
+        layout.add(backButton).width(260f).height(64f).colspan(2).padTop(16f);
+        ScrollPane scrollPane = new ScrollPane(layout);
+        scrollPane.setFadeScrollBars(false);
+        root.add(scrollPane).expand().fill();
+        stage.addActor(root);
+        Gdx.input.setInputProcessor(stage);
+        refreshLabels();
+    }
+
+    private void refreshLabels() {
+        horseshoeLabel.setText("Aranypatk\u00F3: " + progress.horseshoes);
+        for (int i = 0; i < MvpGameConfig.SKIN_LABELS.length; i++) {
+            boolean unlocked = i == 0 || (progress.unlockedSkins != null
+                && i < progress.unlockedSkins.length
+                && progress.unlockedSkins[i]);
+            String statusText = unlocked ? "megvan" : MvpGameConfig.skinPrice(i) + " patk\u00F3";
+            if (unlocked && progress.selectedSkinIndex == i) {
+                statusText = "kiv\u00E1lasztva";
+            }
+            skinLabels[i].setText(MvpGameConfig.SKIN_LABELS[i] + " - " + statusText);
+        }
+        for (int i = 0; i < MvpGameConfig.PET_LABELS.length; i++) {
+            boolean unlocked = i == 0 || (progress.unlockedPets != null
+                && i < progress.unlockedPets.length
+                && progress.unlockedPets[i]);
+            String statusText = unlocked ? "megvan" : MvpGameConfig.PET_UNLOCK_PRICE + " patk\u00F3";
+            petLabels[i].setText(MvpGameConfig.PET_LABELS[i] + " - " + statusText);
+        }
+        for (int i = 0; i < MvpGameConfig.UPGRADE_CATEGORIES.length; i++) {
+            MvpGameConfig.UpgradeCategory category = MvpGameConfig.UPGRADE_CATEGORIES[i];
+            int level = progress.upgradeLevels[i];
+            String costText = level >= category.upgradeCount
+                ? "max"
+                : MvpGameConfig.upgradeCost(nextUpgradeNumber(i, level)) + " patk\u00F3";
+            upgradeLabels[i].setText(category.label + ": " + level + "/" + category.upgradeCount + " - " + costText);
+        }
+    }
+
+    private void playPurchaseSound() {
+        if (!progress.muted && purchaseSound != null) {
+            purchaseSound.play(0.7f);
+        }
+    }
+
+    private void confirmPurchase(String title, String description, final Runnable action) {
+        Dialog dialog = new Dialog(title, game.getSkin()) {
+            @Override
+            protected void result(Object object) {
+                if (Boolean.TRUE.equals(object)) {
+                    action.run();
+                }
+            }
+        };
+        dialog.text(description + "\nMegvásárolod?");
+        dialog.button("Mégse", false);
+        dialog.button("Vásárlás", true);
+        dialog.setModal(true);
+        dialog.show(stage);
+    }
+
+    private void purchaseSkin(int skinIndex) {
+        if (isSkinUnlocked(skinIndex)) {
+            progress.selectSkin(skinIndex);
+            progressStore.save(progress);
+            statusLabel.setText("Skin kiv\u00E1lasztva.");
+            refreshLabels();
+            return;
+        }
+        if (progress.horseshoes < MvpGameConfig.skinPrice(skinIndex)) {
+            statusLabel.setText("Nincs el\u00E9g aranypatk\u00F3.");
+            return;
+        }
+        if (progress.purchaseSkin(skinIndex)) {
+            finishSuccessfulPurchase("Skin megv\u00E1s\u00E1rolva.");
+        }
+    }
+
+    private void purchasePet(int petIndex) {
+        if (isPetUnlocked(petIndex)) {
+            statusLabel.setText("Ez a kedvenc m\u00E1r megvan.");
+            return;
+        }
+        if (progress.horseshoes < MvpGameConfig.PET_UNLOCK_PRICE) {
+            statusLabel.setText("Nincs el\u00E9g aranypatk\u00F3.");
+            return;
+        }
+        if (progress.purchasePet(petIndex)) {
+            finishSuccessfulPurchase("Kedvenc megv\u00E1s\u00E1rolva.");
+        }
+    }
+
+    private void purchaseUpgrade(int categoryIndex) {
+        MvpGameConfig.UpgradeCategory category = MvpGameConfig.UPGRADE_CATEGORIES[categoryIndex];
+        int level = progress.upgradeLevels[categoryIndex];
+        if (level >= category.upgradeCount) {
+            statusLabel.setText("Ez az upgrade m\u00E1r maxon van.");
+            return;
+        }
+        if (progress.horseshoes < MvpGameConfig.upgradeCost(nextUpgradeNumber(categoryIndex, level))) {
+            statusLabel.setText("Nincs el\u00E9g aranypatk\u00F3.");
+            return;
+        }
+        if (progress.purchaseUpgrade(categoryIndex)) {
+            finishSuccessfulPurchase("Upgrade megv\u00E1s\u00E1rolva.");
+        }
+    }
+
+    private void finishSuccessfulPurchase(String message) {
+        progressStore.save(progress);
+        playPurchaseSound();
+        statusLabel.setText(message);
+        refreshLabels();
+    }
+
+    private boolean isSkinUnlocked(int skinIndex) {
+        return skinIndex == 0 || (progress.unlockedSkins != null
+            && skinIndex < progress.unlockedSkins.length
+            && progress.unlockedSkins[skinIndex]);
+    }
+
+    private boolean isPetUnlocked(int petIndex) {
+        return petIndex == 0 || (progress.unlockedPets != null
+            && petIndex < progress.unlockedPets.length
+            && progress.unlockedPets[petIndex]);
+    }
+
+    private int nextUpgradeNumber(int categoryIndex, int currentLevel) {
+        int upgradeNumber = currentLevel + 1;
+        for (int i = 0; i < categoryIndex; i++) {
+            upgradeNumber += MvpGameConfig.UPGRADE_CATEGORIES[i].upgradeCount;
+        }
+        return upgradeNumber;
+    }
+
+    @Override
+    public void render(float delta) {
+        ScreenUtils.clear(Color.valueOf("eef6ff"));
+        stage.act(delta);
+        stage.draw();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        if (stage != null) {
+            stage.getViewport().update(width, height, true);
+        }
+    }
+
+    @Override
+    public void dispose() {
+        if (stage != null) {
+            stage.dispose();
+        }
+    }
+}
