@@ -3,6 +3,7 @@ package com.yourstudio.horse.screens;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import com.yourstudio.horse.model.MvpGameConfig;
@@ -93,6 +94,19 @@ public class RaceScreenTest {
         assertEquals("Pihe", getObjectField(screen, "horseName"));
         assertEquals("Peti", getObjectField(screen, "riderName"));
         assertEquals("Cica", getObjectField(screen, "petName"));
+    }
+
+    @Test
+    public void trackSelectionUsesActualMapFiles() throws Exception {
+        TrackSelectScreen screen = new TrackSelectScreen(null, "Villam", "Lili", "Kutya");
+        Field field = TrackSelectScreen.class.getDeclaredField("trackFiles");
+        field.setAccessible(true);
+        String[] trackFiles = (String[]) field.get(screen);
+
+        assertEquals("forest.tmx", trackFiles[0]);
+        assertEquals("beach.tmx", trackFiles[1]);
+        assertEquals("hegyek.tmx", trackFiles[2]);
+        assertEquals("ejszakai_varos.tmx", trackFiles[3]);
     }
 
     @Test

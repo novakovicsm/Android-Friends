@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.maps.MapProperties;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -52,15 +54,10 @@ public class TrackSelectScreen extends ScreenAdapter {
     private int trackIndex;
     private Table layout;
 
-    private final String[] trackNames = {"Erd\u0151", "Tengerpart", "Hegyek", "\u00C9jszakai v\u00E1ros"};
-    private final String[] trackDescriptions = {
-        "S\u0171r\u0171 f\u00E1k, puha \u00F6sv\u00E9nyek \u00E9s napf\u00E9nyes tiszt\u00E1sok.",
-        "Homokos partok, hull\u00E1mok hangja, szeles sprint.",
-        "Meredek emelked\u0151k \u00E9s h\u0171v\u00F6s hegyi leveg\u0151.",
-        "Neonf\u00E9nyek, sz\u0171k utc\u00E1k \u00E9s gyors kanyarok."
-    };
+    private String[] trackNames;
+    private String[] trackDescriptions;
     // Map track index to .tmx file
-    private final String[] trackFiles = {"forest.tmx", "tengerpart.tmx", "hegyek.tmx", "ejszakai_varos.tmx"};
+    private final String[] trackFiles = {"forest.tmx", "beach.tmx", "hegyek.tmx", "ejszakai_varos.tmx"};
 
     public TrackSelectScreen(HorseGame game, String horseName, String riderName, String petName) {
         this(game, horseName, riderName, petName, null, null, null, null);
@@ -76,6 +73,8 @@ public class TrackSelectScreen extends ScreenAdapter {
         this.maneColor = maneColor;
         this.saddleColor = saddleColor;
         this.outfitColor = outfitColor;
+        this.trackNames = buildTrackNames();
+        this.trackDescriptions = buildTrackDescriptions();
     }
 
     @Override
@@ -195,6 +194,69 @@ public class TrackSelectScreen extends ScreenAdapter {
         }
         disposeTextureArray(trackCards);
         disposeTextureArray(trackCardsSelected);
+    }
+
+    private String[] buildTrackNames() {
+        String[] names = {
+            "Erdő",
+            "Tengerpart",
+            "Hegyek",
+            "Éjszakai város"
+        };
+        for (int i = 0; i < trackFiles.length; i++) {
+            String mapName = mapPropertyValue(trackFiles[i], "theme");
+            if (mapName != null && !mapName.trim().isEmpty()) {
+                names[i] = humanizeTheme(mapName);
+            }
+        }
+        return names;
+    }
+
+    private String[] buildTrackDescriptions() {
+        String[] descriptions = {
+            "Sűrű fák, puha ösvények és napfényes tisztások.",
+            "Homokos partok, hullámok hangja, szeles sprint.",
+            "Meredek emelkedések és hűvös hegyi levegő.",
+            "Neonfények, szűk utcák és gyors kanyarok."
+        };
+        for (int i = 0; i < trackFiles.length; i++) {
+            String value = mapPropertyValue(trackFiles[i], "description");
+            if (value != null && !value.trim().isEmpty()) {
+                descriptions[i] = value;
+            }
+        }
+        return descriptions;
+    }
+
+    private String mapPropertyValue(String trackFile, String propertyKey) {
+        if (trackFile == null || trackFile.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            MapProperties props = new TmxMapLoader().load("maps/" + trackFile).getProperties();
+            Object value = props.get(propertyKey);
+            return value == null ? null : value.toString();
+        } catch (RuntimeException exception) {
+            return null;
+        }
+    }
+
+    private String humanizeTheme(String theme) {
+        if (theme == null) {
+            return "Pálya";
+        }
+        switch (theme) {
+            case "forest":
+                return "Erdő";
+            case "tengerpart":
+                return "Tengerpart";
+            case "hegyek":
+                return "Hegyek";
+            case "ejszakai_varos":
+                return "Éjszakai város";
+            default:
+                return theme.replace('_', ' ');
+        }
     }
 
     private void playClick() {

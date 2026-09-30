@@ -78,6 +78,7 @@ public class RaceScreen extends ScreenAdapter {
     private final String maneColor;
     private final String saddleColor;
     private final String outfitColor;
+    private final String horsePattern;
     private final MvpGameConfig.Difficulty difficulty;
 
     private Stage stage;
@@ -237,6 +238,7 @@ public class RaceScreen extends ScreenAdapter {
         this.maneColor = null;
         this.saddleColor = null;
         this.outfitColor = null;
+        this.horsePattern = MvpGameConfig.HORSE_PATTERNS[0];
         this.difficulty = MvpGameConfig.Difficulty.EASY;
     }
     
@@ -250,6 +252,7 @@ public class RaceScreen extends ScreenAdapter {
         this.maneColor = null;
         this.saddleColor = null;
         this.outfitColor = null;
+        this.horsePattern = MvpGameConfig.HORSE_PATTERNS[0];
         this.difficulty = MvpGameConfig.Difficulty.EASY;
     }
 
@@ -264,6 +267,7 @@ public class RaceScreen extends ScreenAdapter {
         this.maneColor = maneColor;
         this.saddleColor = saddleColor;
         this.outfitColor = null;
+        this.horsePattern = MvpGameConfig.HORSE_PATTERNS[0];
         this.difficulty = MvpGameConfig.Difficulty.EASY;
     }
 
@@ -276,6 +280,13 @@ public class RaceScreen extends ScreenAdapter {
     public RaceScreen(HorseGame game, String horseName, String riderName, String petName, String trackName,
                       String horseColor, String maneColor, String saddleColor, String outfitColor,
                       MvpGameConfig.Difficulty difficulty) {
+        this(game, horseName, riderName, petName, trackName, horseColor, maneColor, saddleColor, outfitColor,
+            MvpGameConfig.HORSE_PATTERNS[0], difficulty);
+    }
+
+    public RaceScreen(HorseGame game, String horseName, String riderName, String petName, String trackName,
+                      String horseColor, String maneColor, String saddleColor, String outfitColor,
+                      String horsePattern, MvpGameConfig.Difficulty difficulty) {
         this.game = game;
         this.horseName = horseName;
         this.riderName = riderName;
@@ -285,6 +296,7 @@ public class RaceScreen extends ScreenAdapter {
         this.maneColor = maneColor;
         this.saddleColor = saddleColor;
         this.outfitColor = outfitColor;
+        this.horsePattern = horsePattern != null ? horsePattern : MvpGameConfig.HORSE_PATTERNS[0];
         this.difficulty = difficulty != null ? difficulty : MvpGameConfig.Difficulty.EASY;
     }
 
@@ -2274,7 +2286,7 @@ public class RaceScreen extends ScreenAdapter {
     }
 
     private void loadHorseAnimations() {
-        if (FORCE_PROCEDURAL_HORSE) {
+        if (FORCE_PROCEDURAL_HORSE || !MvpGameConfig.HORSE_PATTERNS[0].equals(horsePattern)) {
             idleFrames = createHorseIdleFrames();
             runFrames = createHorseRunFrames();
             idleAnimation = new Animation<>(0.6f, toRegions(idleFrames));
@@ -2338,6 +2350,8 @@ public class RaceScreen extends ScreenAdapter {
         Pixmap pixmap = new Pixmap(size, size, Pixmap.Format.RGBA8888);
         pixmap.setColor(0f, 0f, 0f, 0f);
         pixmap.fill();
+
+        applyHorsePattern(pixmap, body);
 
         Color outline = darken(body, 0.48f);
         Color bodyShade = darken(body, 0.18f);
@@ -2449,6 +2463,33 @@ public class RaceScreen extends ScreenAdapter {
         pixmap.dispose();
         flipped.dispose();
         return texture;
+    }
+
+    private void applyHorsePattern(Pixmap pixmap, Color body) {
+        if (horsePattern == null || MvpGameConfig.HORSE_PATTERNS[0].equals(horsePattern)) {
+            return;
+        }
+        if ("Csíkos".equals(horsePattern)) {
+            pixmap.setColor(darken(body, 0.24f));
+            for (int x = 8; x < 56; x += 10) {
+                pixmap.fillRectangle(x, 10, 4, 42);
+            }
+            return;
+        }
+        if ("Foltos".equals(horsePattern)) {
+            pixmap.setColor(darken(body, 0.28f));
+            for (int x = 12; x < 52; x += 14) {
+                for (int y = 12; y < 48; y += 12) {
+                    pixmap.fillCircle(x, y, 3);
+                }
+            }
+            return;
+        }
+        if ("Nyakörv".equals(horsePattern)) {
+            pixmap.setColor(darken(body, 0.35f));
+            pixmap.fillRectangle(12, 26, 40, 8);
+            pixmap.fillRectangle(18, 34, 28, 8);
+        }
     }
 
     private Color resolvePetFurColor() {

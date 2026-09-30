@@ -14,6 +14,8 @@ public final class MvpProgress {
     public String selectedRiderName;
     public String selectedPet;
     public String selectedRiderColor;
+    public String selectedRiderOutfitVariant;
+    public String selectedHorsePattern;
     public MvpGameConfig.Difficulty selectedDifficulty;
     public String recordTime;
     public boolean tutorialComplete;
@@ -36,6 +38,8 @@ public final class MvpProgress {
         progress.selectedRiderName = MvpGameConfig.RIDER_NAMES[0];
         progress.selectedPet = "Kutya";
         progress.selectedRiderColor = "Piros";
+        progress.selectedRiderOutfitVariant = MvpGameConfig.RIDER_OUTFIT_VARIANTS[0];
+        progress.selectedHorsePattern = MvpGameConfig.HORSE_PATTERNS[0];
         progress.selectedDifficulty = MvpGameConfig.Difficulty.EASY;
         progress.recordTime = "";
         progress.tutorialComplete = false;

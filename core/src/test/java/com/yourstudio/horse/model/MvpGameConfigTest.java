@@ -130,6 +130,23 @@ public class MvpGameConfigTest {
     }
 
     @Test
+    public void horsePatternsIncludeSolidStripeAndSpotVariants() {
+        assertEquals(4, MvpGameConfig.HORSE_PATTERNS.length);
+        assertEquals("Sima", MvpGameConfig.HORSE_PATTERNS[0]);
+        assertEquals("Csíkos", MvpGameConfig.HORSE_PATTERNS[1]);
+        assertEquals("Foltos", MvpGameConfig.HORSE_PATTERNS[2]);
+        assertEquals("Nyakörv", MvpGameConfig.HORSE_PATTERNS[3]);
+    }
+
+    @Test
+    public void riderOutfitVariantsIncludeClassicSportAndHeroStyles() {
+        assertEquals(3, MvpGameConfig.RIDER_OUTFIT_VARIANTS.length);
+        assertEquals("Klasszikus", MvpGameConfig.RIDER_OUTFIT_VARIANTS[0]);
+        assertEquals("Sport", MvpGameConfig.RIDER_OUTFIT_VARIANTS[1]);
+        assertEquals("Hős", MvpGameConfig.RIDER_OUTFIT_VARIANTS[2]);
+    }
+
+    @Test
     public void petAndPowerupValuesMatchMvpSpec() {
         assertEquals(10, MvpGameConfig.MAX_PET_LEVEL);
         assertEquals(100, MvpGameConfig.PET_XP_PER_LEVEL);

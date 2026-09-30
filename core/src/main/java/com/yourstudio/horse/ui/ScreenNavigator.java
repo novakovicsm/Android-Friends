@@ -24,7 +24,7 @@ public final class ScreenNavigator {
         }
         game.setScreen(new CharacterSelectScreen(game, selection.horseName, selection.riderName, selection.petName,
             selection.horseColor, selection.maneColor, selection.saddleColor, selection.outfitColor,
-            selection.difficulty));
+            selection.riderOutfitVariant, selection.horsePattern, selection.difficulty));
     }
 
     public static void toShop(HorseGame game) {
@@ -55,7 +55,7 @@ public final class ScreenNavigator {
         }
         game.setScreen(new RaceScreen(game, selection.horseName, selection.riderName, selection.petName, trackName,
             selection.horseColor, selection.maneColor, selection.saddleColor, selection.outfitColor,
-            selection.difficulty));
+            selection.horsePattern, selection.difficulty));
     }
 
     public static final class Selection {
@@ -66,17 +66,26 @@ public final class ScreenNavigator {
         public final String maneColor;
         public final String saddleColor;
         public final String outfitColor;
+        public final String riderOutfitVariant;
+        public final String horsePattern;
         public final MvpGameConfig.Difficulty difficulty;
 
         public Selection(String horseName, String riderName, String petName,
                          String horseColor, String maneColor, String saddleColor, String outfitColor) {
             this(horseName, riderName, petName, horseColor, maneColor, saddleColor, outfitColor,
-                MvpGameConfig.Difficulty.EASY);
+                MvpGameConfig.RIDER_OUTFIT_VARIANTS[0], MvpGameConfig.HORSE_PATTERNS[0], MvpGameConfig.Difficulty.EASY);
         }
 
         public Selection(String horseName, String riderName, String petName,
                          String horseColor, String maneColor, String saddleColor, String outfitColor,
                          MvpGameConfig.Difficulty difficulty) {
+            this(horseName, riderName, petName, horseColor, maneColor, saddleColor, outfitColor,
+                MvpGameConfig.RIDER_OUTFIT_VARIANTS[0], MvpGameConfig.HORSE_PATTERNS[0], difficulty);
+        }
+
+        public Selection(String horseName, String riderName, String petName,
+                         String horseColor, String maneColor, String saddleColor, String outfitColor,
+                         String riderOutfitVariant, String horsePattern, MvpGameConfig.Difficulty difficulty) {
             this.horseName = horseName;
             this.riderName = riderName;
             this.petName = petName;
@@ -84,6 +93,8 @@ public final class ScreenNavigator {
             this.maneColor = maneColor;
             this.saddleColor = saddleColor;
             this.outfitColor = outfitColor;
+            this.riderOutfitVariant = riderOutfitVariant != null ? riderOutfitVariant : MvpGameConfig.RIDER_OUTFIT_VARIANTS[0];
+            this.horsePattern = horsePattern != null ? horsePattern : MvpGameConfig.HORSE_PATTERNS[0];
             this.difficulty = difficulty != null ? difficulty : MvpGameConfig.Difficulty.EASY;
         }
     }

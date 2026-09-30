@@ -44,6 +44,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private static final String PREF_MANE_COLOR = "maneColor";
     private static final String PREF_SADDLE_COLOR = "saddleColor";
     private static final String PREF_OUTFIT_COLOR = "outfitColor";
+    private static final String PREF_RIDER_OUTFIT_VARIANT = "riderOutfitVariant";
+    private static final String PREF_HORSE_PATTERN = "horsePattern";
     private final HorseGame game;
     private final CharacterSelectionFlow selectionFlow = new CharacterSelectionFlow();
     private Stage stage;
@@ -74,6 +76,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private Color[] outfitColorValues;
     private Color[] riderHairColors;
     private Table layout;
+    private Table riderStepPanel;
+    private Table horseStepPanel;
 
     private final String[] horses = horseNamesFromConfig();
     private final String[] riders = MvpGameConfig.RIDER_NAMES;
@@ -82,6 +86,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private final String[] maneColors = {"Fekete", "Csokol\u00E1d\u00E9", "Sz\u00FCrke", "Sz\u0151ke"};
     private final String[] saddleColors = {"V\u00F6r\u00F6s", "K\u00E9k", "Z\u00F6ld", "Fekete"};
     private final String[] outfitColors = {"Piros", "K\u00E9k", "Z\u00F6ld", "Lila"};
+    private final String[] riderOutfitVariants = MvpGameConfig.RIDER_OUTFIT_VARIANTS;
+    private final String[] horsePatterns = MvpGameConfig.HORSE_PATTERNS;
     private final MvpGameConfig.Difficulty[] difficulties = MvpGameConfig.Difficulty.values();
     private final String[] difficultyLabels = {"K\u00F6nny\u0171", "K\u00F6zepes", "Neh\u00E9z"};
 
@@ -92,6 +98,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private int maneColorIndex;
     private int saddleColorIndex;
     private int outfitColorIndex;
+    private int riderOutfitVariantIndex;
+    private int horsePatternIndex;
     private int difficultyIndex;
 
     private Label horseValue;
@@ -101,6 +109,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
     private Label maneColorValue;
     private Label saddleColorValue;
     private Label outfitColorValue;
+    private Label riderOutfitVariantValue;
+    private Label horsePatternValue;
     private Label difficultyValue;
     private Label horseDescriptionValue;
     private Label horseStatsValue;
@@ -132,6 +142,13 @@ public class CharacterSelectScreen extends ScreenAdapter {
     public CharacterSelectScreen(HorseGame game, String horseName, String riderName, String petName,
                                  String horseColor, String maneColor, String saddleColor, String outfitColor,
                                  MvpGameConfig.Difficulty difficulty) {
+        this(game, horseName, riderName, petName, horseColor, maneColor, saddleColor, outfitColor,
+            MvpGameConfig.RIDER_OUTFIT_VARIANTS[0], MvpGameConfig.HORSE_PATTERNS[0], difficulty);
+    }
+
+    public CharacterSelectScreen(HorseGame game, String horseName, String riderName, String petName,
+                                 String horseColor, String maneColor, String saddleColor, String outfitColor,
+                                 String riderOutfitVariant, String horsePattern, MvpGameConfig.Difficulty difficulty) {
         this.game = game;
         Preferences prefs = Gdx.app.getPreferences(PREFS_NAME);
         MvpProgress progress = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME)).load();
@@ -146,6 +163,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
         String resolvedManeColor = maneColor != null ? maneColor : prefs.getString(PREF_MANE_COLOR, null);
         String resolvedSaddleColor = saddleColor != null ? saddleColor : prefs.getString(PREF_SADDLE_COLOR, null);
         String resolvedOutfitColor = outfitColor != null ? outfitColor : prefs.getString(PREF_OUTFIT_COLOR, null);
+        String resolvedRiderOutfitVariant = riderOutfitVariant != null ? riderOutfitVariant : prefs.getString(PREF_RIDER_OUTFIT_VARIANT, progress.selectedRiderOutfitVariant);
+        String resolvedHorsePattern = horsePattern != null ? horsePattern : prefs.getString(PREF_HORSE_PATTERN, MvpGameConfig.HORSE_PATTERNS[0]);
         MvpGameConfig.Difficulty resolvedDifficulty = difficulty != null ? difficulty : progress.selectedDifficulty;
 
         this.horseIndex = findIndex(horses, resolvedHorse);
@@ -155,6 +174,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
         this.maneColorIndex = findIndex(maneColors, resolvedManeColor);
         this.saddleColorIndex = findIndex(saddleColors, resolvedSaddleColor);
         this.outfitColorIndex = findIndex(outfitColors, resolvedOutfitColor);
+        this.riderOutfitVariantIndex = findIndex(riderOutfitVariants, resolvedRiderOutfitVariant);
+        this.horsePatternIndex = findIndex(horsePatterns, resolvedHorsePattern);
         this.difficultyIndex = findDifficultyIndex(resolvedDifficulty);
     }
 
@@ -214,6 +235,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
         maneColorValue = new Label(maneColors[maneColorIndex], labelStyle);
         saddleColorValue = new Label(saddleColors[saddleColorIndex], labelStyle);
         outfitColorValue = new Label(outfitColors[outfitColorIndex], labelStyle);
+        riderOutfitVariantValue = new Label(riderOutfitVariants[riderOutfitVariantIndex], labelStyle);
+        horsePatternValue = new Label(horsePatterns[horsePatternIndex], labelStyle);
         difficultyValue = new Label(difficultyLabels[difficultyIndex], labelStyle);
 
         horsePreviewImage = new Image(horsePreviewRegions[horseIndex]);
@@ -229,8 +252,11 @@ public class CharacterSelectScreen extends ScreenAdapter {
         layout = new Table();
         layout.pad(24f);
 
-        layout.add(title).colspan(5).padBottom(30f);
+        layout.add(title).colspan(5).padBottom(18f);
         layout.row();
+
+        riderStepPanel = new Table();
+        horseStepPanel = new Table();
 
         Table previewRow = new Table();
         previewRow.add(horsePreviewImage).width(150f).height(110f).pad(6f);
@@ -239,11 +265,11 @@ public class CharacterSelectScreen extends ScreenAdapter {
         layout.add(previewRow).colspan(5).padBottom(24f);
         layout.row();
 
-        addSelectorRow(layout, "Lovas", riderValue, buttonStyle, () -> updateRider(-1), () -> updateRider(1));
+        addSelectorRow(riderStepPanel, "Lovas", riderValue, buttonStyle, () -> updateRider(-1), () -> updateRider(1));
         Label customNameLabel = new Label("Saj\u00E1t n\u00E9v", new Label.LabelStyle(bodyFont, Color.WHITE));
-        layout.add(customNameLabel).left().padBottom(18f);
-        layout.add(riderNameField).colspan(4).width(420f).height(60f).padBottom(18f);
-        layout.row();
+        riderStepPanel.add(customNameLabel).left().padBottom(18f);
+        riderStepPanel.add(riderNameField).colspan(4).width(420f).height(60f).padBottom(18f);
+        riderStepPanel.row();
         TextButton randomRiderButton = new TextButton("V\u00E9letlen n\u00E9v", buttonStyle);
         randomRiderButton.addListener(new ClickListener() {
             @Override
@@ -252,15 +278,17 @@ public class CharacterSelectScreen extends ScreenAdapter {
                 randomizeRiderName();
             }
         });
-        layout.add(randomRiderButton).colspan(5).width(260f).height(60f).padBottom(18f);
-        layout.row();
-        addSelectorRow(layout, "Ruh\u00E1zat", outfitColorValue, outfitColorSwatchImage, buttonStyle, () -> updateOutfitColor(-1), () -> updateOutfitColor(1));
-        addSelectorRow(layout, "L\u00F3", horseValue, buttonStyle, () -> updateHorse(-1), () -> updateHorse(1));
-        addSelectorRow(layout, "L\u00F3sz\u00EDn", horseColorValue, horseColorSwatchImage, buttonStyle, () -> updateHorseColor(-1), () -> updateHorseColor(1));
-        addSelectorRow(layout, "S\u00F6r\u00E9ny", maneColorValue, maneColorSwatchImage, buttonStyle, () -> updateManeColor(-1), () -> updateManeColor(1));
-        addSelectorRow(layout, "Nyereg", saddleColorValue, saddleColorSwatchImage, buttonStyle, () -> updateSaddleColor(-1), () -> updateSaddleColor(1));
-        addSelectorRow(layout, "Kis kedvenc", petValue, buttonStyle, () -> updatePet(-1), () -> updatePet(1));
-        addSelectorRow(layout, "Neh\u00E9zs\u00E9g", difficultyValue, buttonStyle, () -> updateDifficulty(-1), () -> updateDifficulty(1));
+        riderStepPanel.add(randomRiderButton).colspan(5).width(260f).height(60f).padBottom(18f);
+        riderStepPanel.row();
+        addSelectorRow(riderStepPanel, "Ruh\u00E1zat", outfitColorValue, outfitColorSwatchImage, buttonStyle, () -> updateOutfitColor(-1), () -> updateOutfitColor(1));
+        addSelectorRow(riderStepPanel, "St\u00EDlusz", riderOutfitVariantValue, buttonStyle, () -> updateRiderOutfitVariant(-1), () -> updateRiderOutfitVariant(1));
+        addSelectorRow(horseStepPanel, "L\u00F3", horseValue, buttonStyle, () -> updateHorse(-1), () -> updateHorse(1));
+        addSelectorRow(horseStepPanel, "L\u00F3sz\u00EDn", horseColorValue, horseColorSwatchImage, buttonStyle, () -> updateHorseColor(-1), () -> updateHorseColor(1));
+        addSelectorRow(horseStepPanel, "S\u00F6r\u00E9ny", maneColorValue, maneColorSwatchImage, buttonStyle, () -> updateManeColor(-1), () -> updateManeColor(1));
+        addSelectorRow(horseStepPanel, "Nyereg", saddleColorValue, saddleColorSwatchImage, buttonStyle, () -> updateSaddleColor(-1), () -> updateSaddleColor(1));
+        addSelectorRow(horseStepPanel, "Mint\u00E1zat", horsePatternValue, buttonStyle, () -> updateHorsePattern(-1), () -> updateHorsePattern(1));
+        addSelectorRow(horseStepPanel, "Kis kedvenc", petValue, buttonStyle, () -> updatePet(-1), () -> updatePet(1));
+        addSelectorRow(horseStepPanel, "Neh\u00E9zs\u00E9g", difficultyValue, buttonStyle, () -> updateDifficulty(-1), () -> updateDifficulty(1));
 
         horseDescriptionValue = createInfoLabel(labelStyle, horseDescriptionText());
         horseStatsValue = createInfoLabel(labelStyle, horseStatsText());
@@ -272,7 +300,10 @@ public class CharacterSelectScreen extends ScreenAdapter {
         infoPanel.row();
         infoPanel.add(riderBonusValue).width(420f).left().padTop(12f).padRight(24f);
         infoPanel.add(petInfoValue).width(280f).left().padTop(12f);
+        layout.add(riderStepPanel).colspan(5).padTop(4f).padBottom(8f);
+        layout.row();
         layout.add(infoPanel).colspan(5).padTop(4f).padBottom(8f);
+        layout.add(horseStepPanel).colspan(5).padTop(4f).padBottom(8f);
         layout.row();
 
         layout.row().padTop(30f);
@@ -283,7 +314,12 @@ public class CharacterSelectScreen extends ScreenAdapter {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 playClick();
-                ScreenNavigator.toMainMenu(game);
+                if (selectionFlow.isHorseStep()) {
+                    selectionFlow.back();
+                    showSelectionStep(title, backButton, startButton);
+                } else {
+                    ScreenNavigator.toMainMenu(game);
+                }
             }
         });
         startButton.addListener(new ClickListener() {
@@ -293,8 +329,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
                 if (selectionFlow.isRiderStep()) {
                     saveSelectionPrefs();
                     selectionFlow.next();
-                    title.setText("Lo es futam valasztas");
-                    startButton.setText("Verseny inditasa");
+                    showSelectionStep(title, backButton, startButton);
                     return;
                 }
                 saveSelectionPrefs();
@@ -306,6 +341,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
                     maneColors[maneColorIndex],
                     saddleColors[saddleColorIndex],
                     outfitColors[outfitColorIndex],
+                    riderOutfitVariants[riderOutfitVariantIndex],
+                    horsePatterns[horsePatternIndex],
                     difficulties[difficultyIndex]
                 );
                 ScreenNavigator.toDefaultRace(game, selection);
@@ -318,9 +355,19 @@ public class CharacterSelectScreen extends ScreenAdapter {
         layout.pack();
         applyLayoutScale();
         stage.addActor(layout);
+        showSelectionStep(title, backButton, startButton);
         Gdx.input.setInputProcessor(stage);
     }
-
+    private void showSelectionStep(Label title, TextButton backButton, TextButton startButton) {
+        boolean riderStep = selectionFlow.isRiderStep();
+        title.setText(riderStep ? "Karakter valasztas" : "Lo es futam valasztas");
+        riderStepPanel.setVisible(riderStep);
+        horseStepPanel.setVisible(!riderStep);
+        backButton.setText(riderStep ? "Vissza" : "Lovas vissza");
+        startButton.setText(riderStep ? "Tovabb" : "Verseny inditasa");
+        layout.pack();
+        applyLayoutScale();
+    }
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0f, 0f, 0f, 1f);
@@ -458,10 +505,24 @@ public class CharacterSelectScreen extends ScreenAdapter {
         saveSelectionPrefs();
     }
 
+    private void updateHorsePattern(int delta) {
+        horsePatternIndex = wrapIndex(horsePatternIndex + delta, horsePatterns.length);
+        horsePatternValue.setText(horsePatterns[horsePatternIndex]);
+        refreshHorsePreview();
+        saveSelectionPrefs();
+    }
+
     private void updateOutfitColor(int delta) {
         outfitColorIndex = wrapIndex(outfitColorIndex + delta, outfitColors.length);
         outfitColorValue.setText(outfitColors[outfitColorIndex]);
         outfitColorSwatchImage.setDrawable(toDrawable(outfitColorSwatches[outfitColorIndex]));
+        refreshRiderPreview();
+        saveSelectionPrefs();
+    }
+
+    private void updateRiderOutfitVariant(int delta) {
+        riderOutfitVariantIndex = wrapIndex(riderOutfitVariantIndex + delta, riderOutfitVariants.length);
+        riderOutfitVariantValue.setText(riderOutfitVariants[riderOutfitVariantIndex]);
         refreshRiderPreview();
         saveSelectionPrefs();
     }
@@ -514,6 +575,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
         prefs.putString(PREF_MANE_COLOR, maneColors[maneColorIndex]);
         prefs.putString(PREF_SADDLE_COLOR, saddleColors[saddleColorIndex]);
         prefs.putString(PREF_OUTFIT_COLOR, outfitColors[outfitColorIndex]);
+        prefs.putString(PREF_RIDER_OUTFIT_VARIANT, riderOutfitVariants[riderOutfitVariantIndex]);
+        prefs.putString(PREF_HORSE_PATTERN, horsePatterns[horsePatternIndex]);
         prefs.flush();
 
         MvpProgressStore progressStore = new MvpProgressStore(Gdx.app.getPreferences(MvpProgressStore.PREFS_NAME));
@@ -522,6 +585,8 @@ public class CharacterSelectScreen extends ScreenAdapter {
         progress.selectedRiderName = selectedRiderName();
         progress.selectedPet = pets[petIndex];
         progress.selectedRiderColor = outfitColors[outfitColorIndex];
+        progress.selectedRiderOutfitVariant = riderOutfitVariants[riderOutfitVariantIndex];
+        progress.selectedHorsePattern = horsePatterns[horsePatternIndex];
         progress.selectedDifficulty = difficulties[difficultyIndex];
         progressStore.save(progress);
     }
@@ -692,7 +757,7 @@ public class CharacterSelectScreen extends ScreenAdapter {
                 previews[i] = loadUiTexture("sprites/pixel_rider_" + assets[i % assets.length] + ".png");
             } catch (RuntimeException exception) {
                 previews[i] = createRiderPreview(outfitColorValues[i % outfitColorValues.length],
-                    riderHairColors[i % riderHairColors.length]);
+                    riderHairColors[i % riderHairColors.length], riderOutfitVariants[i % riderOutfitVariants.length]);
             }
         }
         return previews;
@@ -807,15 +872,27 @@ public class CharacterSelectScreen extends ScreenAdapter {
         if (riderPreviewImage == null) {
             return;
         }
-        riderPreviewImage.setDrawable(toDrawable(riderPreviews[riderIndex]));
+        if (riderPreviewCustom != null) {
+            riderPreviewCustom.dispose();
+            riderPreviewCustom = null;
+        }
+        riderPreviewCustom = createRiderPreview(outfitColorValues[outfitColorIndex], riderHairColors[riderIndex], riderOutfitVariants[riderOutfitVariantIndex]);
+        riderPreviewImage.setDrawable(toDrawable(riderPreviewCustom));
     }
 
-    private Texture createRiderPreview(Color outfit, Color hair) {
+    private Texture createRiderPreview(Color outfit, Color hair, String style) {
         Pixmap pixmap = createPreviewPanel();
         pixmap.setColor(outfit);
         pixmap.fillRectangle(60, 44, 40, 48);
         pixmap.fillRectangle(50, 56, 14, 24);
         pixmap.fillRectangle(96, 56, 14, 24);
+        if ("Sport".equals(style)) {
+            pixmap.setColor(darken(outfit, 0.12f));
+            pixmap.fillRectangle(66, 62, 28, 10);
+        } else if ("Hős".equals(style)) {
+            pixmap.setColor(new Color(0.9f, 0.85f, 0.3f, 1f));
+            pixmap.fillCircle(80, 38, 8);
+        }
         pixmap.setColor(new Color(0.9f, 0.75f, 0.6f, 1f));
         pixmap.fillCircle(80, 98, 12);
         pixmap.setColor(hair);
@@ -909,3 +986,5 @@ public class CharacterSelectScreen extends ScreenAdapter {
         return texture;
     }
 }
+
+

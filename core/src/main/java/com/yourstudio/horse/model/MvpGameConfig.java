@@ -55,6 +55,9 @@ public final class MvpGameConfig {
         new HorseProfile("Fut\u00f3", StatFocus.ACCELERATION, "Gyorsan indul, j\u00f3l kapja el a rajtot.", 3, 3, 5, 3)
     };
 
+    public static final String[] HORSE_PATTERNS = {"Sima", "Cs\u00edkos", "Foltos", "Nyak\u00f6rv"};
+    public static final String[] RIDER_OUTFIT_VARIANTS = {"Klasszikus", "Sport", "H\u0151s"};
+
     public static final RiderBonus[] RIDER_BONUSES = {
         new RiderBonus(RiderBonusType.ACCELERATION, 0.01f),
         new RiderBonus(RiderBonusType.BOOST_CHARGE, 0.01f)

@@ -18,6 +18,8 @@ public final class MvpProgressStore {
     private static final String KEY_SELECTED_RIDER_NAME = "selectedRiderName";
     private static final String KEY_SELECTED_PET = "selectedPet";
     private static final String KEY_SELECTED_RIDER_COLOR = "selectedRiderColor";
+    private static final String KEY_SELECTED_RIDER_OUTFIT_VARIANT = "selectedRiderOutfitVariant";
+    private static final String KEY_SELECTED_HORSE_PATTERN = "selectedHorsePattern";
     private static final String KEY_SELECTED_DIFFICULTY = "selectedDifficulty";
     private static final String KEY_RECORD_TIME = "recordTime";
     private static final String KEY_TUTORIAL_COMPLETE = "tutorialComplete";
@@ -57,6 +59,14 @@ public final class MvpProgressStore {
             preferences.getString(KEY_SELECTED_RIDER_COLOR, defaults.selectedRiderColor),
             defaults.selectedRiderColor
         );
+        progress.selectedRiderOutfitVariant = safeRiderOutfitVariant(
+            preferences.getString(KEY_SELECTED_RIDER_OUTFIT_VARIANT, defaults.selectedRiderOutfitVariant),
+            defaults.selectedRiderOutfitVariant
+        );
+        progress.selectedHorsePattern = safePattern(
+            preferences.getString(KEY_SELECTED_HORSE_PATTERN, defaults.selectedHorsePattern),
+            defaults.selectedHorsePattern
+        );
         progress.selectedDifficulty = difficultyFromName(
             preferences.getString(KEY_SELECTED_DIFFICULTY, defaults.selectedDifficulty.name()),
             defaults.selectedDifficulty
@@ -81,6 +91,9 @@ public final class MvpProgressStore {
         preferences.putString(KEY_SELECTED_RIDER_NAME, progress.selectedRiderName);
         preferences.putString(KEY_SELECTED_PET, safeSelectedPet(progress.selectedPet, progress.unlockedPets));
         preferences.putString(KEY_SELECTED_RIDER_COLOR, progress.selectedRiderColor);
+        preferences.putString(KEY_SELECTED_RIDER_OUTFIT_VARIANT,
+            safeRiderOutfitVariant(progress.selectedRiderOutfitVariant, MvpGameConfig.RIDER_OUTFIT_VARIANTS[0]));
+        preferences.putString(KEY_SELECTED_HORSE_PATTERN, safePattern(progress.selectedHorsePattern, MvpGameConfig.HORSE_PATTERNS[0]));
         MvpGameConfig.Difficulty difficulty = progress.selectedDifficulty != null
             ? progress.selectedDifficulty
             : MvpGameConfig.Difficulty.EASY;
@@ -120,6 +133,30 @@ public final class MvpProgressStore {
             return fallback;
         }
         return color.trim();
+    }
+
+    private String safeRiderOutfitVariant(String variant, String fallback) {
+        if (variant == null || variant.trim().length() == 0) {
+            return fallback;
+        }
+        for (String candidate : MvpGameConfig.RIDER_OUTFIT_VARIANTS) {
+            if (candidate.equals(variant)) {
+                return variant;
+            }
+        }
+        return fallback;
+    }
+
+    private String safePattern(String pattern, String fallback) {
+        if (pattern == null || pattern.trim().length() == 0) {
+            return fallback;
+        }
+        for (String candidate : MvpGameConfig.HORSE_PATTERNS) {
+            if (candidate.equals(pattern)) {
+                return pattern;
+            }
+        }
+        return fallback;
     }
 
     private MvpGameConfig.Difficulty difficultyFromName(String name, MvpGameConfig.Difficulty fallback) {
