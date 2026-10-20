@@ -47,3 +47,5 @@ Set `MAESTRO_BIN` if Maestro is installed outside `%USERPROFILE%\.maestro\bin\ma
 ## Current UI testing limitation
 
 The game UI is rendered by LibGDX `Stage` objects inside a single Android `SurfaceView`, so the Android accessibility hierarchy does not expose the individual game buttons. The smoke flow therefore uses a percentage-based coordinate tap and screenshot checkpoints. Once semantic accessibility identifiers are added to the game UI, replace coordinate taps with stable `id` or text selectors.
+
+The current smoke flow starts with `clearState`, which deletes the app's saved local state on the target device. Use it only on a disposable test install or after backing up any progress that must be retained.

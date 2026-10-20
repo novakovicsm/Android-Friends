@@ -1,14 +1,20 @@
 # Android-Friends MVP playtest checklist
 
-Last updated: 2026-07-15
+Last updated: 2026-09-30
+
+## Validation record
+
+- 2026-09-30: `./gradlew test assembleDebug` passed locally.
+- 2026-09-30: Installed the debug APK on `SM_F731B` with `adb install -r`; launch succeeded and Android reported `AndroidLauncher` as the foreground activity. No app process crash markers were found in the inspected logcat window.
+- The device disconnected before interactive flow checks could run; ADB subsequently reported no connected devices. Maestro CLI is not installed, so the Maestro flow was not run.
+- The documented Maestro flow starts with `clearState`, so run it only on a disposable test install or after backing up test progress.
 
 ## Build
 
 - Branch: `codex/mvp-phase0-implementation`
 - Debug APK: `android/build/outputs/apk/debug/android-debug.apk`
 - Last local checks:
-  - `.\gradlew core:test`
-  - `.\gradlew assembleDebug`
+  - `.\gradlew test assembleDebug`
 
 ## First-run flow
 

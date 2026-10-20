@@ -26,6 +26,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.yourstudio.horse.HorseGame;
+import com.yourstudio.horse.model.MvpGameConfig;
 import com.yourstudio.horse.model.MvpProgress;
 import com.yourstudio.horse.model.MvpProgressStore;
 import com.yourstudio.horse.ui.ScreenNavigator;
@@ -40,6 +41,9 @@ public class TrackSelectScreen extends ScreenAdapter {
     private final String maneColor;
     private final String saddleColor;
     private final String outfitColor;
+    private final String riderOutfitVariant;
+    private final String horsePattern;
+    private final MvpGameConfig.Difficulty difficulty;
 
     private Stage stage;
     private BitmapFont titleFont;
@@ -60,11 +64,19 @@ public class TrackSelectScreen extends ScreenAdapter {
     private final String[] trackFiles = {"forest.tmx", "beach.tmx", "hegyek.tmx", "ejszakai_varos.tmx"};
 
     public TrackSelectScreen(HorseGame game, String horseName, String riderName, String petName) {
-        this(game, horseName, riderName, petName, null, null, null, null);
+        this(game, horseName, riderName, petName, null, null, null, null,
+            MvpGameConfig.RIDER_OUTFIT_VARIANTS[0], MvpGameConfig.HORSE_PATTERNS[0], MvpGameConfig.Difficulty.EASY);
     }
 
     public TrackSelectScreen(HorseGame game, String horseName, String riderName, String petName,
                              String horseColor, String maneColor, String saddleColor, String outfitColor) {
+        this(game, horseName, riderName, petName, horseColor, maneColor, saddleColor, outfitColor,
+            MvpGameConfig.RIDER_OUTFIT_VARIANTS[0], MvpGameConfig.HORSE_PATTERNS[0], MvpGameConfig.Difficulty.EASY);
+    }
+
+    public TrackSelectScreen(HorseGame game, String horseName, String riderName, String petName,
+                             String horseColor, String maneColor, String saddleColor, String outfitColor,
+                             String riderOutfitVariant, String horsePattern, MvpGameConfig.Difficulty difficulty) {
         this.game = game;
         this.horseName = horseName;
         this.riderName = riderName;
@@ -73,6 +85,9 @@ public class TrackSelectScreen extends ScreenAdapter {
         this.maneColor = maneColor;
         this.saddleColor = saddleColor;
         this.outfitColor = outfitColor;
+        this.riderOutfitVariant = riderOutfitVariant != null ? riderOutfitVariant : MvpGameConfig.RIDER_OUTFIT_VARIANTS[0];
+        this.horsePattern = horsePattern != null ? horsePattern : MvpGameConfig.HORSE_PATTERNS[0];
+        this.difficulty = difficulty != null ? difficulty : MvpGameConfig.Difficulty.EASY;
         this.trackNames = buildTrackNames();
         this.trackDescriptions = buildTrackDescriptions();
     }
@@ -125,14 +140,16 @@ public class TrackSelectScreen extends ScreenAdapter {
         TextButton backButton = UiFactory.button("Vissza", buttonStyle, () -> {
             playClick();
             ScreenNavigator.Selection selection = new ScreenNavigator.Selection(
-                horseName, riderName, petName, horseColor, maneColor, saddleColor, outfitColor
+                horseName, riderName, petName, horseColor, maneColor, saddleColor, outfitColor,
+                riderOutfitVariant, horsePattern, difficulty
             );
             ScreenNavigator.toCharacterSelect(game, selection);
         });
         TextButton startButton = UiFactory.button("Verseny ind\u00EDt\u00E1sa", buttonStyle, () -> {
             playClick();
             ScreenNavigator.Selection selection = new ScreenNavigator.Selection(
-                horseName, riderName, petName, horseColor, maneColor, saddleColor, outfitColor
+                horseName, riderName, petName, horseColor, maneColor, saddleColor, outfitColor,
+                riderOutfitVariant, horsePattern, difficulty
             );
             // Pass the .tmx filename according to selected icon
             ScreenNavigator.toRace(game, selection, trackFiles[trackIndex]);

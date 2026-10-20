@@ -49,9 +49,9 @@ Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladat
 ## Specifikációs eltérések / issue-k
 - [x] Izometrikus 2.5D pályarenderelés: gyémántcsempés talaj, mélységi sorrend és izometrikus objektumprojekció.
 - [x] Nagyobb, kanyargó 2.5D pálya: képernyőt kitöltő táj, kétoldali kerítés, külső táj és kerítésérintési lassítás.
-- [x] Hiányzik a pályaválasztás a flow-ból (spec: lovas/ló/pálya választás).
-- [ ] A teljes játék 4 pályája még nincs megvalósítva; MVP-ben csak az erdei pálya aktív.
-- [x] Ló testreszabás még nem készült el (szín, sörény, nyereg).
+- [x] Négy pályához tartozó Tiled map fájl és pályaválasztó képernyő rendelkezésre áll.
+- [x] Az MVP közvetlenül az erdei pályával indul; a többpályás flow a specifikáció szerint nem része az MVP-nek.
+- [x] Alap lótestreszabás (szín, sörény, nyereg és mintaválasztás) elérhető; a további kozmetika későbbi bővítés.
 - [x] Kis kedvenc választás és alap MVP-bónuszok összekötése.
 - [x] Tematikus power-upok és felvételük: boost-töltet, Gyorsító és Pajzs.
 - [x] A karakterválasztó és a verseny HUD lovas/pet előnézetei generált pixel-art PNG-ket használnak; a procedurális rajzolás csak hiányzó asset fallback.
@@ -74,15 +74,22 @@ Az alábbi lista a hátralévő fő feladatokat tartalmazza. A későbbi feladat
 
 
 ### Content expansion (more tracks, power-ups, assets)
-- [ ] 3 új pálya (tengerpart, hegyek, éjszakai város) Tiled map
+- [x] Tiled map fájlok a tengerparti, hegyi és éjszakai városi pályához
+- [ ] A három további pálya vizuális és játékmeneti ellenőrzése; csak külön scope-döntés után kerüljenek az MVP flow-ba
 - [ ] Pálya-specifikus díszletek/tileset elemek
 - [ ] Tematikus power-upok pályánként + ikonok (legalább 2-2)
 - [ ] Új SFX: boost, pickup variánsok, célba érés
 - [x] Pixel-art erdei pályadekorációk frissítése (tölgy, fenyő, bokor, irányjelző, kő)
 
 ### Customization depth (horse/rider/pet cosmetics + bonuses)
-- [ ] Ló testreszabás bővítése: minták / foltok / lábvédők
-- [ ] Lovas ruházat: több szín + sisak / kabát variánsok
+- [ ] Ló testreszabás további bővítése: minták / foltok / lábvédők (alap mintaválasztás már van)
+- [ ] Lovas ruházat további bővítése: sisak / kabát variánsok (alap színek és outfit stílusok már vannak)
 - [ ] Kedvenc bónuszok részletes balansz + UI leírás
 - [ ] Pet kozmetika: színek + kis kiegészítők
 - [ ] Mentett loadout előnézet a főmenüben
+
+## MVP release gate
+
+- [x] Adatmodell, mentés, jutalmak és shop-vásárlások automatizált egységtesztjei rendelkezésre állnak.
+- [ ] Teljes első indítási, karakterválasztási, verseny-, jutalom- és shop-flow végigjátszása Android emulátoron vagy eszközön (APK telepítés és indulás ellenőrizve; az eszköz az interaktív ellenőrzés előtt lecsatlakozott).
+- [ ] A playtest checklist minden pontjának ellenőrzése; build-siker önmagában nem helyettesíti az eszköztesztet.

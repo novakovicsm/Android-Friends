@@ -41,7 +41,8 @@ public final class ScreenNavigator {
             return;
         }
         game.setScreen(new TrackSelectScreen(game, selection.horseName, selection.riderName, selection.petName,
-            selection.horseColor, selection.maneColor, selection.saddleColor, selection.outfitColor));
+            selection.horseColor, selection.maneColor, selection.saddleColor, selection.outfitColor,
+            selection.riderOutfitVariant, selection.horsePattern, selection.difficulty));
     }
 
     public static void toDefaultRace(HorseGame game, Selection selection) {

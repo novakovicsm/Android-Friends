@@ -92,6 +92,16 @@ public class MvpProgressTest {
     }
 
     @Test
+    public void purchaseSkinRequiresEnoughHorseshoes() {
+        MvpProgress progress = MvpProgress.newGame();
+        progress.horseshoes = 9;
+
+        assertFalse(progress.purchaseSkin(1));
+        assertEquals(9, progress.horseshoes);
+        assertFalse(progress.unlockedSkins[1]);
+    }
+
+    @Test
     public void selectSkinRequiresUnlockedSkin() {
         MvpProgress progress = MvpProgress.newGame();
 
@@ -114,5 +124,15 @@ public class MvpProgressTest {
 
         assertEquals(false, progress.purchasePet(1));
         assertEquals(20, progress.horseshoes);
+    }
+
+    @Test
+    public void purchasePetRequiresEnoughHorseshoes() {
+        MvpProgress progress = MvpProgress.newGame();
+        progress.horseshoes = MvpGameConfig.PET_UNLOCK_PRICE - 1;
+
+        assertFalse(progress.purchasePet(1));
+        assertEquals(MvpGameConfig.PET_UNLOCK_PRICE - 1, progress.horseshoes);
+        assertFalse(progress.unlockedPets[1]);
     }
 }

@@ -110,6 +110,19 @@ public class RaceScreenTest {
     }
 
     @Test
+    public void trackSelectionRetainsCustomCharacterOptions() throws Exception {
+        TrackSelectScreen screen = new TrackSelectScreen(
+            null, "Villam", "Lili", "Kutya",
+            "Arany", "Fekete", "Piros", "Lila",
+            "Sport", "Csíkos", MvpGameConfig.Difficulty.HARD
+        );
+
+        assertEquals("Sport", getObjectField(screen, "riderOutfitVariant"));
+        assertEquals("Csíkos", getObjectField(screen, "horsePattern"));
+        assertEquals(MvpGameConfig.Difficulty.HARD, getField(screen, "difficulty"));
+    }
+
+    @Test
     public void coinCollectionUsesPetMultiplier() {
         setFloatField(raceScreen, "petCoinMultiplier", 2f);
 
